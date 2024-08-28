@@ -5,7 +5,7 @@ const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 // Middleware
 app.use(cors()); // Enable CORS for all routes
@@ -13,8 +13,8 @@ app.use(express.json()); // Parse JSON bodies
 
 // SSL options
 const options = {
-    key: fs.readFileSync('path/to/your/private.key'),
-    cert: fs.readFileSync('path/to/your/certificate.crt')
+    // key: fs.readFileSync('path/to/your/private.key'),
+    // cert: fs.readFileSync('path/to/your/certificate.crt')
 };
 
 // Define the greet endpoint
@@ -34,7 +34,12 @@ app.post("/api/greet", (req, res) => {
     res.json({ message: greetingMessage });
 });
 
+// Define the greet endpoint
+app.get("/healthcheck", (req, res) => {
+    res.json({ status: "healthy!"});
+});
+
 // Start the server with HTTPS
-https.createServer(options, app).listen(PORT, () => {
+app.listen(PORT, () => {
     console.log(`Server is running on https://localhost:${PORT}`);
 });

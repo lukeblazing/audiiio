@@ -1,20 +1,20 @@
-# Use the official Node.js 14 image as a base
+# Use Node.js 20 as the base image
 FROM node:20
 
-# Set the working directory to /app
+# Set the working directory
 WORKDIR /app
 
-# Copy the package*.json files into the container
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --production
 
-# Copy the application code into the container
+# Copy the rest of the application code
 COPY . .
 
-# Expose the port that your app will listen on
+# Expose the port your app runs on
 EXPOSE 3000
 
-# Run the command to start your app when the container starts
-CMD ["npm", "start"]
+# Start the application
+CMD [ "npm", "start" ]
