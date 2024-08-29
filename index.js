@@ -4,12 +4,18 @@ const https = require('https');
 const fs = require('fs');
 require('dotenv').config();
 
+console.log("HELLO THERE 1")
+
 const app = express();
 const PORT = process.env.PORT;
+
+console.log("HELLO THERE 2")
 
 // Middleware
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Parse JSON bodies
+
+console.log("HELLO THERE 3")
 
 // SSL options
 const options = {
@@ -41,5 +47,6 @@ app.get("/healthcheck", (req, res) => {
 
 // Start the server with HTTPS
 app.listen(PORT, () => {
+    console.log("HELLO there 4");
     console.log(`Server is running on https://localhost:${PORT}`);
 });
