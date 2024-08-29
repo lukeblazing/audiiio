@@ -30,4 +30,9 @@ jobs:
       run: |
         az webapp config container set --name ${{ secrets.AZURE_WEBAPP_NAME }} \
           --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-          --docker-custom-image-name ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io/gustie:latest 
+          --docker-custom-image-name ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io/gustie:latest
+
+    - name: Restart Azure Web App
+      run: |
+        az webapp restart --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
