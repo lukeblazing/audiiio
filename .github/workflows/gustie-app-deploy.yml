@@ -1,0 +1,36 @@
+name: Deploy Docker to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Azure CLI
+      run: |
+        az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+    - name: Log in to Azure Container Registry
+      run: |
+        az acr login --name ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io/your-app:latest .
+        docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io/your-app:latest
+
+    - name: Deploy to Azure Web App
+      run: |
+        az webapp config container set --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+          --docker-custom-image-name ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io/gustie-app:latest \
+          --registry-login-server ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io \
+          --registry-username ${{ secrets.AZURE_CONTAINER_REGISTRY_USERNAME }} \
+          --registry-password ${{ secrets.AZURE_CONTAINER_REGISTRY_PASSWORD }}
