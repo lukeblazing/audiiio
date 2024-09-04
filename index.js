@@ -1,5 +1,4 @@
 const express = require("express");
-const cors = require("cors");
 const https = require('https');
 const fs = require('fs');
 require('dotenv').config();
@@ -7,9 +6,8 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT;
 
-// Middleware
-app.use(cors()); // Enable CORS for all routes
-app.use(express.json()); // Parse JSON bodies
+// Middleware to parse JSON bodies
+app.use(express.json());
 
 // Middleware to force HTTPS
 app.use((req, res, next) => {
@@ -21,27 +19,20 @@ app.use((req, res, next) => {
 
 // Define the greet endpoint
 app.post("/api/greet", (req, res) => {
-
-    console.log("got here luke");
-
     const { name } = req.body;
-
-    console.log(name);
-
     if (!name) {
         return res.status(400).json({ message: "Name is required" });
     }
-
     const greetingMessage = `Hello, ${name}!`;
     res.json({ message: greetingMessage });
 });
 
-// Define the healthcheck endpoint
+// Healthcheck endpoint
 app.get("/healthcheck", (req, res) => {
-    res.json({ status: "healthy!"});
+    res.json({ status: "healthy!" });
 });
 
-// Start the server with HTTPS
+// Start the server
 app.listen(PORT, () => {
     console.log('We are about to start this server now.');
     console.log(`Server is running on https://localhost:${PORT}`);
