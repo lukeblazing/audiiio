@@ -1,6 +1,5 @@
 const express = require("express");
 const https = require('https');
-const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
@@ -31,11 +30,6 @@ app.post("/api/greet", (req, res) => {
 app.get("/healthcheck", (req, res) => {
     res.json({ status: "healthy!" });
 });
-
-console.log(
-    "luke port: " + PORT
-);
-console.log("luke process port: " + process.env.PORT);
 
 // Start the server
 app.listen(PORT, () => {
