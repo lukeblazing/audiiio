@@ -32,6 +32,11 @@ app.get("/healthcheck", (req, res) => {
     res.json({ status: "healthy!" });
 });
 
+console.log(
+    "luke port: " + PORT
+);
+console.log("luke process port: " + process.env.PORT);
+
 // Start the server
 app.listen(PORT, () => {
     console.log('We are about to start this server now.');
