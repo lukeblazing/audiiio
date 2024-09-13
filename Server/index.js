@@ -43,5 +43,6 @@ app.get("/healthcheck", (req, res) => {
 // Start the server
 app.listen(PORT, () => {
     console.log('We are about to start this server now.');
-    console.log(`Server is running on https://localhost:${PORT}`);
+    if (process.env.NODE_ENV === 'development') console.log(`Server is running on http://localhost:${PORT}`);
+    else console.log(`Server is running on PORT ${PORT}`);
 });
