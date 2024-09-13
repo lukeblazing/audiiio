@@ -1,21 +1,23 @@
-const express = require("express");
-const https = require('https');
 require('dotenv').config();
+const express = require("express");
 const path = require('path');
-
+const helmet = require('helmet');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Use helmet middleware
+app.use(helmet());
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 
 // Middleware to force HTTPS
-// app.use((req, res, next) => {
-//     if (req.headers['x-forwarded-proto'] !== 'https') {
-//         return res.redirect('https://' + req.headers.host + req.url);
-//     }
-//     next();
-// });
+app.use((req, res, next) => {
+    if (process.env.NODE_ENV !== 'development' && req.headers['x-forwarded-proto'] !== 'https') {
+        return res.redirect('https://' + req.headers.host + req.url);
+    }
+    next();
+});
 
 app.use(express.static(path.join(__dirname, 'public/build')));
 
