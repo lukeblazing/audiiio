@@ -11,13 +11,13 @@ import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import SideMenuMobile from './SideMenuMobile.js';
 import MenuButton from './MenuButton.js';
 
-const Toolbar = styled(MuiToolbar)({
+const Toolbar = styled(MuiToolbar)(({ theme }) => ({
   width: '100%',
-  padding: '12px',
+  padding: '8px', // Adjust padding for all screen sizes
   display: 'flex',
   flexDirection: 'row',
-  alignItems: 'start',
-  justifyContent: 'center',
+  alignItems: 'center', // Align items to the center for all screen sizes
+  justifyContent: 'space-between',
   gap: '12px',
   flexShrink: 0,
   [`& ${tabsClasses.flexContainer}`]: {
@@ -25,12 +25,13 @@ const Toolbar = styled(MuiToolbar)({
     p: '8px',
     pb: 0,
   },
-});
+  [theme.breakpoints.down('sm')]: {
+    padding: '8px', // Adjust padding for mobile
+  },
+}));
 
 export default function AppNavbar() {
   const [open, setOpen] = React.useState(false);
-
-  console.log("navbar is rendering luke")
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -40,19 +41,24 @@ export default function AppNavbar() {
     <AppBar
       position="fixed"
       sx={{
-        display: { xs: 'flex', md: 'flex' },
+        display: 'flex',
         boxShadow: 0,
         bgcolor: 'background.paper',
         backgroundImage: 'none',
         borderBottom: '1px solid',
         borderColor: 'divider',
         top: 'var(--template-frame-height, 0px)',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
       }}
     >
       <Toolbar variant="regular">
         <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
-            <MenuRoundedIcon />
+          <MenuRoundedIcon />
         </MenuButton>
+
         <Stack
           direction="row"
           sx={{
@@ -62,15 +68,20 @@ export default function AppNavbar() {
             width: '100%',
           }}
         >
-          <Stack direction="row" spacing={1} sx={{ justifyContent: 'center', flexGrow: 1 }}>
-            <Typography
-              variant="h4"
-              component="h1"
-              sx={{ color: 'text.primary', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}
-            >
-              Luke's cool site
-            </Typography>
-          </Stack>
+          <Typography
+            variant="h5" // Set a more responsive font size for mobile
+            component="h1"
+            sx={{
+              color: 'text.primary',
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' }, // Responsive font size
+            }}
+          >
+            Luke's cool site
+          </Typography>
+
           <SideMenuMobile open={open} toggleDrawer={toggleDrawer} />
         </Stack>
       </Toolbar>
