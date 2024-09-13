@@ -4,7 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"  # Maps port 3000 on the host to port 3000 in the container
+      - "3000:3000"  # Exposes port 3000
     environment:
-      NODE_ENV: development  # Sets the environment to development
-    working_dir: /app/Server  # Ensures npm runs in the correct directory
+      NODE_ENV: development
