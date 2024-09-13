@@ -26,6 +26,9 @@ export default {
         use: {
           loader: 'babel-loader', // Use Babel to transpile ES6+ and JSX
         },
+        resolve: {
+          fullySpecified: false, // Allows importing without specifying extensions
+        },
       },
     ],
   },
@@ -48,6 +51,6 @@ export default {
 
   // File extensions to resolve
   resolve: {
-    extensions: ['.js', '.jsx'], // Resolve these extensions automatically
+    extensions: ['.js', '.jsx', '.json'],
   },
 };
