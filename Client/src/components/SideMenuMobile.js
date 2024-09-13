@@ -57,7 +57,16 @@ function SideMenuMobile({ open, toggleDrawer }) {
           <Divider />
         </Stack>
         <Stack sx={{ p: 2 }}>
-          <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />}>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<LogoutRoundedIcon />}
+            sx={{
+              paddingLeft: { xs: '20vw', sm: '15vw', md: '100px' }, // Use viewport width (vw) on smaller screens, pixel-based for larger screens
+              paddingRight: { xs: '20vw', sm: '15vw', md: '100px' },
+              textTransform: 'none',
+            }}
+          >
             Logout
           </Button>
         </Stack>
