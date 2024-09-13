@@ -13,6 +13,9 @@ COPY ./Server/package.json ./
 RUN npm install --production
 COPY ./Server ./
 
+# Copy the built client files from Stage 1 to the server's public build folder
+COPY --from=client-build /app/Client/dist /app/Server/public/build
+
 # Stage 3: Production Image
 FROM node:20
 WORKDIR /app/Server

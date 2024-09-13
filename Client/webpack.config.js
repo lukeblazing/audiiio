@@ -13,7 +13,7 @@ export default {
   // Output configuration
   output: {
     filename: 'bundle.js', // Output bundle name
-    path: resolve(__dirname, '../Server/public/build'), // Output path in the backend folder
+    path: resolve(__dirname, './dist'), // Output path in the backend folder
     publicPath: '/', // Important for handling routing in React with client-side routing
   },
 
