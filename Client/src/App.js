@@ -3,8 +3,9 @@ import AppNavbar from './components/dashboard/AppNavbar.js';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import SignIn from './components/authentication/SignIn.js';
+import AppTheme from './components/shared-theme/AppTheme.js';
 
-function App() {
+function App(props) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleLogin = () => {
@@ -16,7 +17,7 @@ function App() {
   };
 
   return (
-    <>
+    <AppTheme {...props}>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
         {/* If not authenticated, show the SignIn component */}
@@ -38,7 +39,7 @@ function App() {
           </>
         )}
       </Box>
-    </>
+    </AppTheme>
   );
 }
 

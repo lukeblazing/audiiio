@@ -14,7 +14,7 @@ import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgotPassword.js';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from './CustomIcons.js';
+import { MicrosoftIcon, LogoIcon } from './CustomIcons.js';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -77,7 +77,7 @@ export default function SignIn({ onLogin }) {
       password: data.get('password'),
     });
 
-    if (data.get('email') === 'user@example.com' && data.get('password') === 'hellothere') {
+    if (data.get('email') === 'user@example.com' && data.get('password') === 'hello') {
       onLogin(); 
     } else {
       setPasswordError(true);
@@ -117,7 +117,21 @@ export default function SignIn({ onLogin }) {
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
-          <SitemarkIcon />
+          <Box display="flex" alignItems="center">
+            <LogoIcon/>
+            <Typography
+              variant="h6"
+              sx={{
+                marginLeft: 1,
+                fontWeight: 'bold', // Makes the text bold
+                color: '#FFDD57', // Reddish-orange color
+                fontFamily: 'Roboto, sans-serif', // Example of an easily readable logo font
+                fontSize: '1.5rem', // Adjusted font size
+              }}
+            >
+              Hello
+            </Typography>
+          </Box>
           <Typography
             component="h1"
             variant="h4"
@@ -198,7 +212,7 @@ export default function SignIn({ onLogin }) {
               Don&apos;t have an account?{' '}
               <span>
                 <Link
-                  href="/material-ui/getting-started/templates/sign-in/"
+                  href="/sign-up/"
                   variant="body2"
                   sx={{ alignSelf: 'center' }}
                 >
@@ -213,19 +227,10 @@ export default function SignIn({ onLogin }) {
               type="submit"
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign in with Google')}
-              startIcon={<GoogleIcon />}
+              onClick={() => alert('Sign in with Microsoft')}
+              startIcon={<MicrosoftIcon />}
             >
-              Sign in with Google
-            </Button>
-            <Button
-              type="submit"
-              fullWidth
-              variant="outlined"
-              onClick={() => alert('Sign in with Facebook')}
-              startIcon={<FacebookIcon />}
-            >
-              Sign in with Facebook
+              Sign in with Microsoft
             </Button>
           </Box>
         </Card>
