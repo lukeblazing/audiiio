@@ -1,31 +1,42 @@
-import React from 'react';
-import AppNavbar from './components/AppNavbar.js';
+import React, { useState } from 'react';
+import AppNavbar from './components/dashboard/AppNavbar.js';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
+import SignIn from './components/authentication/SignIn.js';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);  // Set auth state back to false
+  };
+
   return (
     <>
-      {/* CSS Reset and Base Styles */}
       <CssBaseline />
-
-      {/* Container Box to structure the layout */}
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        
-        {/* AppNavbar Component */}
-        <AppNavbar />
-
-        {/* Empty main content area to occupy space below the NavBar */}
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            backgroundColor: 'background.default', // Uses MUI's default background
-            overflow: 'auto',
-          }}
-        >
-          {/* Empty content */}
-        </Box>
+        {/* If not authenticated, show the SignIn component */}
+        {!isAuthenticated ? (
+          <SignIn onLogin={handleLogin} />
+        ) : (
+          <>
+            <AppNavbar handleLogout={handleLogout} />
+            <Box
+              component="main"
+              sx={{
+                flexGrow: 1,
+                backgroundColor: 'background.default',
+                overflow: 'auto',
+              }}
+            >
+              {/* Dashboard content goes here */}
+            </Box>
+          </>
+        )}
       </Box>
     </>
   );

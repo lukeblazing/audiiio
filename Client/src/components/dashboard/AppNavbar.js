@@ -30,7 +30,7 @@ const Toolbar = styled(MuiToolbar)(({ theme }) => ({
   },
 }));
 
-export default function AppNavbar() {
+export default function AppNavbar({ handleLogout }) {
   const [open, setOpen] = React.useState(false);
 
   const toggleDrawer = (newOpen) => () => {
@@ -82,7 +82,7 @@ export default function AppNavbar() {
             Luke's cool site
           </Typography>
 
-          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} />
+          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} handleLogout={handleLogout} />
         </Stack>
       </Toolbar>
     </AppBar>

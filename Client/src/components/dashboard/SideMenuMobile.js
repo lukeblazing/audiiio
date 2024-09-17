@@ -12,7 +12,7 @@ import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import MenuButton from './MenuButton.js';
 import MenuContent from './MenuContent.js';
 
-function SideMenuMobile({ open, toggleDrawer }) {
+function SideMenuMobile({ open, toggleDrawer, handleLogout }) {
   return (
     <Drawer
       anchor="left"
@@ -61,6 +61,7 @@ function SideMenuMobile({ open, toggleDrawer }) {
             variant="outlined"
             fullWidth
             startIcon={<LogoutRoundedIcon />}
+            onClick={handleLogout}
             sx={{
               paddingLeft: { xs: '20vw', sm: '15vw', md: '100px' }, // Use viewport width (vw) on smaller screens, pixel-based for larger screens
               paddingRight: { xs: '20vw', sm: '15vw', md: '100px' },
