@@ -5,10 +5,12 @@ import Box from '@mui/material/Box';
 import SignIn from './components/authentication/SignIn.js';
 import AppTheme from './components/shared-theme/AppTheme.js';
 
-function App(props) {
+function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = (result) => {
+    console.log("luke result handleLogin:");
+    console.log(result);
     setIsAuthenticated(true);
   };
 
@@ -17,7 +19,7 @@ function App(props) {
   };
 
   return (
-    <AppTheme {...props}>
+    <AppTheme>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
         {/* If not authenticated, show the SignIn component */}

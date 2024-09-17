@@ -69,21 +69,47 @@ export default function SignIn({ onLogin }) {
     setOpen(false);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
 
-    if (data.get('email') === 'user@example.com' && data.get('password') === 'hello') {
-      onLogin(); 
-    } else {
+    const data = new FormData(event.currentTarget);
+    const email = data.get('email');
+    const password = data.get('password');
+  
+    try {
+      // Sending login data to the server for verification
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+  
+      // Checking if the response is successful
+      if (!response.ok) {
+        throw new Error('/login request failed');
+      }
+  
+      const result = await response.json();
+  
+      // server returns a success state if the login was successful
+      if (result.success) {
+        // Trigger the login success action, passing any necessary data like a token
+        onLogin(result); 
+      } else {
+        setPasswordError(true);
+        setPasswordErrorMessage(result.message || 'Password is incorrect.');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
       setPasswordError(true);
-      setPasswordErrorMessage('Password is incorrect.');
+      setPasswordErrorMessage('There was an error logging in. Please try again.');
     }
-  };
+  };  
 
   const validateInputs = () => {
     const email = document.getElementById('email');

@@ -3,6 +3,8 @@ const express = require("express");
 const path = require('path');
 const helmet = require('helmet');
 const app = express();
+const cors = require('cors');
+
 const PORT = process.env.PORT || 3000;
 
 // Use helmet middleware
@@ -10,6 +12,12 @@ app.use(helmet());
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+if (process.env.NODE_ENV === 'development') {
+    app.use(cors({
+        origin: 'http://localhost:8080' // Allow only requests from this origin
+    }));
+}
 
 // Middleware to force HTTPS
 app.use((req, res, next) => {
@@ -25,20 +33,23 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/build/index.html'));
 });
 
-// Define the greet endpoint
-app.post("/api/greet", (req, res) => {
-    const { name } = req.body;
-    if (!name) {
-        return res.status(400).json({ message: "Name is required" });
+// Login
+app.post("/api/login", (req, res) => {
+    const { email, password } = req.body;
+
+    if (email === 'luke' && password === 'hi') {
+        res.status(200).json({ 
+            success: true, 
+            token: "auth token here" 
+        });
+    } else {
+        res.status(401).json({
+            success: false,
+            message: "Unauthorized: Invalid username or password."
+        });
     }
-    const greetingMessage = `Hello, ${name}!`;
-    res.json({ message: greetingMessage });
 });
 
-// Healthcheck endpoint
-app.get("/healthcheck", (req, res) => {
-    res.json({ status: "healthy!" });
-});
 
 // Start the server
 app.listen(PORT, () => {
