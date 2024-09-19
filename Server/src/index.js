@@ -53,17 +53,17 @@ app.get('*', (req, res) => {
 });
 
 // Route for handling login
-app.post('/login', (req, res) => {
+app.post('/api/login', (req, res) => {
     AuthController.login(req, res);
 });
 
 // Route for handling logout
-app.post('/logout', (req, res) => {
+app.post('/api/logout', (req, res) => {
     AuthController.logout(req, res);
 });
 
 // Protected route to test authentication from AuthController
-app.get('/protected', AuthController.verifyToken, (req, res) => {
+app.get('/api/protected', AuthController.verifyToken, (req, res) => {
     const userEmail = req.user.email;
     const userRole = req.user.role;
 

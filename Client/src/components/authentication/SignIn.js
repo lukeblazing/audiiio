@@ -15,6 +15,7 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgotPassword.js';
 import { MicrosoftIcon, LogoIcon } from './CustomIcons.js';
+import { useAuth } from './AuthContext.js';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -77,7 +78,7 @@ export default function SignIn() {
     const data = new FormData(event.currentTarget);
     const email = data.get('email');
     const password = data.get('password');
-  
+
     try {
       // Sending login data to the server for verification
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/login`, {
@@ -90,27 +91,24 @@ export default function SignIn() {
           password,
         }),
       });
-  
-      // Checking if the response is successful
-      if (!response.ok) {
-        throw new Error('/login request failed');
-      }
-  
+
+      // Parse JSON response
       const responseJSON = await response.json();
-  
-      // Server returns a success state if the login was successful
-      if (responseJSON.success) {
-        handleLogin(responseJSON); 
+
+      // Check if Login was successful (200 status code)
+      if (response.ok) {
+        handleLogin(responseJSON);
       } else {
+        // Handle unsuccessful login (e.g., invalid credentials or other errors, 401 unauthorized)
         setPasswordError(true);
-        setPasswordErrorMessage(responseJSON.message || 'Password is incorrect.');
+        setPasswordErrorMessage(responseJSON.message || 'There was an error logging in.');
       }
     } catch (error) {
       console.error('Error during login:', error);
       setPasswordError(true);
       setPasswordErrorMessage('There was an error logging in. Please try again.');
     }
-  };  
+  };
 
   const validateInputs = () => {
     const email = document.getElementById('email');
@@ -145,7 +143,7 @@ export default function SignIn() {
       <SignInContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
           <Box display="flex" alignItems="center">
-            <LogoIcon/>
+            <LogoIcon />
             <Typography
               variant="h6"
               sx={{

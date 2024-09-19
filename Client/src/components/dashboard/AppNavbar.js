@@ -8,7 +8,6 @@ import Typography from '@mui/material/Typography';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import SideMenuMobile from './SideMenuMobile.js';
 import MenuButton from './MenuButton.js';
-import { useAuth } from '../authentication/AuthContext.js';
 
 const Toolbar = styled(MuiToolbar)(({ theme }) => ({
   width: '100%',
@@ -31,8 +30,6 @@ const Toolbar = styled(MuiToolbar)(({ theme }) => ({
 
 export default function AppNavbar() {
   const [open, setOpen] = React.useState(false);
-
-  const { handleLogout } = useAuth();
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -83,7 +80,7 @@ export default function AppNavbar() {
             Luke's cool site
           </Typography>
 
-          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} handleLogout={handleLogout} />
+          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} />
         </Stack>
       </Toolbar>
     </AppBar>

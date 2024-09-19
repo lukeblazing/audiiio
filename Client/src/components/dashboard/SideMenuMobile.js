@@ -8,11 +8,32 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-
 import MenuButton from './MenuButton.js';
 import MenuContent from './MenuContent.js';
+import { useAuth } from '../authentication/AuthContext.js';
 
-function SideMenuMobile({ open, toggleDrawer, handleLogout }) {
+function SideMenuMobile({ open, toggleDrawer }) {
+  const { handleLogout } = useAuth();
+
+  const attemptLogout = async () => {
+    try {
+      // Make the API request to logout
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include', // Send cookies with the request
+      });
+
+      if (response.ok) {
+        // Call handleLogout to update the context after successful logout
+        handleLogout();
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
   return (
     <Drawer
       anchor="left"
@@ -61,7 +82,7 @@ function SideMenuMobile({ open, toggleDrawer, handleLogout }) {
             variant="outlined"
             fullWidth
             startIcon={<LogoutRoundedIcon />}
-            onClick={handleLogout}
+            onClick={attemptLogout}
             sx={{
               paddingLeft: { xs: '20vw', sm: '15vw', md: '100px' }, // Use viewport width (vw) on smaller screens, pixel-based for larger screens
               paddingRight: { xs: '20vw', sm: '15vw', md: '100px' },
