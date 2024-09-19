@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Server for Tauri-Client",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "node index.js",
+    "start": "node src/index.js",
     "dev": "cd ../Client && npm install && npm run build"
   },
   "author": "Luke Blazing",
