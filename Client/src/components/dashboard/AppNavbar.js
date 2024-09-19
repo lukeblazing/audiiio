@@ -1,15 +1,14 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import MuiToolbar from '@mui/material/Toolbar';
 import { tabsClasses } from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import SideMenuMobile from './SideMenuMobile.js';
 import MenuButton from './MenuButton.js';
+import { useAuth } from '../authentication/AuthContext.js';
 
 const Toolbar = styled(MuiToolbar)(({ theme }) => ({
   width: '100%',
@@ -30,8 +29,10 @@ const Toolbar = styled(MuiToolbar)(({ theme }) => ({
   },
 }));
 
-export default function AppNavbar({ handleLogout }) {
+export default function AppNavbar() {
   const [open, setOpen] = React.useState(false);
+
+  const { handleLogout } = useAuth();
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);

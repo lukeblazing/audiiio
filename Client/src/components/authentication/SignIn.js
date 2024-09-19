@@ -54,12 +54,14 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignIn({ onLogin }) {
+export default function SignIn() {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
+
+  const { handleLogin } = useAuth();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -94,15 +96,14 @@ export default function SignIn({ onLogin }) {
         throw new Error('/login request failed');
       }
   
-      const result = await response.json();
+      const responseJSON = await response.json();
   
-      // server returns a success state if the login was successful
-      if (result.success) {
-        // Trigger the login success action, passing any necessary data like a token
-        onLogin(result); 
+      // Server returns a success state if the login was successful
+      if (responseJSON.success) {
+        handleLogin(responseJSON); 
       } else {
         setPasswordError(true);
-        setPasswordErrorMessage(result.message || 'Password is incorrect.');
+        setPasswordErrorMessage(responseJSON.message || 'Password is incorrect.');
       }
     } catch (error) {
       console.error('Error during login:', error);

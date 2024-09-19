@@ -1,49 +1,22 @@
 import React, { useState } from 'react';
-import AppNavbar from './components/dashboard/AppNavbar.js';
 import CssBaseline from '@mui/material/CssBaseline';
-import Box from '@mui/material/Box';
-import SignIn from './components/authentication/SignIn.js';
 import AppTheme from './components/shared-theme/AppTheme.js';
+import Dashboard from './components/dashboard/Dashboard.js';
+import { AuthProvider, useAuth } from './components/authentication/AuthContext.js';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const handleLogin = (result) => {
-    console.log("luke result handleLogin:");
-    console.log(result);
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);  // Set auth state back to false
-  };
+  const { isAuthenticated } = useAuth();
 
   return (
-    <AppTheme>
-      <CssBaseline />
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        {/* If not authenticated, show the SignIn component */}
-        {!isAuthenticated ? (
-          <SignIn onLogin={handleLogin} />
-        ) : (
-          <>
-            <AppNavbar handleLogout={handleLogout} />
-            <Box
-              component="main"
-              sx={{
-                flexGrow: 1,
-                backgroundColor: 'background.default',
-                overflow: 'auto',
-              }}
-            >
-              {/* Dashboard content goes here */}
-            </Box>
-          </>
-        )}
-      </Box>
-    </AppTheme>
+    <AuthProvider>
+      <AppTheme>
+        <CssBaseline />
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+          {!isAuthenticated ? <SignIn /> : <Dashboard />}
+        </Box>
+      </AppTheme>
+    </AuthProvider>
   );
 }
 
 export default App;
-
