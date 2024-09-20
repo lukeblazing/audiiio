@@ -7,9 +7,14 @@ import SignIn from '../authentication/SignIn.js';
 function Dashboard() {
   const { isAuthenticated } = useAuth();
 
+  // If not authenticated, only render sign-in page
+  if (!isAuthenticated) {
+    return <SignIn />;
+  }
+
   return (
     <>
-      <AppNavbar/>
+      <AppNavbar />
       <Box
         component="main"
         sx={{
@@ -19,7 +24,7 @@ function Dashboard() {
         }}
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-          {!isAuthenticated ? <SignIn /> : <Dashboard />}
+          <Dashboard />
         </Box>
       </Box>
     </>
