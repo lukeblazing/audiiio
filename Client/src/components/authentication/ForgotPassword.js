@@ -8,17 +8,17 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import OutlinedInput from '@mui/material/OutlinedInput';
 
-function ForgotPassword({ open, handleClose }) {
-  const handleFormSubmit = (event) => {
+function ForgotPassword({ isForgotPwdOpen, handleForgotPwdClose }) {
+  const handleForgotPasswordSubmit = (event) => {
     event.preventDefault();  // Prevent the default form submission behavior
-    // Here you would typically trigger the reset password request
-    handleClose(); // Close the dialog after form submission
+    alert('Forgot password functionality is not yet supported.')
+    handleForgotPwdClose(); // Close the dialog after form submission
   };
 
   return (
     <Dialog
-      open={open}
-      onClose={handleClose}
+      isForgotPwdOpen={isForgotPwdOpen}
+      onClose={handleForgotPwdClose}
     >
       <DialogTitle>Reset password</DialogTitle>
       <DialogContent
@@ -27,7 +27,7 @@ function ForgotPassword({ open, handleClose }) {
         <DialogContentText>
           Enter your account&apos;s email address, and we&apos;ll send you a link to reset your password.
         </DialogContentText>
-        <form onSubmit={handleFormSubmit}>
+        <form onSubmit={handleForgotPasswordSubmit}>
           <OutlinedInput
             autoFocus
             required
@@ -40,7 +40,7 @@ function ForgotPassword({ open, handleClose }) {
             fullWidth
           />
           <DialogActions sx={{ pb: 3, px: 3 }}>
-            <Button onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleForgotPwdClose}>Cancel</Button>
             <Button variant="contained" type="submit">
               Continue
             </Button>
@@ -52,8 +52,8 @@ function ForgotPassword({ open, handleClose }) {
 }
 
 ForgotPassword.propTypes = {
-  handleClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
+  handleForgotPwdClose: PropTypes.func.isRequired,
+  isForgotPwdOpen: PropTypes.bool.isRequired,
 };
 
 export default ForgotPassword;

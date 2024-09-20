@@ -63,7 +63,7 @@ export default function SignUp() {
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState('');
 
-  const { handleLogin } = useAuth(); // Moved useAuth hook to the top level
+  const { handleLogin } = useAuth();
 
   const validateInputs = () => {
     const email = document.getElementById('email');
@@ -131,7 +131,7 @@ export default function SignUp() {
       const responseJSON = await response.json();
 
       if (response.ok) {
-        handleLogin(responseJSON); // Assuming handleLogin handles login logic
+        handleLogin(responseJSON);
       } else {
         // Handle unsuccessful login (e.g., invalid credentials or other errors, 401 unauthorized)
         setPasswordError(true);

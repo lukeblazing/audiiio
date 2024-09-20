@@ -61,16 +61,16 @@ export default function SignIn() {
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [open, setOpen] = React.useState(false);
+  const [isForgotPwdOpen, setIsForgotPwdOpen] = React.useState(false);
 
   const { handleLogin } = useAuth();
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  const handleForgotPwdOpen = () => {
+    setIsForgotPwdOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleForgotPwdClose = () => {
+    setIsForgotPwdOpen(false);
   };
 
   const validateInputs = () => {
@@ -193,7 +193,7 @@ export default function SignIn() {
                 <FormLabel htmlFor="password">Password</FormLabel>
                 <Link
                   component="button"
-                  onClick={handleClickOpen}
+                  onClick={handleForgotPwdOpen}
                   variant="body2"
                   sx={{ alignSelf: 'baseline' }}
                 >
@@ -218,7 +218,7 @@ export default function SignIn() {
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             />
-            <ForgotPassword open={open} handleClose={handleClose} />
+            <ForgotPassword isForgotPwdOpen={isForgotPwdOpen} handleForgotPwdClose={handleForgotPwdClose} />
             <Button type="submit" fullWidth variant="contained">
               Sign in
             </Button>
