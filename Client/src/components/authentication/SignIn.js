@@ -73,44 +73,6 @@ export default function SignIn() {
     setOpen(false);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    const data = new FormData(event.currentTarget);
-    const email = data.get('email');
-    const password = data.get('password');
-
-    try {
-      // Sending login data to the server for verification
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-
-      // Parse JSON response
-      const responseJSON = await response.json();
-
-      // Check if Login was successful (200 status code)
-      if (response.ok) {
-        handleLogin(responseJSON);
-      } else {
-        // Handle unsuccessful login (e.g., invalid credentials or other errors, 401 unauthorized)
-        setPasswordError(true);
-        setPasswordErrorMessage(responseJSON.message || 'There was an error logging in.');
-      }
-    } catch (error) {
-      console.error('Error during login:', error);
-      setPasswordError(true);
-      setPasswordErrorMessage('There was an error logging in. Please try again.');
-    }
-  };
-
   const validateInputs = () => {
     const email = document.getElementById('email');
     const password = document.getElementById('password');
@@ -138,6 +100,44 @@ export default function SignIn() {
     return isValid;
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!validateInputs()) {
+      return;
+    }
+
+    const data = new FormData(event.currentTarget);
+    const email = data.get('email');
+    const password = data.get('password');
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const responseJSON = await response.json();
+
+      if (response.ok) {
+        handleLogin(responseJSON);
+      } else {
+        setPasswordError(true);
+        setPasswordErrorMessage(responseJSON.message || 'There was an error logging in.');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      setPasswordError(true);
+      setPasswordErrorMessage('There was an error logging in. Please try again.');
+    }
+  };
+
   return (
     <div>
       <CssBaseline enableColorScheme />
@@ -149,10 +149,10 @@ export default function SignIn() {
               variant="h6"
               sx={{
                 marginLeft: 1,
-                fontWeight: 'bold', // Makes the text bold
-                color: '#FFDD57', // Reddish-orange color
-                fontFamily: 'Roboto, sans-serif', // Example of an easily readable logo font
-                fontSize: '1.5rem', // Adjusted font size
+                fontWeight: 'bold',
+                color: '#FFDD57',
+                fontFamily: 'Roboto, sans-serif',
+                fontSize: '1.5rem',
               }}
             >
               Hello
@@ -169,12 +169,7 @@ export default function SignIn() {
             component="form"
             onSubmit={handleSubmit}
             noValidate
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              gap: 2,
-            }}
+            sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}
           >
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
@@ -191,7 +186,6 @@ export default function SignIn() {
                 fullWidth
                 variant="outlined"
                 color={emailError ? 'error' : 'primary'}
-                sx={{ ariaLabel: 'email' }}
               />
             </FormControl>
             <FormControl>
@@ -214,7 +208,6 @@ export default function SignIn() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                autoFocus
                 required
                 fullWidth
                 variant="outlined"
@@ -226,12 +219,7 @@ export default function SignIn() {
               label="Remember me"
             />
             <ForgotPassword open={open} handleClose={handleClose} />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              onClick={validateInputs}
-            >
+            <Button type="submit" fullWidth variant="contained">
               Sign in
             </Button>
             <Typography sx={{ textAlign: 'center' }}>
@@ -246,7 +234,7 @@ export default function SignIn() {
           <Divider>or</Divider>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Button
-              type="submit"
+              type="button"
               fullWidth
               variant="outlined"
               onClick={() => alert('Sign in with Microsoft')}
