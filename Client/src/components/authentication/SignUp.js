@@ -63,11 +63,12 @@ export default function SignUp() {
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState('');
 
+  const { handleLogin } = useAuth(); // Moved useAuth hook to the top level
+
   const validateInputs = () => {
     const email = document.getElementById('email');
     const password = document.getElementById('password');
     const name = document.getElementById('name');
-    const { handleLogin } = useAuth();
 
     let isValid = true;
 
@@ -101,8 +102,12 @@ export default function SignUp() {
     return isValid;
   };
 
-const handleSubmit = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!validateInputs()) {
+      return; // Stop form submission if validation fails
+    }
 
     const data = new FormData(event.currentTarget);
     const name = data.get('name');
@@ -117,26 +122,25 @@ const handleSubmit = async (event) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          name, // Make sure name is included in the request body
           email,
           password,
         }),
       });
 
-      // Parse JSON response
       const responseJSON = await response.json();
 
-      // Check if Login was successful (200 status code)
       if (response.ok) {
-        handleLogin(responseJSON);
+        handleLogin(responseJSON); // Assuming handleLogin handles login logic
       } else {
         // Handle unsuccessful login (e.g., invalid credentials or other errors, 401 unauthorized)
         setPasswordError(true);
-        setPasswordErrorMessage(responseJSON.message || 'There was an error logging in.');
+        setPasswordErrorMessage(responseJSON.message || 'There was an error signing up.');
       }
     } catch (error) {
-      console.error('Error during login:', error);
+      console.error('Error during sign up:', error);
       setPasswordError(true);
-      setPasswordErrorMessage('There was an error logging in. Please try again.');
+      setPasswordErrorMessage('There was an error signing up. Please try again.');
     }
   };
 
@@ -151,8 +155,8 @@ const handleSubmit = async (event) => {
               variant="h6"
               sx={{
                 marginLeft: 1,
-                fontWeight: 'bold', // Makes the text bold
-                color: '#FFDD57', // Yellow color
+                fontWeight: 'bold', 
+                color: '#FFDD57', 
                 fontFamily: 'Roboto, sans-serif',
                 fontSize: '1.5rem', 
               }}
@@ -226,7 +230,6 @@ const handleSubmit = async (event) => {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
             >
               Sign up
             </Button>
@@ -242,7 +245,7 @@ const handleSubmit = async (event) => {
           <Divider>or</Divider>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Button
-              type="submit"
+              type="button"
               fullWidth
               variant="outlined"
               onClick={() => alert('Sign up with Microsoft')}
