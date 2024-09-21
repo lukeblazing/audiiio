@@ -17,7 +17,7 @@ function ForgotPassword({ isForgotPwdOpen, handleForgotPwdClose }) {
 
   return (
     <Dialog
-      isForgotPwdOpen={isForgotPwdOpen}
+      open={isForgotPwdOpen}
       onClose={handleForgotPwdClose}
     >
       <DialogTitle>Reset password</DialogTitle>
