@@ -4,8 +4,8 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import CssBaseline from '@mui/material/CssBaseline';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
@@ -14,8 +14,7 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
-import ForgotPassword from './ForgotPassword.js';
-import { MicrosoftIcon, LogoIcon } from './CustomIcons.js';
+import { LogoIcon, MicrosoftIcon } from './CustomIcons.js';
 import { useAuth } from './AuthContext.js';
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -37,7 +36,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   }),
 }));
 
-const SignInContainer = styled(Stack)(({ theme }) => ({
+const SignUpContainer = styled(Stack)(({ theme }) => ({
   padding: 20,
   marginTop: '10vh',
   '&::before': {
@@ -56,26 +55,20 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignIn() {
+export default function SignUp() {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [isForgotPwdOpen, setIsForgotPwdOpen] = React.useState(false);
+  const [nameError, setNameError] = React.useState(false);
+  const [nameErrorMessage, setNameErrorMessage] = React.useState('');
 
   const { handleLogin } = useAuth();
-
-  const handleForgotPwdOpen = () => {
-    setIsForgotPwdOpen(true);
-  };
-
-  const handleForgotPwdClose = () => {
-    setIsForgotPwdOpen(false);
-  };
 
   const validateInputs = () => {
     const email = document.getElementById('email');
     const password = document.getElementById('password');
+    const name = document.getElementById('name');
 
     let isValid = true;
 
@@ -97,6 +90,15 @@ export default function SignIn() {
       setPasswordErrorMessage('');
     }
 
+    if (!name.value || name.value.length < 1) {
+      setNameError(true);
+      setNameErrorMessage('Name is required.');
+      isValid = false;
+    } else {
+      setNameError(false);
+      setNameErrorMessage('');
+    }
+
     return isValid;
   };
 
@@ -104,20 +106,23 @@ export default function SignIn() {
     event.preventDefault();
 
     if (!validateInputs()) {
-      return;
+      return; // Stop form submission if validation fails
     }
 
     const data = new FormData(event.currentTarget);
+    const name = data.get('name');
     const email = data.get('email');
     const password = data.get('password');
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/login`, {
+      // Sending Sign Up data to the server for verification
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/createUser`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          name, // Make sure name is included in the request body
           email,
           password,
         }),
@@ -128,20 +133,21 @@ export default function SignIn() {
       if (response.ok) {
         handleLogin(responseJSON);
       } else {
+        // Handle unsuccessful login (e.g., invalid credentials or other errors, 401 unauthorized)
         setPasswordError(true);
-        setPasswordErrorMessage(responseJSON.message || 'There was an error logging in.');
+        setPasswordErrorMessage(responseJSON.message || 'There was an error signing up.');
       }
     } catch (error) {
-      console.error('Error during login:', error);
+      console.error('Error during sign up:', error);
       setPasswordError(true);
-      setPasswordErrorMessage('There was an error logging in. Please try again.');
+      setPasswordErrorMessage('There was an error signing up. Please try again.');
     }
   };
 
   return (
     <div>
       <CssBaseline enableColorScheme />
-      <SignInContainer direction="column" justifyContent="space-between">
+      <SignUpContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
           <Box display="flex" alignItems="center">
             <LogoIcon />
@@ -149,13 +155,13 @@ export default function SignIn() {
               variant="h6"
               sx={{
                 marginLeft: 1,
-                fontWeight: 'bold',
-                color: '#FFDD57',
+                fontWeight: 'bold', 
+                color: '#FFDD57', 
                 fontFamily: 'Roboto, sans-serif',
-                fontSize: '1.5rem',
+                fontSize: '1.5rem', 
               }}
             >
-              Hello
+              Welcome
             </Typography>
           </Box>
           <Typography
@@ -163,70 +169,75 @@ export default function SignIn() {
             variant="h4"
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
-            Sign in
+            Sign up
           </Typography>
           <Box
             component="form"
             onSubmit={handleSubmit}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
             noValidate
-            sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}
           >
+            <FormControl>
+              <FormLabel htmlFor="name">Full name</FormLabel>
+              <TextField
+                autoComplete="name"
+                name="name"
+                required
+                fullWidth
+                id="name"
+                placeholder="Jon Snow"
+                error={nameError}
+                helperText={nameErrorMessage}
+                color={nameError ? 'error' : 'primary'}
+              />
+            </FormControl>
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
-                error={emailError}
-                helperText={emailErrorMessage}
-                id="email"
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                autoComplete="email"
-                autoFocus
                 required
                 fullWidth
+                id="email"
+                placeholder="your@email.com"
+                name="email"
+                autoComplete="email"
                 variant="outlined"
+                error={emailError}
+                helperText={emailErrorMessage}
                 color={emailError ? 'error' : 'primary'}
               />
             </FormControl>
             <FormControl>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <FormLabel htmlFor="password">Password</FormLabel>
-                <Link
-                  component="button"
-                  onClick={handleForgotPwdOpen}
-                  variant="body2"
-                  sx={{ alignSelf: 'baseline' }}
-                >
-                  Forgot your password?
-                </Link>
-              </Box>
+              <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
+                required
+                fullWidth
                 name="password"
                 placeholder="••••••"
                 type="password"
                 id="password"
-                autoComplete="current-password"
-                required
-                fullWidth
+                autoComplete="new-password"
                 variant="outlined"
+                error={passwordError}
+                helperText={passwordErrorMessage}
                 color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
             <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
+              control={<Checkbox value="allowExtraEmails" color="primary" />}
+              label="I want to receive updates via email."
             />
-            <ForgotPassword isForgotPwdOpen={isForgotPwdOpen} handleForgotPwdClose={handleForgotPwdClose} />
-            <Button type="submit" fullWidth variant="contained">
-              Sign in
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+            >
+              Sign up
             </Button>
             <Typography sx={{ textAlign: 'center' }}>
-              Don&apos;t have an account?{' '}
+              Already have an account?{' '}
               <span>
-                <Link component={RouterLink} to="/sign-up" variant="body2">
-                  Sign up
+                <Link component={RouterLink} to="/sign-in" variant="body2">
+                  Sign in
                 </Link>
               </span>
             </Typography>
@@ -237,14 +248,14 @@ export default function SignIn() {
               type="button"
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign in with Microsoft')}
+              onClick={() => alert('Sign up with Microsoft')}
               startIcon={<MicrosoftIcon />}
             >
-              Sign in with Microsoft
+              Sign up with Microsoft
             </Button>
           </Box>
         </Card>
-      </SignInContainer>
+      </SignUpContainer>
     </div>
   );
 }

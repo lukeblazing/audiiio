@@ -1,47 +1,27 @@
 import React, { useState } from 'react';
-import AppNavbar from './components/dashboard/AppNavbar.js';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
-import Box from '@mui/material/Box';
-import SignIn from './components/authentication/SignIn.js';
 import AppTheme from './components/shared-theme/AppTheme.js';
+import Dashboard from './components/dashboard/Dashboard.js';
+import { AuthProvider } from './components/authentication/AuthContext.js';
+import SignUp from './components/authentication/SignUp.js';
+import SignIn from './components/authentication/SignIn.js';
 
-function App(props) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);  // Set auth state back to false
-  };
-
+function App() {
   return (
-    <AppTheme {...props}>
-      <CssBaseline />
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        {/* If not authenticated, show the SignIn component */}
-        {!isAuthenticated ? (
-          <SignIn onLogin={handleLogin} />
-        ) : (
-          <>
-            <AppNavbar handleLogout={handleLogout} />
-            <Box
-              component="main"
-              sx={{
-                flexGrow: 1,
-                backgroundColor: 'background.default',
-                overflow: 'auto',
-              }}
-            >
-              {/* Dashboard content goes here */}
-            </Box>
-          </>
-        )}
-      </Box>
-    </AppTheme>
+    <Router>
+      <AuthProvider>
+        <AppTheme>
+          <CssBaseline />
+          <Routes>
+            <Route path="/" element={<Dashboard />} /> 
+            <Route path="/sign-up" element={<SignUp />} /> 
+            <Route path="/sign-in" element={<SignIn />} /> 
+          </Routes>
+        </AppTheme>
+      </AuthProvider>
+    </Router>
   );
 }
 
 export default App;
-
