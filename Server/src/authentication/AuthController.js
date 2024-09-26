@@ -49,32 +49,49 @@ class AuthController {
   }
 
   // Create a new user
-  async createUser(email, password) {
+  async createUser(req, res) {
     try {
+      const { name, email, password } = req.body;
+
       // Check if the email is already in use
       const existingUserQuery = 'SELECT * FROM users WHERE email = $1';
-      const existingUserResult = {rows: []}//await pool.query(existingUserQuery, [email]);
+      const existingUserResult = await pool.query(existingUserQuery, [email]);
 
       if (existingUserResult.rows.length > 0) {
-        throw new Error('Email is already in use');
+        // If the email is already in use, return an error response
+        return {
+          success: false,
+          message: 'Email is already in use',
+        };
       }
-
+  
       // Hash the password before storing it in the database
-      const saltRounds = 10; // You can adjust the number of rounds for hashing, 10 is a good balance between security and performance
+      const saltRounds = 10; // 10 is a good balance between security and performance
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-
+  
       // Insert the new user into the database
-      const insertUserQuery = 'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *';
-      const result = {rows: []}//await pool.query(insertUserQuery, [email, hashedPassword]);
-
+      const insertUserQuery = 'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email';
+      const result = await pool.query(insertUserQuery, [email, hashedPassword]);
+  
       // Return the newly created user details (excluding the password)
       const newUser = result.rows[0];
-      delete newUser.password; // Don't return the password hash to the caller
-
-      return newUser;
+  
+      // Send back a success response with the new user details
+      return {
+        success: true,
+        message: 'User created successfully',
+        user: newUser, // Send the new user object (with id and email)
+      };
+      
     } catch (err) {
-      console.error('Error creating user', err);
-      throw err;
+      console.error('Error creating user:', err);
+
+      // Avoid thowing a 500 error
+      return {
+        success: false,
+        message: 'An error occurred while creating the user',
+        error: err.message,
+      };
     }
   }
 

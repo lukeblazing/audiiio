@@ -1,9 +1,22 @@
+version: "0.2"
+
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"  # Exposes port 3000
+      - "3000:3000"
     environment:
       NODE_ENV: development
+
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+    profiles:
+      - prod
