@@ -1,4 +1,6 @@
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import pool from '../database/db.js'; // Ensure you have a db.js that exports your database pool
 
 class AuthController {
   // Handles Login and cookie generation
@@ -6,12 +8,13 @@ class AuthController {
     const { email, password } = req.body;
 
     // Validate provided email and password are correct
-    if (!this.validateCredentials(email, password)) {
+    const credentialsResult = await this.getCredentials(email, password);
+    if (!credentialsResult.passwordMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Assuming user validation is successful, generate a JWT token
-    const token = this.generateToken({ email, role: 'admin' });
+    // Generate a JWT token
+    const token = this.generateToken({ email, role: credentialsResult.storedUserRole });
 
     // Set the token in an HTTP-only, secure cookie
     res.cookie('token', token, {
@@ -22,14 +25,19 @@ class AuthController {
     });
 
     // Respond with success
-    res.status(200).json({ message: 'Login successful' });
+    res.status(200).json({ 
+      message: 'Login successful',         
+      user: {
+        name: credentialsResult.storedName,
+      },
+    });
   }
 
   // Validate email and password
-  async validateCredentials(email, password) {
+  async getCredentials(email, password) {
     try {
-      const queryText = 'SELECT password FROM users WHERE email = $1';
-      const result = {rows: []}//await pool.query(queryText, [email]);
+      const queryText = 'SELECT password, name, role FROM app_users WHERE email = $1';
+      const result = await pool.query(queryText, [email]);
 
       if (result.rows.length === 0) {
         // No user found with the given email
@@ -37,32 +45,42 @@ class AuthController {
       }
 
       const storedPasswordHash = result.rows[0].password;
+      const storedUserRole = result.rows[0].role;
+      const storedName = result.rows[0].name;
 
       // Compare the given password with the hashed password in the database
       const passwordMatch = await bcrypt.compare(password, storedPasswordHash);
 
-      return passwordMatch;
+      return {passwordMatch, storedUserRole, storedName};
     } catch (err) {
       console.error('Error validating credentials', err);
       return false;
     }
   }
 
-  // Create a new user
+  // Create a new user and automatically log them in
   async createUser(req, res) {
     try {
-      const { name, email, password } = req.body;
+      const { email, name, password } = req.body;
+
+      const blockingNewUsers = true;
+      if (blockingNewUsers) {
+        return res.status(400).json({
+          success: false,
+          message: 'We are currently at capacity, and are not accepting new users at this time.',
+        });
+      }
 
       // Check if the email is already in use
-      const existingUserQuery = 'SELECT * FROM users WHERE email = $1';
+      const existingUserQuery = 'SELECT * FROM app_users WHERE email = $1';
       const existingUserResult = await pool.query(existingUserQuery, [email]);
 
       if (existingUserResult.rows.length > 0) {
         // If the email is already in use, return an error response
-        return {
+        return res.status(400).json({
           success: false,
           message: 'Email is already in use',
-        };
+        });
       }
   
       // Hash the password before storing it in the database
@@ -70,28 +88,41 @@ class AuthController {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
   
       // Insert the new user into the database
-      const insertUserQuery = 'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email';
-      const result = await pool.query(insertUserQuery, [email, hashedPassword]);
+      const insertUserQuery = 'INSERT INTO app_users (email, password, name, role) VALUES ($1, $2, $3, $4) RETURNING email, name, role';
+      const result = await pool.query(insertUserQuery, [email, hashedPassword, name, 'user']);
   
       // Return the newly created user details (excluding the password)
       const newUser = result.rows[0];
   
+      // Generate a JWT token for the new user
+      const token = this.generateToken({ email: newUser.email, role: 'user' });
+  
+      // Set the token in an HTTP-only, secure cookie
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        sameSite: 'Strict', // Protect against CSRF attacks
+        maxAge: 3600000, // 1 hour expiration in milliseconds
+      });
+  
       // Send back a success response with the new user details
-      return {
+      res.status(201).json({
         success: true,
-        message: 'User created successfully',
-        user: newUser, // Send the new user object (with id and email)
-      };
+        message: 'User created and logged in successfully',
+        user: {
+          name: newUser.name,
+        },
+      });
       
     } catch (err) {
       console.error('Error creating user:', err);
-
-      // Avoid thowing a 500 error
-      return {
+  
+      // Send a 500 error response
+      res.status(500).json({
         success: false,
         message: 'An error occurred while creating the user',
         error: err.message,
-      };
+      });
     }
   }
 
@@ -102,7 +133,11 @@ class AuthController {
 
   // Handle Logout, clear the cookie in the user's browser
   logout(req, res) {
-    res.clearCookie('token');
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development',
+      sameSite: 'Strict',
+    });
     res.status(200).json({ message: 'Logout successful' });
   }
 

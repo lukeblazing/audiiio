@@ -4,7 +4,7 @@ WORKDIR /app/Client
 COPY ./Client/package.json ./
 RUN npm install
 COPY ./Client ./
-RUN npm run build-prod
+RUN npm run build
 
 # Stage 2: Build the Server
 FROM node:20 AS server-build

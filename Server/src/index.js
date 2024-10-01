@@ -55,20 +55,7 @@ app.get('*', (req, res) => {
 // Sign up: Create a new user
 app.post('/api/signUp', async (req, res) => {
     try {
-        // Call the createUser function and wait for its response
-        const newUser = await AuthController.createUser(req, res);
-
-        // If user creation was successful, return a 200 status code with the response
-        if (newUser.success) {
-            return res.status(200).json(newUser);
-        }
-
-        // If there was an error (e.g., email already in use), return a 400 status code
-        return res.status(400).json({
-            success: false,
-            message: newUser.message
-        });
-
+        return await AuthController.createUser(req, res);
     } catch (error) {
         // If there's a server error, return a 500 status code
         return res.status(500).json({
@@ -80,13 +67,31 @@ app.post('/api/signUp', async (req, res) => {
 });
 
 // Route for handling login
-app.post('/api/login', (req, res) => {
-    AuthController.login(req, res);
+app.post('/api/login', async (req, res) => {
+    try {
+        return await AuthController.login(req, res);
+    } catch (error) {
+        // If there's a server error, return a 500 status code
+        return res.status(500).json({
+            success: false,
+            message: 'An internal server error occurred',
+            error: error.message
+        });
+    }
 });
 
 // Route for handling logout
 app.post('/api/logout', (req, res) => {
-    AuthController.logout(req, res);
+    try {
+        return AuthController.logout(req, res);
+    } catch (error) {
+        // If there's a server error, return a 500 status code
+        return res.status(500).json({
+            success: false,
+            message: 'An internal server error occurred',
+            error: error.message
+        });
+    }
 });
 
 // Protected route to test authentication from AuthController
