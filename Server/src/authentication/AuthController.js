@@ -67,7 +67,7 @@ class AuthController {
       if (blockingNewUsers) {
         return res.status(400).json({
           success: false,
-          message: 'We are currently at capacity, and are not accepting new users at this time.',
+          message: 'We are currently at capacity. We are not accepting new users at this time.',
         });
       }
 
