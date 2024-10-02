@@ -1,12 +1,20 @@
-import { Pool } from 'pg';
+import pg from 'pg';
+const { Pool } = pg;
 
-// Set up your PostgreSQL connection pool
 const pool = new Pool({
-  user: 'your_user',
-  host: 'localhost',
-  database: 'your_database',
-  password: 'your_db_password',
-  port: 5432, // PostgreSQL port
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT || 5432,
+  ssl: {
+    rejectUnauthorized: true,
+    ca: process.env.PG_CERT
+    ,
+  },
+  max: process.env.PG_MAX_CLIENTS || 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 20000,
 });
 
 export default pool;

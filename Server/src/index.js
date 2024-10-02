@@ -1,5 +1,5 @@
 // Import the necessary modules using ES module syntax
-import 'dotenv/config';  // Replaces require('dotenv').config()
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import helmet from 'helmet';
@@ -52,14 +52,46 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/build/index.html'));
 });
 
+// Sign up: Create a new user
+app.post('/api/signUp', async (req, res) => {
+    try {
+        return await AuthController.createUser(req, res);
+    } catch (error) {
+        // If there's a server error, return a 500 status code
+        return res.status(500).json({
+            success: false,
+            message: 'An internal server error occurred',
+            error: error.message
+        });
+    }
+});
+
 // Route for handling login
-app.post('/api/login', (req, res) => {
-    AuthController.login(req, res);
+app.post('/api/login', async (req, res) => {
+    try {
+        return await AuthController.login(req, res);
+    } catch (error) {
+        // If there's a server error, return a 500 status code
+        return res.status(500).json({
+            success: false,
+            message: 'An internal server error occurred',
+            error: error.message
+        });
+    }
 });
 
 // Route for handling logout
 app.post('/api/logout', (req, res) => {
-    AuthController.logout(req, res);
+    try {
+        return AuthController.logout(req, res);
+    } catch (error) {
+        // If there's a server error, return a 500 status code
+        return res.status(500).json({
+            success: false,
+            message: 'An internal server error occurred',
+            error: error.message
+        });
+    }
 });
 
 // Protected route to test authentication from AuthController

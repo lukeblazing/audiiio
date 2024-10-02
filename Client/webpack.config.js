@@ -52,5 +52,6 @@ export default (env, argv) => {
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
     },
+    devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
   };
 };

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -64,6 +64,7 @@ export default function SignIn() {
   const [isForgotPwdOpen, setIsForgotPwdOpen] = React.useState(false);
 
   const { handleLogin } = useAuth();
+  const navigate = useNavigate();
 
   const handleForgotPwdOpen = () => {
     setIsForgotPwdOpen(true);
@@ -126,7 +127,8 @@ export default function SignIn() {
       const responseJSON = await response.json();
 
       if (response.ok) {
-        handleLogin(responseJSON);
+        handleLogin(responseJSON); // Log the user in
+        navigate('/'); // Redirect to the home page after successful login
       } else {
         setPasswordError(true);
         setPasswordErrorMessage(responseJSON.message || 'There was an error logging in.');
