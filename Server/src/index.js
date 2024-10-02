@@ -18,7 +18,16 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Use helmet middleware
-app.use(helmet());
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                connectSrc: ["'self'"],
+            },
+        },
+    })
+);
 
 // Middleware to parse JSON bodies
 app.use(express.json());
