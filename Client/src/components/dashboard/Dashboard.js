@@ -24,7 +24,6 @@ function Dashboard() {
         }}
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-          <Dashboard />
         </Box>
       </Box>
     </>
