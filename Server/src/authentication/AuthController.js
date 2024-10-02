@@ -54,7 +54,7 @@ class AuthController {
       return {passwordMatch, storedUserRole, storedName};
     } catch (err) {
       console.error('Error validating credentials', err);
-      return false;
+      return { error: `Error validating credentials: ${err.message}` };
     }
   }
 
