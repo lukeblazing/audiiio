@@ -200,17 +200,7 @@ export default function SignIn() {
               />
             </FormControl>
             <FormControl>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <FormLabel htmlFor="password">Password</FormLabel>
-                <Link
-                  component="button"
-                  onClick={handleForgotPwdOpen}
-                  variant="body2"
-                  sx={{ alignSelf: 'baseline' }}
-                >
-                  Forgot your password?
-                </Link>
-              </Box>
+              <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
                 error={passwordError}
                 helperText={passwordErrorMessage}
@@ -225,11 +215,31 @@ export default function SignIn() {
                 color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap', // Allows wrapping on smaller screens
+                gap: 1, // Adds spacing between items
+              }}
+            >
+              <FormControlLabel
+                control={<Checkbox value="remember" color="primary" />}
+                label="Remember me"
+              />
+              <Button
+                onClick={handleForgotPwdOpen}
+                variant="text"
+                sx={{ textTransform: 'none', padding: 0 }}
+              >
+                Forgot your password?
+              </Button>
+            </Box>
+            <ForgotPassword
+              isForgotPwdOpen={isForgotPwdOpen}
+              handleForgotPwdClose={handleForgotPwdClose}
             />
-            <ForgotPassword isForgotPwdOpen={isForgotPwdOpen} handleForgotPwdClose={handleForgotPwdClose} />
             <Button
               type="submit"
               fullWidth
