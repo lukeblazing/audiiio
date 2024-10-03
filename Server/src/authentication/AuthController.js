@@ -64,7 +64,7 @@ class AuthController {
     try {
       const { email, name, password } = req.body;
 
-      const blockingNewUsers = true;
+      const blockingNewUsers = false;
       if (blockingNewUsers) {
         return res.status(400).json({
           success: false,

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Checkbox from '@mui/material/Checkbox';
 import CssBaseline from '@mui/material/CssBaseline';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -41,6 +42,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
 const SignInContainer = styled(Stack)(({ theme }) => ({
   padding: 20,
   marginTop: '10vh',
+  position: 'relative',
   '&::before': {
     content: '""',
     display: 'block',
@@ -137,11 +139,12 @@ export default function SignIn() {
         setPasswordError(true);
         setPasswordErrorMessage(responseJSON.message || 'There was an error logging in.');
       }
-      setIsLoading(false);
     } catch (error) {
       console.error('Error during login:', error);
       setPasswordError(true);
       setPasswordErrorMessage('There was an error logging in. Please try again.');
+    } finally {
+      setIsLoading(false); // Stop loading regardless of outcome
     }
   };
 
@@ -227,8 +230,29 @@ export default function SignIn() {
               label="Remember me"
             />
             <ForgotPassword isForgotPwdOpen={isForgotPwdOpen} handleForgotPwdClose={handleForgotPwdClose} />
-            <Button type="submit" fullWidth variant="contained">
-              Sign in
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isLoading} // Disable the button when loading
+              sx={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1, // Adds space between spinner and text
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <CircularProgress size={24} color="inherit" />
+                  <Typography variant="button" sx={{ marginLeft: 1 }}>
+                    Signing in...
+                  </Typography>
+                </>
+              ) : (
+                'Sign in'
+              )}
             </Button>
             <Typography sx={{ textAlign: 'center' }}>
               Don&apos;t have an account?{' '}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Checkbox from '@mui/material/Checkbox';
 import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
@@ -40,6 +41,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
 const SignUpContainer = styled(Stack)(({ theme }) => ({
   padding: 20,
   marginTop: '10vh',
+  position: 'relative',
   '&::before': {
     content: '""',
     display: 'block',
@@ -63,7 +65,7 @@ export default function SignUp() {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
   const [nameError, setNameError] = useState(false);
   const [nameErrorMessage, setNameErrorMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
@@ -93,7 +95,7 @@ export default function SignUp() {
       setPasswordErrorMessage('');
     }
 
-    if (!name.value || name.value.length < 1) {
+    if (!name.value || name.value.trim().length < 1) {
       setNameError(true);
       setNameErrorMessage('Name is required.');
       isValid = false;
@@ -115,9 +117,9 @@ export default function SignUp() {
     setIsLoading(true);
 
     const data = new FormData(event.currentTarget);
-    const name = data.get('name');
-    const email = data.get('email');
-    const password = data.get('password');
+    const name = data.get('name').trim();
+    const email = data.get('email').trim();
+    const password = data.get('password').trim();
 
     try {
       // Sending Sign Up data to the server for verification
@@ -127,7 +129,7 @@ export default function SignUp() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name, 
+          name,
           email,
           password,
         }),
@@ -137,24 +139,24 @@ export default function SignUp() {
 
       if (response.ok) {
         handleLogin(responseJSON); // Log the user in
-        navigate('/'); // Redirect to the home page after successful login
+        navigate('/'); // Redirect to the home page after successful signup
       } else {
-        // Handle unsuccessful login (e.g., invalid credentials or other errors, 401 unauthorized)
         setPasswordError(true);
         setPasswordErrorMessage(responseJSON.message || 'There was an error signing up.');
       }
-      setIsLoading(false);
     } catch (error) {
       console.error('Error during sign up:', error);
       setPasswordError(true);
       setPasswordErrorMessage('There was an error signing up. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div>
-      <CssBaseline enableColorScheme />
       {isLoading && <LoadingBorder />}
+      <CssBaseline enableColorScheme />
       <SignUpContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
           <Box display="flex" alignItems="center">
@@ -163,10 +165,10 @@ export default function SignUp() {
               variant="h6"
               sx={{
                 marginLeft: 1,
-                fontWeight: 'bold', 
-                color: '#FFDD57', 
+                fontWeight: 'bold',
+                color: '#FFDD57',
                 fontFamily: 'Roboto, sans-serif',
-                fontSize: '1.5rem', 
+                fontSize: '1.5rem',
               }}
             >
               Welcome
@@ -238,8 +240,25 @@ export default function SignUp() {
               type="submit"
               fullWidth
               variant="contained"
+              disabled={isLoading} // Disable the button when loading
+              sx={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '3rem', // Optional: Set a consistent height
+              }}
             >
-              Sign up
+              {isLoading ? (
+                <>
+                  <CircularProgress size={24} color="inherit" />
+                  <Typography variant="button" sx={{ marginLeft: 1 }}>
+                    Signing up...
+                  </Typography>
+                </>
+              ) : (
+                'Sign up'
+              )}
             </Button>
             <Typography sx={{ textAlign: 'center' }}>
               Already have an account?{' '}
