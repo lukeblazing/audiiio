@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import LoadingBorder from '../loading-components/LoadingBorder';
 
 // Create the AuthContext
 const AuthContext = createContext();
@@ -10,6 +11,34 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/authCheck`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const authResult = await response.json();
+        setIsAuthenticated(true);
+        setUserRole(authResult.role);
+      } else {
+        setIsAuthenticated(false);
+        setUserRole(null);
+      }
+    } catch (error) {
+      console.error('Failed to fetch auth status:', error);
+      setIsAuthenticated(false);
+      setUserRole(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = (responseJSON) => {
     setIsAuthenticated(true); // Login user
@@ -20,6 +49,16 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setUserRole(null);
   };
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    setLoading(true)
+    checkAuthStatus();
+  }, []);
+
+
+  if (loading)
+    return <LoadingBorder />
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, userRole, handleLogin, handleLogout }}>

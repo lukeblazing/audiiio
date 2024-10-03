@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -16,6 +16,7 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import { LogoIcon, MicrosoftIcon } from './CustomIcons.js';
 import { useAuth } from './AuthContext.js';
+import LoadingBorder from '../loading-components/LoadingBorder.js';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -56,12 +57,13 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignUp() {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [nameError, setNameError] = React.useState(false);
-  const [nameErrorMessage, setNameErrorMessage] = React.useState('');
+  const [emailError, setEmailError] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+  const [nameError, setNameError] = useState(false);
+  const [nameErrorMessage, setNameErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
@@ -110,6 +112,8 @@ export default function SignUp() {
       return; // Stop form submission if validation fails
     }
 
+    setIsLoading(true);
+
     const data = new FormData(event.currentTarget);
     const name = data.get('name');
     const email = data.get('email');
@@ -139,6 +143,7 @@ export default function SignUp() {
         setPasswordError(true);
         setPasswordErrorMessage(responseJSON.message || 'There was an error signing up.');
       }
+      setIsLoading(false);
     } catch (error) {
       console.error('Error during sign up:', error);
       setPasswordError(true);
@@ -149,6 +154,7 @@ export default function SignUp() {
   return (
     <div>
       <CssBaseline enableColorScheme />
+      {isLoading && <LoadingBorder />}
       <SignUpContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
           <Box display="flex" alignItems="center">
