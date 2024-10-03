@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -70,7 +70,13 @@ export default function SignIn() {
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
 
-  const handleForgotPwdOpen = () => {
+  // Refs for form inputs
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+
+  const handleForgotPwdOpen = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     setIsForgotPwdOpen(true);
   };
 
@@ -79,12 +85,12 @@ export default function SignIn() {
   };
 
   const validateInputs = () => {
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
+    const email = emailRef.current.value;
+    const password = passwordRef.current.value;
 
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setEmailError(true);
       setEmailErrorMessage('Please enter a valid email address.');
       isValid = false;
@@ -93,7 +99,7 @@ export default function SignIn() {
       setEmailErrorMessage('');
     }
 
-    if (!password.value || password.value.length < 6) {
+    if (!password || password.length < 6) {
       setPasswordError(true);
       setPasswordErrorMessage('Password must be at least 6 characters long.');
       isValid = false;
@@ -182,12 +188,12 @@ export default function SignIn() {
             noValidate
             sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}
           >
-            <FormControl>
-              <FormLabel htmlFor="email">Email</FormLabel>
+            <FormControl fullWidth>
+              <FormLabel htmlFor="sign-in-email">Email</FormLabel>
               <TextField
                 error={emailError}
                 helperText={emailErrorMessage}
-                id="email"
+                id="sign-in-email" // Unique ID
                 type="email"
                 name="email"
                 placeholder="your@email.com"
@@ -197,22 +203,24 @@ export default function SignIn() {
                 fullWidth
                 variant="outlined"
                 color={emailError ? 'error' : 'primary'}
+                inputRef={emailRef} // Attach ref
               />
             </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="password">Password</FormLabel>
+            <FormControl fullWidth>
+              <FormLabel htmlFor="sign-in-password">Password</FormLabel>
               <TextField
                 error={passwordError}
                 helperText={passwordErrorMessage}
                 name="password"
                 placeholder="••••••"
                 type="password"
-                id="password"
+                id="sign-in-password" // Unique ID
                 autoComplete="current-password"
                 required
                 fullWidth
                 variant="outlined"
                 color={passwordError ? 'error' : 'primary'}
+                inputRef={passwordRef} // Attach ref
               />
             </FormControl>
             <Box
@@ -236,10 +244,6 @@ export default function SignIn() {
                 Forgot your password?
               </Button>
             </Box>
-            <ForgotPassword
-              isForgotPwdOpen={isForgotPwdOpen}
-              handleForgotPwdClose={handleForgotPwdClose}
-            />
             <Button
               type="submit"
               fullWidth
@@ -286,6 +290,10 @@ export default function SignIn() {
             </Button>
           </Box>
         </Card>
+        <ForgotPassword
+          isForgotPwdOpen={isForgotPwdOpen}
+          handleForgotPwdClose={handleForgotPwdClose}
+        />
       </SignInContainer>
     </div>
   );

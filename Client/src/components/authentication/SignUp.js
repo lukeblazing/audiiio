@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -70,14 +70,30 @@ export default function SignUp() {
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
 
+  // Refs for form inputs
+  const nameRef = useRef(null);
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+
   const validateInputs = () => {
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const name = document.getElementById('name');
+    const name = nameRef.current.value.trim();
+    const email = emailRef.current.value.trim();
+    const password = passwordRef.current.value.trim();
 
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+    // Validate Name
+    if (!name) {
+      setNameError(true);
+      setNameErrorMessage('Name is required.');
+      isValid = false;
+    } else {
+      setNameError(false);
+      setNameErrorMessage('');
+    }
+
+    // Validate Email
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setEmailError(true);
       setEmailErrorMessage('Please enter a valid email address.');
       isValid = false;
@@ -86,22 +102,14 @@ export default function SignUp() {
       setEmailErrorMessage('');
     }
 
-    if (!password.value || password.value.length < 6) {
+    // Validate Password
+    if (!password || password.length < 6) {
       setPasswordError(true);
       setPasswordErrorMessage('Password must be at least 6 characters long.');
       isValid = false;
     } else {
       setPasswordError(false);
       setPasswordErrorMessage('');
-    }
-
-    if (!name.value || name.value.trim().length < 1) {
-      setNameError(true);
-      setNameErrorMessage('Name is required.');
-      isValid = false;
-    } else {
-      setNameError(false);
-      setNameErrorMessage('');
     }
 
     return isValid;
@@ -187,26 +195,27 @@ export default function SignUp() {
             sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
             noValidate
           >
-            <FormControl>
-              <FormLabel htmlFor="name">Full name</FormLabel>
+            <FormControl fullWidth>
+              <FormLabel htmlFor="sign-up-name">Full name</FormLabel>
               <TextField
                 autoComplete="name"
                 name="name"
                 required
                 fullWidth
-                id="name"
+                id="sign-up-name" // Unique ID
                 placeholder="Jon Snow"
                 error={nameError}
                 helperText={nameErrorMessage}
                 color={nameError ? 'error' : 'primary'}
+                inputRef={nameRef} // Attach ref
               />
             </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="email">Email</FormLabel>
+            <FormControl fullWidth>
+              <FormLabel htmlFor="sign-up-email">Email</FormLabel>
               <TextField
                 required
                 fullWidth
-                id="email"
+                id="sign-up-email" // Unique ID
                 placeholder="your@email.com"
                 name="email"
                 autoComplete="email"
@@ -214,22 +223,24 @@ export default function SignUp() {
                 error={emailError}
                 helperText={emailErrorMessage}
                 color={emailError ? 'error' : 'primary'}
+                inputRef={emailRef} // Attach ref
               />
             </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="password">Password</FormLabel>
+            <FormControl fullWidth>
+              <FormLabel htmlFor="sign-up-password">Password</FormLabel>
               <TextField
                 required
                 fullWidth
                 name="password"
                 placeholder="••••••"
                 type="password"
-                id="password"
+                id="sign-up-password" // Unique ID
                 autoComplete="new-password"
                 variant="outlined"
                 error={passwordError}
                 helperText={passwordErrorMessage}
                 color={passwordError ? 'error' : 'primary'}
+                inputRef={passwordRef} // Attach ref
               />
             </FormControl>
             <FormControlLabel
