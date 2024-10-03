@@ -4,7 +4,7 @@ import express from 'express';
 import path from 'path';
 import helmet from 'helmet';
 import cors from 'cors';
-import { startCronJobs } from './crons/crons.js';  // Use import instead of require
+import { startCronJobs } from './crons/crons.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import AuthController from './authentication/AuthController.js'
@@ -42,14 +42,6 @@ app.use((req, res, next) => {
         return res.redirect('https://' + req.headers.host + req.url);
     }
     next();
-});
-
-// Serve static files from the React app build directory
-app.use(express.static(path.join(__dirname, '../public/build')));
-
-// Catch-all handler to serve the React app
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/build/index.html'));
 });
 
 // Sign up: Create a new user
@@ -95,11 +87,19 @@ app.post('/api/logout', (req, res) => {
 });
 
 // Protected route to test authentication from AuthController
-app.get('/api/protected', AuthController.verifyToken, (req, res) => {
+app.get('/api/authCheck', AuthController.verifyToken, (req, res) => {
     const userEmail = req.user.email;
     const userRole = req.user.role;
 
     res.status(200).json({ message: `Welcome ${userEmail}, you are authorized for /protected route as ${userRole}.` });
+});
+
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, '../public/build')));
+
+// Catch-all handler to serve the React app
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/build/index.html'));
 });
 
 // Start the server

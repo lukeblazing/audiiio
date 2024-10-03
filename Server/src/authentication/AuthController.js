@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import pool from '../database/db.js'; // Ensure you have a db.js that exports your database pool
+import { parseCookies } from './authUtils.js';
 
 class AuthController {
   // Handles Login and cookie generation
@@ -54,7 +55,7 @@ class AuthController {
       return {passwordMatch, storedUserRole, storedName};
     } catch (err) {
       console.error('Error validating credentials', err);
-      return false;
+      return { error: `Error validating credentials: ${err.message}` };
     }
   }
 
@@ -143,7 +144,8 @@ class AuthController {
 
   // Middleware to verify the token from the cookie
   verifyToken(req, res, next) {
-    const token = req.cookies.token; // Extract token from cookies
+    const cookies = parseCookies(req.headers.cookie);
+    const token = cookies['token'];
 
     if (!token) {
       return res.status(401).json({ message: 'Access denied. No token provided.' });

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -17,6 +17,7 @@ import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgotPassword.js';
 import { MicrosoftIcon, LogoIcon } from './CustomIcons.js';
 import { useAuth } from './AuthContext.js';
+import LoadingBorder from '../loading-components/LoadingBorder.js';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -57,11 +58,12 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignIn() {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [isForgotPwdOpen, setIsForgotPwdOpen] = React.useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+  const [isForgotPwdOpen, setIsForgotPwdOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
@@ -108,6 +110,8 @@ export default function SignIn() {
       return;
     }
 
+    setIsLoading(true);
+
     const data = new FormData(event.currentTarget);
     const email = data.get('email');
     const password = data.get('password');
@@ -133,6 +137,7 @@ export default function SignIn() {
         setPasswordError(true);
         setPasswordErrorMessage(responseJSON.message || 'There was an error logging in.');
       }
+      setIsLoading(false);
     } catch (error) {
       console.error('Error during login:', error);
       setPasswordError(true);
@@ -142,6 +147,7 @@ export default function SignIn() {
 
   return (
     <div>
+      {isLoading && <LoadingBorder />}
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
