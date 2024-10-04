@@ -94,6 +94,30 @@ app.get('/api/authCheck', AuthController.verifyToken, (req, res) => {
     res.status(200).json({ message: `Welcome ${userEmail}, you are authorized for /protected route as ${userRole}.` });
 });
 
+app.get('/api/calendar/events', (req, res) => {
+    console.log("luke got a request for events")
+    res.status(200).json([
+        {
+            "id": 1,
+            "title": "first",
+            "start": "2024-10-09T10:00:00Z",
+            "end": "2024-10-14T11:00:00Z"
+        },
+        {
+            "id": 2,
+            "title": "second",
+            "start": "2024-10-06T00:00:00Z",
+            "end": "2024-10-15T23:59:59Z"
+        },
+        {
+            "id": 3,
+            "title": "third",
+            "start": "2024-10-06T00:00:00Z",
+            "end": "2024-10-07T23:59:59Z"
+        }
+    ])
+});
+
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, '../public/build')));
 

@@ -32,7 +32,11 @@ export default (env, argv) => {
           },
           resolve: {
             fullySpecified: false, // Allows importing without specifying extensions
-          },
+          }
+        },
+        {
+          test: /\.css$/, // For CSS files
+          use: ['style-loader', 'css-loader'], // Use both style-loader and css-loader
         },
       ],
     },
