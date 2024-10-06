@@ -24,11 +24,13 @@ function Dashboard() {
           overflow: 'auto',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center', // Centers content vertically
+          alignItems: 'center',     // Centers content horizontally (optional)
           padding: '20px',
           paddingTop: {
             xs: `56px`, // 56px for mobile
             sm: `56px`, // 56px for small screens
-            md: '84px', // 64px for medium and larger screens
+            md: '84px', // 84px for medium and larger screens
           },
         }}
       >

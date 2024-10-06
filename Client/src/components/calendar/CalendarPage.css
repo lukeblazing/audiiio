@@ -1,0 +1,92 @@
+/* CalendarPage.css */
+
+/* Container to enforce the aspect ratio and center the calendar */
+.calendar-container {
+    display: flex;                  
+    align-items: center;            
+    justify-content: center;        
+    
+    width: 100%;
+    max-width: 1200px;              
+    margin: 0 auto;                 
+    aspect-ratio: 16 / 9;            
+    position: relative;              
+
+    /* Minimum size constraints */
+    min-width: 300px;                
+    min-height: calc(300px * (9 / 16)); 
+}
+
+/* Wrapper to make the calendar fill the container */
+.calendar-wrapper {
+    width: 100%;
+    height: 100%;
+    
+    /* Ensure content scales properly */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Handle overflow if necessary */
+    overflow: auto; /* Adds scrollbars if content overflows */
+    
+    /* Maintain aspect ratio */
+    aspect-ratio: inherit; /* Inherits the aspect ratio from the parent */
+    
+    /* Added Styling Enhancements */
+    background-color: #f9f9f9;       /* Adds background color */
+    border: 1px solid #ddd;          /* Adds border */
+    border-radius: 8px;              /* Rounds the corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
+    padding: 10px;                    /* Optional: Adds padding inside the wrapper */
+    box-sizing: border-box;           /* Ensures padding is included within width and height */
+}
+
+/* CalendarPage.css */
+
+/* Ensure event text wraps and height adjusts automatically */
+.rbc-event {
+    white-space: normal;        /* Allow text to wrap */
+    height: auto !important;    /* Let height adjust based on content */
+    padding: 2px 4px;           /* Reduce padding for smaller screens */
+    box-sizing: border-box;     /* Include padding and border in element's total width and height */
+    overflow: hidden;           /* Hide overflow to prevent content spill */
+    font-size: 0.9em;           /* Slightly smaller font for better fit */
+}
+
+/* Adjust font size and padding for very small screens */
+@media (max-width: 600px) {
+    .rbc-event {
+        font-size: 0.8em;       /* Further reduce font size */
+        padding: 1px 2px;       /* Reduce padding */
+    }
+}
+
+/* Ensure day cells have enough space and proper padding */
+.rbc-month-view .rbc-row, 
+.rbc-month-view .rbc-date-cell {
+    padding: 2px;               /* Adjust padding as needed */
+}
+
+/* Optional: Add ellipsis for overflowing text */
+.rbc-event > div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsive adjustments for medium screens */
+@media (max-width: 768px) {
+    .calendar-container {
+        aspect-ratio: 4 / 3;                 /* Update aspect ratio for medium screens */
+        min-height: calc(300px * (3 / 4));    /* Adjust min-height based on new aspect ratio */
+    }
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 480px) {
+    .calendar-container {
+        aspect-ratio: 3 / 4;                 /* Update aspect ratio for small screens */
+        min-height: calc(300px * (4 / 3));    /* Adjust min-height based on new aspect ratio */
+    }
+}
