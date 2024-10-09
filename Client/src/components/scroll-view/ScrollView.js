@@ -1,42 +1,136 @@
 import React, { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-
-const style = {
-  height: 30,
-  border: "1px solid green",
-  margin: 6,
-  padding: 8
-};
+import {
+  Card,
+  CardContent,
+  Typography,
+  useTheme,
+  Container,
+  CircularProgress,
+  Box,
+  CardActionArea,
+} from '@mui/material';
+import EventIcon from '@mui/icons-material/Event';
 
 const ScrollView = () => {
-  // Initialize state using the useState hook
+  // Initialize state with 20 items
   const [items, setItems] = useState(Array.from({ length: 20 }));
-
-  // Function to fetch more data
+  
+  // State to manage if more items are available
+  const [hasMore, setHasMore] = useState(true);
+  
+  // Function to fetch more data (placeholder for filler data)
   const fetchMoreData = () => {
-    // Simulate an async API call that fetches 20 more items after 1.5 seconds
+    console.log("fetching more data")
+    // Simulate a network request
     setTimeout(() => {
-      setItems((prevItems) => prevItems.concat(Array.from({ length: 20 })));
+      // Example condition to stop fetching more data
+      if (items.length >= 100) { // Let's say we have a maximum of 100 items
+        setHasMore(false);
+        return;
+      }
+      setItems((prevItems) => [...prevItems, ...Array.from({ length: 20 })]);
     }, 1500);
   };
 
+  // Use theme for consistent styling
+  const theme = useTheme();
+
   return (
-    <div>
-      <h1>Demo: react-infinite-scroll-component</h1>
-      <hr />
-      <InfiniteScroll
-        dataLength={items.length} // This is important to determine if more data should be loaded
-        next={fetchMoreData}      // Function to fetch more data
-        hasMore={true}            // Whether there are more items to load
-        loader={<h4>Loading...</h4>} // Loader component
+    <Container maxWidth="md" sx={{ paddingTop: theme.spacing(4), paddingBottom: theme.spacing(4) }}>
+      {/* Header */}
+      <Typography
+        variant="h4"
+        component="h2"
+        align="center"
+        gutterBottom
+        sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}
       >
-        {items.map((_, index) => (
-          <div style={style} key={index}>
-            div - #{index + 1}
-          </div>
-        ))}
+        Coming Up...
+      </Typography>
+
+      {/* Infinite Scroll Component */}
+      <InfiniteScroll
+        dataLength={items.length} // This is the number of items currently loaded
+        next={fetchMoreData}      // Function to fetch more data
+        hasMore={hasMore}         // Determines if more items should be loaded
+        loader={
+          <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: theme.spacing(2) }}>
+            <CircularProgress />
+          </Box>
+        }
+        endMessage={
+          <Typography
+            variant="body2"
+            color={theme.palette.text.secondary}
+            align="center"
+            sx={{ marginTop: theme.spacing(2) }}
+          >
+            You have seen all events.
+          </Typography>
+        }
+        style={{ overflow: 'visible' }}  // Prevent the inner scrollbar
+      >
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: '1fr 1fr',
+              md: '1fr 1fr 1fr',
+            },
+            gap: theme.spacing(3),
+          }}
+        >
+          {items.map((_, index) => (
+            <Card
+              elevation={3}
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                borderRadius: 2,
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-8px)',
+                  boxShadow: theme.shadows[6],
+                },
+              }}
+              key={index}
+            >
+              <CardActionArea sx={{ flexGrow: 1 }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: theme.spacing(1) }}>
+                    <EventIcon color="primary" sx={{ marginRight: theme.spacing(1) }} />
+                    <Typography
+                      variant="h6"
+                      component="div"
+                      color={theme.palette.text.primary}
+                      sx={{ fontWeight: 'medium' }}
+                    >
+                      New Event
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    color={theme.palette.text.secondary}
+                    sx={{ marginBottom: theme.spacing(2) }}
+                  >
+                    Upcoming Event - #{index + 1}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    color={theme.palette.text.primary}
+                  >
+                    Join us for an exciting event where you can network and learn more about our upcoming projects.
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          ))}
+        </Box>
       </InfiniteScroll>
-    </div>
+    </Container>
   );
 };
 

@@ -1,11 +1,8 @@
-// CalendarPage.js
-
 import React, { useState, useEffect } from "react";
 import { Calendar as BigCalendar, momentLocalizer, Views } from "react-big-calendar";
 import LoadingBorder from '../loading-components/LoadingBorder.js';
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import './CalendarPage.css';
 import CalendarToolbar from "./CalendarToolbar.js";
 
 const localizer = momentLocalizer(moment);
@@ -73,28 +70,20 @@ const CalendarPage = () => {
   }, []);
 
   return (
-    <div className="calendar-container">
-      {isLoading && <LoadingBorder />}
-      {!isLoading && (
-        <div className="calendar-wrapper">
-          <BigCalendar
-            localizer={localizer}
-            events={events}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ width: '100%', height: '100%' }} // Ensure the calendar fills the wrapper
-            view={currentView}
-            views={["month"]}
-            date={currentDate}
-            onView={handleViewChange}
-            onNavigate={handleNavigate}
-            components={{
-              toolbar: CalendarToolbar,
-            }}
-          />
-        </div>
-      )}
-    </div>
+    <BigCalendar
+      localizer={localizer}
+      events={events}
+      startAccessor="start"
+      endAccessor="end"
+      view={currentView}
+      views={["month"]}
+      date={currentDate}
+      onView={handleViewChange}
+      onNavigate={handleNavigate}
+      components={{
+        toolbar: CalendarToolbar,
+      }}
+    />
   );
 };
 

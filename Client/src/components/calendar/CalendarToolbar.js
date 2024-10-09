@@ -43,7 +43,7 @@ const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
             flexDirection="row"
             justifyContent="space-between"
             alignItems="center"
-            padding={isSmallScreen ? 1 : 2}
+            padding={1}
             bgcolor="background.paper"
             borderBottom={1}
             borderColor="divider"
@@ -55,9 +55,9 @@ const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
                     onClick={goToBack}
                     color="inherit"
                     aria-label="Previous"
-                    size={isSmallScreen ? 'small' : 'medium'}
+                    size={'small'}
                     sx={{
-                        padding: isSmallScreen ? '6px' : '8px',
+                        padding: '6px',
                         boxShadow: 'none',
                         border: 'none',
                         '&:hover': {
@@ -81,7 +81,7 @@ const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
                     component="div"
                     sx={{
                         textAlign: 'center',
-                        fontSize: isSmallScreen ? '1rem' : '1.25rem',
+                        fontSize: '1rem',
                         fontFamily: theme.typography.fontFamily,
                     }}
                 >
@@ -91,12 +91,12 @@ const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
                     onClick={goToToday}
                     color="primary"
                     aria-label="Today"
-                    size={isSmallScreen ? 'small' : 'medium'}
+                    size={'small'}
                     variant="text"
                     disableElevation
                     sx={{
                         textTransform: 'none',
-                        padding: isSmallScreen ? '4px 8px' : '6px 12px',
+                        padding: '4px 8px',
                         boxShadow: 'none',
                         border: 'none',
                         outline: 'none',
@@ -115,8 +115,8 @@ const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
                             border: 'none',
                         },
                         fontFamily: theme.typography.fontFamily,
-                        fontSize: isSmallScreen ? '0.75rem' : '0.875rem',
-                        marginBottom: isSmallScreen ? 0.5 : 1, // Space between button and label
+                        fontSize: '0.875rem',
+                        marginBottom: 0.5, // Space between button and label
                     }}
                 >
                     Today

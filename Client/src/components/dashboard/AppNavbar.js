@@ -1,88 +1,77 @@
-import * as React from 'react';
+// AppNavbar.js
+import React from 'react';
 import { styled } from '@mui/material/styles';
-import AppBar from '@mui/material/AppBar';
-import Stack from '@mui/material/Stack';
-import MuiToolbar from '@mui/material/Toolbar';
-import { tabsClasses } from '@mui/material/Tabs';
+import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import SideMenuMobile from './SideMenuMobile.js';
 import MenuButton from './MenuButton.js';
 
-const Toolbar = styled(MuiToolbar)(({ theme }) => ({
+// Styled Container using Box for layout with proper responsive height
+const NavbarContainer = styled(Box)(({ theme }) => ({
+  position: 'fixed', // Fixes the navbar at the top
+  top: 0,
+  left: 0,
   width: '100%',
-  padding: '8px', // Adjust padding for all screen sizes
   display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center', // Align items to the center for all screen sizes
+  alignItems: 'center',
   justifyContent: 'space-between',
-  gap: '12px',
-  flexShrink: 0,
-  [`& ${tabsClasses.flexContainer}`]: {
-    gap: '8px',
-    p: '8px',
-    pb: 0,
-  },
+  zIndex: theme.zIndex.appBar, // Ensures the navbar is above other elements
+
+  // Default height for medium and larger screens
+  height: '72px',
+
+  // Responsive height adjustments using theme breakpoints
   [theme.breakpoints.down('sm')]: {
-    padding: '8px', // Adjust padding for mobile
+    height: '56px', // Height for small and extra-small screens
   },
+}));
+
+// Styled Typography for the "Events" text with custom font and bold weight
+const Title = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.primary,
+  fontFamily: 'Verdana, sans-serif', // Use a system font with fallback
+  fontWeight: 'bold', // Make the text bold
+  fontSize: '2rem', // Default font size
+
+  position: 'absolute', // Position absolutely within NavbarContainer
+  left: '50%', // Position at 50% from the left
+  transform: 'translateX(-50%)', // Center the title by shifting it left by 50% of its width
+
+  letterSpacing: '2px', // Adds spacing between letters
+  // Remove flexGrow and textAlign as they're no longer needed
 }));
 
 export default function AppNavbar() {
   const [open, setOpen] = React.useState(false);
 
+  // Function to toggle the drawer open state
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
 
   return (
-    <AppBar
-      position="fixed"
-      sx={{
-        display: 'flex',
-        boxShadow: 0,
-        bgcolor: 'background.paper',
-        backgroundImage: 'none',
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        top: 'var(--template-frame-height, 0px)',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-      }}
-    >
-      <Toolbar variant="regular">
-        <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
-          <MenuRoundedIcon />
-        </MenuButton>
+    <>
+      <NavbarContainer>
+        {/* Hamburger Menu Button on the Left with left spacing */}
+        <Box sx={{ marginLeft: '16px' }}> {/* Adjust spacing as needed */}
+          <MenuButton aria-label="menu" onClick={toggleDrawer(true)} size="large">
+            {/* Increase the icon size using the sx prop */}
+            <MenuRoundedIcon sx={{ fontSize: '2.5rem' }} />
+          </MenuButton>
+        </Box>
 
-        <Stack
-          direction="row"
-          sx={{
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexGrow: 1,
-            width: '100%',
-          }}
-        >
-          <Typography
-            variant="h5" // Set a more responsive font size for mobile
-            component="h1"
-            sx={{
-              color: 'text.primary',
-              position: 'absolute',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' }, // Responsive font size
-            }}
-          >
-            Events
-          </Typography>
+        {/* Centered "Events" Text */}
+        <Title variant="h6" component="h1">
+          Calendar
+        </Title>
 
-          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} />
-        </Stack>
-      </Toolbar>
-    </AppBar>
+        {/* Placeholder to balance the layout */}
+        <Box sx={{ width: '48px' }}></Box> {/* Adjust width to match MenuButton */}
+      </NavbarContainer>
+
+      {/* Side Drawer Component */}
+      <SideMenuMobile open={open} toggleDrawer={toggleDrawer} />
+    </>
   );
 }
