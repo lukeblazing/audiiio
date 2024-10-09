@@ -1,6 +1,6 @@
 {
     "name": "Luke's App",
-    "short_name": "Cal",
+    "short_name": "Calendar",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffaffa",

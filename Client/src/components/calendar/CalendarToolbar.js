@@ -44,7 +44,7 @@ const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
             justifyContent="space-between"
             alignItems="center"
             padding={1}
-            bgcolor="background.paper"
+            bgcolor="#B0BEC5"
             borderBottom={1}
             borderColor="divider"
             flexWrap="nowrap" // Prevent wrapping to maintain single row

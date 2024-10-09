@@ -12,6 +12,21 @@ import {
 } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 
+// Function to generate random hex color
+const getRandomColor = () => {
+  const colors = [
+    "#B0BEC5",  // Light Slate Grey
+    "#90A4AE",  // Muted Blue Grey
+    "#B2DFDB",  // Muted Aqua Green
+    "#FFE0B2",  // Soft Peach
+    "#CFD8DC"   // Light Cool Grey
+  ];
+  
+
+  // Randomly select a color from the array
+  return colors[Math.floor(Math.random() * colors.length)];
+};
+
 const ScrollView = () => {
   // Initialize state with 20 items
   const [items, setItems] = useState(Array.from({ length: 20 }));
@@ -91,6 +106,7 @@ const ScrollView = () => {
                 flexDirection: 'column',
                 borderRadius: 2,
                 transition: 'transform 0.2s, box-shadow 0.2s',
+                backgroundColor: getRandomColor(),  // Assign random background color to each event
                 '&:hover': {
                   transform: 'translateY(-8px)',
                   boxShadow: theme.shadows[6],
@@ -122,7 +138,7 @@ const ScrollView = () => {
                     variant="body1"
                     color={theme.palette.text.primary}
                   >
-                    Join us for an exciting event where you can network and learn more about our upcoming projects.
+                    This is the description for the event.
                   </Typography>
                 </CardContent>
               </CardActionArea>

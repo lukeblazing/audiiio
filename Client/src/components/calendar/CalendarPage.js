@@ -2,10 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Calendar as BigCalendar, momentLocalizer, Views } from "react-big-calendar";
 import LoadingBorder from '../loading-components/LoadingBorder.js';
 import moment from "moment";
-import "react-big-calendar/lib/css/react-big-calendar.css";
 import CalendarToolbar from "./CalendarToolbar.js";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 
 const localizer = momentLocalizer(moment);
+
+// Custom styles for light mode
+const calendarLightModeStyles = {
+  backgroundColor: "#fff",  // White background for light mode
+  color: "#000",  // Black text for light mode
+  borderColor: "#ddd",  // Light grey border
+};
 
 const CalendarPage = () => {
   const [events, setEvents] = useState([]);
@@ -70,20 +77,27 @@ const CalendarPage = () => {
   }, []);
 
   return (
-    <BigCalendar
-      localizer={localizer}
-      events={events}
-      startAccessor="start"
-      endAccessor="end"
-      view={currentView}
-      views={["month"]}
-      date={currentDate}
-      onView={handleViewChange}
-      onNavigate={handleNavigate}
-      components={{
-        toolbar: CalendarToolbar,
-      }}
-    />
+    <div style={calendarLightModeStyles}>
+      {isLoading ? (
+        <LoadingBorder />
+      ) : (
+        <BigCalendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          view={currentView}
+          views={["month"]}
+          date={currentDate}
+          onView={handleViewChange}
+          onNavigate={handleNavigate}
+          components={{
+            toolbar: CalendarToolbar,
+          }}
+          style={calendarLightModeStyles}
+        />
+      )}
+    </div>
   );
 };
 

@@ -35,44 +35,42 @@ function Dashboard() {
             md: 'calc(56px + 20px)',  // Navbar height (md and above) + 20px padding
           },
           boxSizing: 'border-box',
-         // gap: '20px',  // Consistent spacing between children
+          // gap: '20px',  // Consistent spacing between children
           overflow: 'hidden',  // Prevent content overflow
         }}
       >
-<Box
-  sx={{
-    width: '100%',
-    maxWidth: '1000px',
-    maxHeight: 'calc(100vh - 56px - 40px)',  // Adjust based on navbar height and padding
-    aspectRatio: '5 / 4',  // Default aspect ratio for smaller screens
-    position: 'relative',
-    margin: '0 auto',  // Center the box horizontally
-    '&::before': {
-      content: '""',
-      display: 'block',
-      paddingBottom: '80%', // Larger height-to-width ratio for small screens (5:4)
-    },
-    '& > *': {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-    },
-    // Media queries for larger screens to enforce 16:9 aspect ratio
-    '@media (min-width: 600px)': {
-      aspectRatio: '16 / 9',
-      '&::before': {
-        paddingBottom: '56.25%',  // 16:9 aspect ratio
-      },
-    },
-  }}
->
-  <CalendarPage />
-</Box>
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: '1000px',
+            maxHeight: 'calc(100vh - 56px - 40px)',  // Adjust based on navbar height and padding
+            aspectRatio: '5 / 4',  // Default aspect ratio for smaller screens
+            position: 'relative',
+            margin: '0 auto',  // Center the box horizontally
+            '&::before': {
+              content: '""',
+              display: 'block',
+              paddingBottom: '80%', // Larger height-to-width ratio for small screens (5:4)
+            },
+            '& > *': {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            },
+            // Media queries for larger screens to enforce 16:9 aspect ratio
+            '@media (min-width: 600px)': {
+              aspectRatio: '16 / 9',
+              '&::before': {
+                paddingBottom: '56.25%',  // 16:9 aspect ratio
+              },
+            },
+          }}
+        >
+          <CalendarPage />
+        </Box>
 
-
-        {/* Scrollable view below the calendar */}
         <Box
           sx={{
             flexGrow: 1,
