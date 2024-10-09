@@ -1,0 +1,15 @@
+{
+    "name": "Luke's App",
+    "short_name": "Cal",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffaffa",
+    "theme_color": "#000000",
+    "icons": [
+        {
+            "src": "/icons/app-icon.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ]
+}

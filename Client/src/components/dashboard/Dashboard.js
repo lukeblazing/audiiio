@@ -4,6 +4,7 @@ import AppNavbar from './AppNavbar.js';
 import { useAuth } from '../authentication/AuthContext.js';
 import SignIn from '../authentication/SignIn.js';
 import CalendarPage from '../calendar/CalendarPage.js';
+import ScrollView from '../scroll-view/ScrollView.js'
 
 function Dashboard() {
   const { isAuthenticated } = useAuth();
@@ -15,26 +16,43 @@ function Dashboard() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      {/* Navbar at the top */}
       <AppNavbar />
+
       <Box
         component="main"
         sx={{
-          flexGrow: 1,
-          backgroundColor: 'background.default',
-          overflow: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center', // Centers content vertically
-          alignItems: 'center',     // Centers content horizontally (optional)
+          flexGrow: 1, // Allows this container to fill the remaining space
+          backgroundColor: 'background.default',
           padding: '20px',
           paddingTop: {
-            xs: `56px`, // 56px for mobile
-            sm: `56px`, // 56px for small screens
+            xs: '56px', // 56px for mobile
+            sm: '56px', // 56px for small screens
             md: '84px', // 84px for medium and larger screens
           },
         }}
       >
-        <CalendarPage />
+        {/* Calendar at the top */}
+        <Box
+          sx={{
+            width: '100%',
+            marginBottom: '20px', // Space between calendar and scroll view
+          }}
+        >
+          <CalendarPage />
+        </Box>
+
+        {/* Scrollable view below the calendar */}
+        <Box
+          sx={{
+            flexGrow: 1, // Takes up remaining space
+            overflow: 'auto', // Enables scrolling if content overflows
+          }}
+        >
+          <ScrollView />
+        </Box>
       </Box>
     </Box>
   );

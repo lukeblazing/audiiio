@@ -77,7 +77,7 @@ export default function AppNavbar() {
               fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' }, // Responsive font size
             }}
           >
-            Luke's site
+            Events
           </Typography>
 
           <SideMenuMobile open={open} toggleDrawer={toggleDrawer} />
