@@ -12,6 +12,7 @@ import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
+import Box from '@mui/material/Box';
 
 const mainListItems = [
   { text: 'First thing', icon: <HomeRoundedIcon /> },
@@ -29,27 +30,29 @@ const secondaryListItems = [
 export default function MenuContent() {
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: 'space-between' }}>
-      <List dense>
+      <List>
         {mainListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-            <ListItemButton selected={index === 0}>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+            <ListItemButton selected={index === 0} sx={{ py: 1.5 }}>
+              <ListItemIcon sx={{ minWidth: 48 }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: '1.1rem' }} />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
 
-      <List dense>
-        {secondaryListItems.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-            <ListItemButton>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+      <Box sx={{  }}>
+        <List>
+          {secondaryListItems.map((item, index) => (
+            <ListItem key={index} disablePadding sx={{ display: 'block' }}>
+              <ListItemButton sx={{ py: 1.5 }}>
+                <ListItemIcon sx={{ minWidth: 48 }}>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: '1.1rem' }} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Box>
     </Stack>
   );
 }
