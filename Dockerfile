@@ -6,6 +6,11 @@ RUN npm install
 COPY ./Client ./
 RUN npm run build-prod
 
+# Copy static assets like manifest.json and icons to the build directory
+RUN mkdir -p /app/Client/dist/icons && \
+    cp ./public/manifest.json /app/Client/dist/ && \
+    cp -r ./public/icons /app/Client/dist/icons
+
 # Stage 2: Build the Server
 FROM node:20 AS server-build
 WORKDIR /app/Server
