@@ -11,15 +11,15 @@
     <title>Luke's App</title>
   </head>
   <body>
+    <div id="loading-screen" style="background: linear-gradient(45deg, #FF9A8B, #FF6A88, #FF99AC); height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; z-index: 1000;"></div>
     <div id="root"></div>
-    <style>
-      body {
-        background: linear-gradient(45deg, #FF9A8B, #FF6A88, #FF99AC);
-        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-        margin: 0;
-        height: 100vh;
-        overflow: hidden;
-      }
-    </style>
+    <script>
+      window.addEventListener('load', () => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.style.display = 'none';
+        }
+      });
+    </script>
   </body>
 </html>
