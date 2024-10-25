@@ -9,8 +9,7 @@ const pool = new Pool({
   port: process.env.PG_PORT || 5432,
   ssl: {
     rejectUnauthorized: true,
-    ca: process.env.PG_CERT
-    ,
+    ca: process.env.PG_SSL_CERT
   },
   max: process.env.PG_MAX_CLIENTS || 10,
   idleTimeoutMillis: 30000,
