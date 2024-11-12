@@ -148,7 +148,7 @@ export default function SignIn() {
     } catch (error) {
       console.error('Error during login:', error);
       setPasswordError(true);
-      setPasswordErrorMessage('There was an error logging in. Please try again.');
+      setPasswordErrorMessage('There was an error logging in. Please try again!!');
     } finally {
       setIsLoading(false); // Stop loading regardless of outcome
     }

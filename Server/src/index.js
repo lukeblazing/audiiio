@@ -23,14 +23,20 @@ app.use(helmet());
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-// Enable cors for development
+// Enable cors for prod url
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'development'
+        ? 'http://localhost:8080'  // Allow dev frontend on localhost
+        : 'https://www.lukeblazing.com', // Allow production frontend on myapp.com
+    credentials: true,               // Enable sending cookies with requests
+};
+
+app.use(cors(corsOptions));
+
 if (process.env.NODE_ENV === 'development') {
-    const corsOptions = {
-        origin: 'http://localhost:8080', // dev webpack frontend
-        credentials: true,  // Enable sending cookies with requests
-    };
-    app.use(cors(corsOptions));
-    console.log('CORS enabled for development with cookies');
+    console.log('CORS enabled for development with localhost:8080');
+} else {
+    console.log('CORS enabled for production with www.lukeblazing.com');
 }
 
 // Start the cron jobs
@@ -61,6 +67,7 @@ app.post('/api/signUp', async (req, res) => {
 // Route for handling login
 app.post('/api/login', async (req, res) => {
     try {
+	console.log("Luke we're trying to log in, req came from Client", req);
         return await AuthController.login(req, res);
     } catch (error) {
         // If there's a server error, return a 500 status code
