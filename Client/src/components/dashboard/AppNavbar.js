@@ -63,7 +63,7 @@ export default function AppNavbar() {
 
         {/* Centered "Events" Text */}
         <Title variant="h6" component="h1">
-          Calendar
+          Availability
         </Title>
 
         {/* Placeholder to balance the layout */}
