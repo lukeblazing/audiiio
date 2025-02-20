@@ -77,16 +77,11 @@ export default (env, argv) => {
         },
       },
     },
-    
-    externals: {
-      react: 'React',
-      'react-dom': 'ReactDOM',
-    },
 
     // File extensions to resolve
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
     },
-    devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
+    devtool: isProduction ? 'hidden-source-map' : 'cheap-module-source-map',
   };
 };
