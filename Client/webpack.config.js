@@ -45,8 +45,9 @@ export default (env, argv) => {
     // Plugins for additional functionalities
     plugins: [
       new HtmlWebpackPlugin({
-        template: './public/index.html', // Template for the HTML file
-        filename: 'index.html', // Name of the output HTML file in the build folder
+        template: './public/index.html', // ✅ Webpack injects correct script tags
+        filename: 'index.html',
+        inject: 'body', // ✅ Ensures scripts are added inside <body>
       }),
       new Dotenv({
         path: isProduction ? './.env.production' : './.env.development',
