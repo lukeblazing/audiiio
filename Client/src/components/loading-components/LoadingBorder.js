@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, keyframes } from '@mui/material';
+import Box from '@mui/material/Box';
+import { keyframes } from '@mui/system';
 
 // Define keyframes for horizontal animation (left to right)
 const horizontalAnimation = keyframes`

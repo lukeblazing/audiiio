@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import {
-  Card,
-  CardContent,
-  Typography,
-  useTheme,
-  Container,
-  CircularProgress,
-  Box,
-  CardActionArea,
-} from '@mui/material';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import useTheme from '@mui/material/styles/useTheme';
+import Container from '@mui/material/Container';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import CardActionArea from '@mui/material/CardActionArea';
 import EventIcon from '@mui/icons-material/Event';
 
 const ScrollView = () => {

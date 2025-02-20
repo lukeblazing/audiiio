@@ -1,12 +1,10 @@
 import React from 'react';
-import {
-  Box,
-  IconButton,
-  Typography,
-  Button,
-  useTheme,
-  useMediaQuery,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import useTheme from '@mui/material/styles/useTheme';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 
 const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {

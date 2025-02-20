@@ -2,6 +2,7 @@ import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import Dotenv from 'dotenv-webpack';
+import TerserPlugin from 'terser-webpack-plugin';
 
 // Create __filename and __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -16,9 +17,9 @@ export default (env, argv) => {
 
     // Output configuration
     output: {
-      filename: 'bundle.js', // Output bundle name
-      path: resolve(__dirname, './dist'), // Output path in the backend folder
-      publicPath: '/', // Important for handling routing in React with client-side routing
+      filename: '[name].[contenthash].js', // Uses unique hashed filenames
+      path: resolve(__dirname, './dist'),
+      publicPath: '/',
     },
 
     // Module rules (Loaders)
@@ -51,6 +52,35 @@ export default (env, argv) => {
         path: isProduction ? './.env.production' : './.env.development',
       }),
     ],
+
+    optimization: {
+      usedExports: true, // Enables tree shaking
+      minimize: isProduction, // Minifies the bundle
+      minimizer: [
+        new TerserPlugin({
+          terserOptions: {
+            compress: {
+              drop_console: true, // Removes console logs in production
+            },
+          },
+        }),
+      ],
+      splitChunks: {
+        chunks: 'all', // ✅ Splits vendor files (like lodash, dayjs, etc.)
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
+      },
+    },
+    
+    externals: {
+      react: 'React',
+      'react-dom': 'ReactDOM',
+    },
 
     // File extensions to resolve
     resolve: {

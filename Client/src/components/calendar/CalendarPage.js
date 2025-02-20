@@ -1,18 +1,35 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Calendar as BigCalendar,
-  momentLocalizer,
+  dateFnsLocalizer,
   Views,
 } from "react-big-calendar";
 import {
-  useTheme,
-} from '@mui/material';
+  parseISO,
+  isWithinInterval,
+  startOfDay,
+  endOfDay,
+  format,
+  getDay,
+
+} from "date-fns";
+import { useTheme } from "@mui/material/styles"; 
 import LoadingBorder from "../loading-components/LoadingBorder.js";
-import moment from "moment";
 import CalendarToolbar from "./CalendarToolbar.js";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import enUS from "date-fns/locale/en-US";
 
-const localizer = momentLocalizer(moment);
+const locales = {
+  "en-US": enUS,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse: parseISO,
+  startOfWeek: () => new Date(), // Adjust as needed
+  getDay: (date) => getDay(date),
+  locales,
+});
 
 const calendarAppleStyle = {
   color: "#000",
@@ -115,10 +132,13 @@ const CalendarPage = () => {
 
   const dayPropGetter = useCallback(
     (date) => {
-      const hasEvents = events.some((event) => 
-        moment(date).isBetween(moment(event.start).startOf("day"), moment(event.end).endOf("day"), null, "[]") // Inclusive range
+      const hasEvents = events.some((event) =>
+        isWithinInterval(date, {
+          start: startOfDay(new Date(event.start)),
+          end: endOfDay(new Date(event.end)),
+        })
       );
-  
+
       return {
         style: {
           cursor: "pointer",
@@ -128,18 +148,20 @@ const CalendarPage = () => {
           justifyContent: "center",
           width: "100%",
           height: "100%",
-          position: "relative", // Ensures absolute positioning for the "X"
+          position: "relative",
         },
         className: hasEvents ? "calendar-day-with-event" : "calendar-day",
       };
     },
     [events]
   );
-  
 
-  const eventPropGetter = useCallback(() => ({
-    style: { display: "none" },
-  }), []);  
+  const eventPropGetter = useCallback(
+    () => ({
+      style: { display: "none" },
+    }),
+    []
+  );
 
   return (
     <div
@@ -148,31 +170,28 @@ const CalendarPage = () => {
         backgroundColor: "transparent",
       }}
     >
-    <style>{`
+      <style>{`
       .rbc-today, .rbc-off-range-bg {
         background-color: transparent !important;
       }
       .rbc-month-view {
-        border-radius: 0 0 8px 8px; /* Adjust the value as needed */
-        overflow: hidden; /* Ensures children respect the border radius */
+        border-radius: 0 0 8px 8px;
+        overflow: hidden;
         border: 2px solid ${theme.palette.divider};
       }
-      /* Make the borders between days thicker and use the theme palette */
       .rbc-day-bg {
         border-right: 1px solid ${theme.palette.divider} !important;
         border-bottom: 1px solid ${theme.palette.divider} !important;
         border-radius: 0 !important;
       }
-      /* Remove border from last column to avoid double thickness on right edge */
       .rbc-month-row:last-child .rbc-day-bg {
         border-bottom: none !important;
       }
-      /* Remove border from last column to avoid double thickness on right edge */
       .rbc-day-bg:last-child {
         border-right: none !important;
       }
       .calendar-day-with-event::after {
-        content: '✖'; /* Red X */
+        content: '✖';
         color: red;
         font-size: 20px;
         font-weight: bold;
