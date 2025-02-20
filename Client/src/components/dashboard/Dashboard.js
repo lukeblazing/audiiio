@@ -4,7 +4,6 @@ import AppNavbar from './AppNavbar.js';
 import { useAuth } from '../authentication/AuthContext.js';
 import SignIn from '../authentication/SignIn.js';
 import CalendarPage from '../calendar/CalendarPage.js';
-import ScrollView from '../scroll-view/ScrollView.js';
 
 function Dashboard() {
   const { isAuthenticated } = useAuth();
@@ -69,15 +68,6 @@ function Dashboard() {
           }}
         >
           <CalendarPage />
-        </Box>
-
-        <Box
-          sx={{
-            flexGrow: 1,
-            overflow: 'auto',
-          }}
-        >
-          <ScrollView />
         </Box>
       </Box>
     </Box>

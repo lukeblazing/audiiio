@@ -61,11 +61,6 @@ export default function AppNavbar() {
           </MenuButton>
         </Box>
 
-        {/* Centered "Events" Text */}
-        <Title variant="h6" component="h1">
-          Availability
-        </Title>
-
         {/* Placeholder to balance the layout */}
         <Box sx={{ width: '48px' }}></Box> {/* Adjust width to match MenuButton */}
       </NavbarContainer>
