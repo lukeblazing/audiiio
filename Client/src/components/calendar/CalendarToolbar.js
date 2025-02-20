@@ -23,7 +23,6 @@ const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
   const iconButtonStyle = {
     padding: '10px',
     backgroundColor: 'transparent',
-    borderRadius: '12px', // Rounded box style
     transition: 'background-color 0.2s ease',
     '&:hover': {
       backgroundColor: 'rgba(0,0,0,0.05)',
@@ -49,9 +48,10 @@ const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
       alignItems="center"
       padding={1}
       bgcolor="white"
-      border="1px solid"
+      border="2px solid"
       borderColor={theme.palette.divider}
       borderRadius="8px 8px 0 0"
+      borderBottom="none"
       flexWrap="nowrap"
     >
       {/* Left: Back Button */}

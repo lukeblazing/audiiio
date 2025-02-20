@@ -4,6 +4,9 @@ import {
   momentLocalizer,
   Views,
 } from "react-big-calendar";
+import {
+  useTheme,
+} from '@mui/material';
 import LoadingBorder from "../loading-components/LoadingBorder.js";
 import moment from "moment";
 import CalendarToolbar from "./CalendarToolbar.js";
@@ -12,16 +15,14 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 const localizer = momentLocalizer(moment);
 
 const calendarAppleStyle = {
-  backgroundColor: "#fff",
-  border: "1px solid #E0E0E0",
-  borderRadius: "8px",
-  boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
   color: "#000",
   transition: "background-color 0.2s ease",
   fontFamily: "cursive",
+  backgroundColor: "inherit",
 };
 
 const CalendarPage = () => {
+  const theme = useTheme();
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState(Views.MONTH);
@@ -37,7 +38,6 @@ const CalendarPage = () => {
 
   const handleSelectSlot = useCallback((slotInfo) => {
     console.log("Clicked on date: ", slotInfo.start);
-    // Further actions on date click can be implemented here.
   }, []);
 
   useEffect(() => {
@@ -51,8 +51,7 @@ const CalendarPage = () => {
             headers: { "Content-Type": "application/json" },
           }
         );
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
         const fetchedEvents = data
@@ -80,69 +79,110 @@ const CalendarPage = () => {
     fetchEvents();
   }, []);
 
-  const CustomDateHeader = useCallback(({ date }) => {
-    const now = new Date();
-    const isCurrentMonth = date.getMonth() === currentDate.getMonth();
-    const isToday = date.toDateString() === now.toDateString();
+  const CustomDateHeader = useCallback(
+    ({ date }) => {
+      const now = new Date();
+      const isCurrentMonth = date.getMonth() === currentDate.getMonth();
+      const isToday = date.toDateString() === now.toDateString();
+
+      const baseStyle = {
+        position: "absolute",
+        top: "4px",
+        right: "4px",
+        width: "28px",
+        height: "28px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "14px",
+        lineHeight: "normal",
+        textAlign: "center",
+        pointerEvents: "none",
+      };
+
+      const style = isToday
+        ? { ...baseStyle, border: "2px solid #aaa", borderRadius: "50%", fontWeight: "bold" }
+        : { ...baseStyle, color: isCurrentMonth ? "#000" : "#aaa" };
+
+      return (
+        <div style={{ position: "relative", height: "100%" }}>
+          <div style={style}>{date.getDate()}</div>
+        </div>
+      );
+    },
+    [currentDate]
+  );
+
+  const dayPropGetter = useCallback(
+    (date) => {
+      const hasEvents = events.some((event) => 
+        moment(date).isBetween(moment(event.start).startOf("day"), moment(event.end).endOf("day"), null, "[]") // Inclusive range
+      );
   
-    const baseStyle = {
-      position: "absolute",
-      top: "4px",
-      right: "4px",
-      width: "28px",
-      height: "28px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "14px",
-      lineHeight: "normal",
-      textAlign: "center",
-      pointerEvents: "none", // disable pointer events on the date number
-    };
-  
-    const style = isToday
-      ? {
-          ...baseStyle,
-          border: "2px solid #aaa",
-          borderRadius: "50%",
-          fontWeight: "bold",
-        }
-      : {
-          ...baseStyle,
-          color: isCurrentMonth ? "#000" : "#aaa",
-        };
-  
-    return (
-      <div style={{ position: "relative", height: "100%" }}>
-        <div style={style}>{date.getDate()}</div>
-      </div>
-    );
-  }, [currentDate]);
-  
-  
-  
+      return {
+        style: {
+          cursor: "pointer",
+          transition: "background-color 0.2s ease",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          height: "100%",
+          position: "relative", // Ensures absolute positioning for the "X"
+        },
+        className: hasEvents ? "calendar-day-with-event" : "calendar-day",
+      };
+    },
+    [events]
+  );
   
 
-  const dayPropGetter = useCallback((date) => ({
-    style: {
-      cursor: "pointer",
-      transition: "background-color 0.2s ease",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: "100%",
-      height: "100%",
-    },
-    className: "calendar-day",
-  }), []);
+  const eventPropGetter = useCallback(() => ({
+    style: { display: "none" },
+  }), []);  
 
   return (
-    <div style={{ padding: "16px", backgroundColor: "#fafafa" }}>
-      <style>{`
-        .rbc-today, .rbc-off-range-bg {
-          background-color: transparent !important;
-        }
-      `}</style>
+    <div
+      style={{
+        padding: "16px",
+        backgroundColor: "transparent",
+      }}
+    >
+    <style>{`
+      .rbc-today, .rbc-off-range-bg {
+        background-color: transparent !important;
+      }
+      .rbc-month-view {
+        border-radius: 0 0 8px 8px; /* Adjust the value as needed */
+        overflow: hidden; /* Ensures children respect the border radius */
+        border: 2px solid ${theme.palette.divider};
+      }
+      /* Make the borders between days thicker and use the theme palette */
+      .rbc-day-bg {
+        border-right: 1px solid ${theme.palette.divider} !important;
+        border-bottom: 1px solid ${theme.palette.divider} !important;
+        border-radius: 0 !important;
+      }
+      /* Remove border from last column to avoid double thickness on right edge */
+      .rbc-month-row:last-child .rbc-day-bg {
+        border-bottom: none !important;
+      }
+      /* Remove border from last column to avoid double thickness on right edge */
+      .rbc-day-bg:last-child {
+        border-right: none !important;
+      }
+      .calendar-day-with-event::after {
+        content: '✖'; /* Red X */
+        color: red;
+        font-size: 20px;
+        font-weight: bold;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+      }
+    `}</style>
       {isLoading ? (
         <LoadingBorder />
       ) : (
@@ -166,6 +206,7 @@ const CalendarPage = () => {
           }}
           style={calendarAppleStyle}
           dayPropGetter={dayPropGetter}
+          eventPropGetter={eventPropGetter}
         />
       )}
     </div>
