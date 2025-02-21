@@ -6,7 +6,7 @@
   "scripts": {
     "start": "webpack serve --mode development",
     "build": "webpack --mode development",
-    "build-prod": "webpack --mode production"
+    "build-prod": "rm -rf dist && webpack --mode production"
   },
   "keywords": [],
   "author": "",
