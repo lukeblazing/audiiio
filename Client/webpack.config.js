@@ -79,6 +79,8 @@ export default (env, argv) => {
         new TerserPlugin({
           terserOptions: {
             compress: {
+              drop_console: false,
+              drop_debugger: false
             },
           },
         }),
