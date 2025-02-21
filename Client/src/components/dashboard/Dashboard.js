@@ -8,67 +8,35 @@ import CalendarPage from '../calendar/CalendarPage.js';
 function Dashboard() {
   const { isAuthenticated } = useAuth();
 
-  // If not authenticated, only render sign-in page
   if (!isAuthenticated) {
     return <SignIn />;
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+    <Box 
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        height: '100vh', // Full viewport height
+        overflow: 'hidden' // Prevents unwanted scrolling
+      }}
+    >
       {/* Navbar at the top */}
       <AppNavbar />
 
       <Box
-        component="main"
         sx={{
+          width: '100%',
+          maxWidth: 900,
+          margin: '0 auto',
           display: 'flex',
           flexDirection: 'column',
-          flexGrow: 1,
-          backgroundColor: 'background.default',
-          paddingLeft: '20px',
-          paddingRight: '20px',
-          paddingBottom: '20px',
-          paddingTop: {
-            xs: 'calc(56px + 20px)',  // Navbar height (xs) + 20px padding
-            sm: 'calc(56px + 20px)',  // Navbar height (sm) + 20px padding
-            md: 'calc(56px + 20px)',  // Navbar height (md and above) + 20px padding
-          },
-          boxSizing: 'border-box',
-          // gap: '20px',  // Consistent spacing between children
-          overflow: 'hidden',  // Prevent content overflow
+          minHeight: 0, // Prevents flex issues
+          marginTop: '10vh', // Buffer from the top by 10%
+          maxHeight: '50vh', // Limit max height to 50% of viewport height
         }}
       >
-        <Box
-          sx={{
-            width: '100%',
-            maxWidth: '1000px',
-            maxHeight: 'calc(100vh - 56px - 40px)',  // Adjust based on navbar height and padding
-            aspectRatio: '5 / 4',  // Default aspect ratio for smaller screens
-            position: 'relative',
-            margin: '0 auto',  // Center the box horizontally
-            '&::before': {
-              content: '""',
-              display: 'block',
-              paddingBottom: '80%', // Larger height-to-width ratio for small screens (5:4)
-            },
-            '& > *': {
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            },
-            // Media queries for larger screens to enforce 16:9 aspect ratio
-            '@media (min-width: 600px)': {
-              aspectRatio: '16 / 9',
-              '&::before': {
-                paddingBottom: '56.25%',  // 16:9 aspect ratio
-              },
-            },
-          }}
-        >
-          <CalendarPage />
-        </Box>
+        <CalendarPage />
       </Box>
     </Box>
   );

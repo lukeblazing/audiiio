@@ -11,13 +11,14 @@ import {
   endOfDay,
   format,
   getDay,
-
+  startOfWeek,
 } from "date-fns";
-import { useTheme } from "@mui/material/styles"; 
+import enUS from "date-fns/locale/en-US";
+import { useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
 import LoadingBorder from "../loading-components/LoadingBorder.js";
 import CalendarToolbar from "./CalendarToolbar.js";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import enUS from "date-fns/locale/en-US";
 
 const locales = {
   "en-US": enUS,
@@ -26,8 +27,8 @@ const locales = {
 const localizer = dateFnsLocalizer({
   format,
   parse: parseISO,
-  startOfWeek: () => new Date(), // Adjust as needed
-  getDay: (date) => getDay(date),
+  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }), // Ensuring correct week start
+  getDay,
   locales,
 });
 
@@ -97,37 +98,21 @@ const CalendarPage = () => {
   }, []);
 
   const CustomDateHeader = useCallback(
-    ({ date }) => {
-      const now = new Date();
-      const isCurrentMonth = date.getMonth() === currentDate.getMonth();
-      const isToday = date.toDateString() === now.toDateString();
-
-      const baseStyle = {
-        position: "absolute",
-        top: "4px",
-        right: "4px",
-        width: "28px",
-        height: "28px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontSize: "14px",
-        lineHeight: "normal",
-        textAlign: "center",
-        pointerEvents: "none",
-      };
-
-      const style = isToday
-        ? { ...baseStyle, border: "2px solid #aaa", borderRadius: "50%", fontWeight: "bold" }
-        : { ...baseStyle, color: isCurrentMonth ? "#000" : "#aaa" };
+    ({ label, date }) => {
+      const today = new Date();
+      const isToday = date.toDateString() === today.toDateString();
 
       return (
-        <div style={{ position: "relative", height: "100%" }}>
-          <div style={style}>{date.getDate()}</div>
-        </div>
+        <span
+          style={{
+            fontWeight: isToday ? "bold" : "normal",
+          }}
+        >
+          {label}
+        </span>
       );
     },
-    [currentDate]
+    [theme]
   );
 
   const dayPropGetter = useCallback(
@@ -138,17 +123,12 @@ const CalendarPage = () => {
           end: endOfDay(new Date(event.end)),
         })
       );
-
       return {
         style: {
           cursor: "pointer",
           transition: "background-color 0.2s ease",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          height: "100%",
           position: "relative",
+          overflow: "hidden",
         },
         className: hasEvents ? "calendar-day-with-event" : "calendar-day",
       };
@@ -156,79 +136,113 @@ const CalendarPage = () => {
     [events]
   );
 
-  const eventPropGetter = useCallback(
-    () => ({
-      style: { display: "none" },
-    }),
-    []
-  );
+  const eventPropGetter = useCallback(() => ({ style: { display: "none" } }), []);
 
   return (
-    <div
-      style={{
-        padding: "16px",
-        backgroundColor: "transparent",
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        flexGrow: 1,
+        minHeight: "55vh",
+        marginRight: "2vh",
+        marginLeft: "2vh",
+        overflow: "hidden",
       }}
     >
       <style>{`
-      .rbc-today, .rbc-off-range-bg {
-        background-color: transparent !important;
-      }
-      .rbc-month-view {
-        border-radius: 0 0 8px 8px;
-        overflow: hidden;
-        border: 2px solid ${theme.palette.divider};
-      }
-      .rbc-day-bg {
-        border-right: 1px solid ${theme.palette.divider} !important;
-        border-bottom: 1px solid ${theme.palette.divider} !important;
-        border-radius: 0 !important;
-      }
-      .rbc-month-row:last-child .rbc-day-bg {
-        border-bottom: none !important;
-      }
-      .rbc-day-bg:last-child {
-        border-right: none !important;
-      }
-      .calendar-day-with-event::after {
-        content: '✖';
-        color: red;
-        font-size: 20px;
-        font-weight: bold;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-      }
-    `}</style>
+        .rbc-today, .rbc-off-range-bg {
+          background-color: transparent !important;
+        }
+        .rbc-month-view {
+          border-radius: 0 0 8px 8px;
+          border: 2px solid ${theme.palette.divider};
+        }
+        .rbc-day-bg {
+          border-right: 1px solid ${theme.palette.divider} !important;
+          border-bottom: 1px solid ${theme.palette.divider} !important;
+          position: relative;
+        }
+        .rbc-month-row:last-child .rbc-day-bg {
+          border-bottom: none !important;
+        }
+        .rbc-day-bg:last-child {
+          border-right: none !important;
+        }
+        .calendar-day-with-event::after {
+          content: '●';
+          color: red;
+          font-size: 20px;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          pointer-events: none;
+        }
+        .rbc-header {
+          font-size: 1rem;
+          font-weight: bold;
+        }
+        .rbc-date-cell {
+          font-size: 1rem;
+          font-weight: normal;
+          transition: font-size 0.2s ease;
+        }
+        @media (max-width: 1024px) {
+          .rbc-header, .rbc-date-cell {
+            font-size: 0.8rem;
+          }
+        }
+        @media (max-width: 768px) {
+          .rbc-header, .rbc-date-cell {
+            font-size: 0.7rem;
+          }
+        }
+        @media (max-width: 480px) {
+          .rbc-header, .rbc-date-cell {
+            font-size: 0.6rem;
+          }
+        }
+        @media (max-width: 360px) {
+          .rbc-header, .rbc-date-cell {
+            font-size: 0.5rem;
+          }
+        }
+      `}</style>
+
       {isLoading ? (
         <LoadingBorder />
       ) : (
-        <BigCalendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          selectable
-          onSelectSlot={handleSelectSlot}
-          view={currentView}
-          views={["month"]}
-          date={currentDate}
-          onView={handleViewChange}
-          onNavigate={handleNavigate}
-          components={{
-            toolbar: CalendarToolbar,
-            month: {
-              dateHeader: CustomDateHeader,
-            },
+        <Box
+          sx={{
+            flexGrow: 1,
+            height: "100%", // Ensures it takes full height of container
+            overflow: "hidden",
           }}
-          style={calendarAppleStyle}
-          dayPropGetter={dayPropGetter}
-          eventPropGetter={eventPropGetter}
-        />
+        >
+          <BigCalendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            selectable
+            onSelectSlot={handleSelectSlot}
+            view={currentView}
+            views={[Views.MONTH, Views.DAY]}
+            date={currentDate}
+            onView={handleViewChange}
+            onNavigate={handleNavigate}
+            components={{
+              toolbar: CalendarToolbar,
+              month: { dateHeader: CustomDateHeader },
+            }}
+            style={{ ...calendarAppleStyle, height: "100%" }} // Forces height to fill container
+            dayPropGetter={dayPropGetter}
+            eventPropGetter={eventPropGetter}
+          />
+        </Box>
       )}
-    </div>
+    </Box>
   );
 };
 
