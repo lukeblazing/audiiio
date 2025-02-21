@@ -49,27 +49,27 @@ export default (env, argv) => {
       new Dotenv({
         path: isProduction ? './.env.production' : './.env.development',
       }),
-      {
-        apply: (compiler) => {
-          compiler.hooks.afterEmit.tap("CopyPublicFiles", () => {
-            const publicSource = resolve(__dirname, "public");
-            const serviceWorkerSource = resolve(__dirname, "src/service-worker.js");
-            const destination = resolve(__dirname, "dist");
+      // {
+      //   apply: (compiler) => {
+      //     compiler.hooks.afterEmit.tap("CopyPublicFiles", () => {
+      //       const publicSource = resolve(__dirname, "public");
+      //       const serviceWorkerSource = resolve(__dirname, "src/service-worker.js");
+      //       const destination = resolve(__dirname, "dist");
       
-            try {
-              // Copy the entire public folder
-              fs.cpSync(publicSource, destination, { recursive: true });
-              console.log("✔ Public files copied to /dist");
+      //       try {
+      //         // Copy the entire public folder
+      //         fs.cpSync(publicSource, destination, { recursive: true });
+      //         console.log("✔ Public files copied to /dist");
       
-              // Copy service-worker.js separately
-              fs.copyFileSync(serviceWorkerSource, resolve(destination, "service-worker.js"));
-              console.log("✔ service-worker.js copied to /dist");
-            } catch (error) {
-              console.error("❌ Failed to copy files:", error);
-            }
-          });
-        },
-      },
+      //         // Copy service-worker.js separately
+      //         fs.copyFileSync(serviceWorkerSource, resolve(destination, "service-worker.js"));
+      //         console.log("✔ service-worker.js copied to /dist");
+      //       } catch (error) {
+      //         console.error("❌ Failed to copy files:", error);
+      //       }
+      //     });
+      //   },
+      // },
     ],
 
     optimization: {
