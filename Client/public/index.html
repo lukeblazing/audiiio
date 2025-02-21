@@ -3,21 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    
-    <title>Luke's App</title>
 
-    <!-- Manifest for PWA support -->
+    <title>Our Shared Calendar</title>
+
+    <link rel="icon" href="/icons/app-icon-512x512.png" type="image/png">
+
+    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
 
     <!-- iOS Web App Settings -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Luke's App">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Our Shared Cal" />
+
+    <!-- iOS Splash Screen & Icon Support (Optional, but recommended) -->
+    <link rel="apple-touch-icon" href="/icons/app-icon-512x512.png" />
+
+    <!-- Theme Color (Used for PWA and Mobile UI Styling) -->
+    <meta name="theme-color" content="#000000" />
+
+    <!-- Fix for double <link rel="manifest"> (Removed the duplicate) -->
 
     <style>
       body {
         margin: 0;
-        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) 
+                 env(safe-area-inset-bottom) env(safe-area-inset-left);
+        background-color: #ffffff; /* Improves loading experience */
       }
     </style>
   </head>

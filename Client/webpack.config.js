@@ -3,6 +3,7 @@ import { dirname, resolve } from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import Dotenv from 'dotenv-webpack';
 import TerserPlugin from 'terser-webpack-plugin';
+import fs from 'fs';
 
 // Create __filename and __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -12,62 +13,74 @@ export default (env, argv) => {
   const isProduction = argv.mode === 'production';
 
   return {
-    // Entry point for your app
     entry: './src/index.js',
 
-    // Output configuration
     output: {
-      filename: '[name].[contenthash].js', // Uses unique hashed filenames
+      filename: '[name].[contenthash].js',
       path: resolve(__dirname, './dist'),
       publicPath: '/',
     },
 
-    // Module rules (Loaders)
     module: {
       rules: [
         {
-          test: /\.jsx?$/, // For both .js and .jsx files
+          test: /\.jsx?$/,
           exclude: /node_modules/,
           use: {
-            loader: 'babel-loader', // Use Babel to transpile ES6+ and JSX
+            loader: 'babel-loader',
           },
           resolve: {
             fullySpecified: false, // Allows importing without specifying extensions
           }
         },
         {
-          test: /\.css$/, // For CSS files
-          use: ['style-loader', 'css-loader'], // Use both style-loader and css-loader
+          test: /\.css$/,
+          use: ['style-loader', 'css-loader'],
         },
       ],
     },
 
-    // Plugins for additional functionalities
     plugins: [
       new HtmlWebpackPlugin({
-        template: './public/index.html', // ✅ Webpack injects correct script tags
+        template: './public/index.html',
         filename: 'index.html',
-        inject: 'body', // ✅ Ensures scripts are added inside <body>
+        inject: 'body',
       }),
       new Dotenv({
         path: isProduction ? './.env.production' : './.env.development',
       }),
+      {
+        apply: (compiler) => {
+          compiler.hooks.afterEmit.tap("CopyPublicFiles", () => {
+            const source = resolve(__dirname, "public");
+            const destination = resolve(__dirname, "dist");
+
+            // ✅ Use fs.cpSync to copy the entire 'public' directory
+            try {
+              fs.cpSync(source, destination, { recursive: true });
+              console.log("✔ Public files copied to /dist");
+            } catch (error) {
+              console.error("❌ Failed to copy public files:", error);
+            }
+          });
+        },
+      },
     ],
 
     optimization: {
-      usedExports: true, // Enables tree shaking
-      minimize: isProduction, // Minifies the bundle
+      usedExports: true,
+      minimize: isProduction,
       minimizer: [
         new TerserPlugin({
           terserOptions: {
             compress: {
-              drop_console: true, // Removes console logs in production
+              drop_console: true,
             },
           },
         }),
       ],
       splitChunks: {
-        chunks: 'all', // ✅ Splits vendor files (like lodash, dayjs, etc.)
+        chunks: 'all',
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
@@ -78,7 +91,6 @@ export default (env, argv) => {
       },
     },
 
-    // File extensions to resolve
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
     },
