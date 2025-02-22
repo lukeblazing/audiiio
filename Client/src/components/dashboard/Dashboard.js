@@ -18,7 +18,9 @@ function Dashboard() {
         display: 'flex', 
         flexDirection: 'column', 
         height: '100vh', // Full viewport height
-        overflow: 'hidden' // Prevents unwanted scrolling
+        overflow: 'hidden', // Prevents unwanted scrolling
+        position: 'fixed', // Critical for iOS to prevent scrolling
+        width: '100vw', // Ensure it spans full width
       }}
     >
       {/* Navbar at the top */}

@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
+    <style>
+      html, body {
+        position: fixed;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
+        overscroll-behavior: none; /* Prevent iOS bounce effect */
+        touch-action: none; /* Prevent gestures that trigger scroll */
+        -webkit-overflow-scrolling: none; /* Disable smooth scrolling on iOS */
+      }
+    </style>
+
     <title>Our Shared Calendar</title>
 
     <!-- Favicon -->
