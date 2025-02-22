@@ -3,7 +3,8 @@ import { dirname, resolve } from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import Dotenv from 'dotenv-webpack';
 import TerserPlugin from 'terser-webpack-plugin';
-import fs from 'fs';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import path from 'path'; // Fixed incorrect import
 
 // Create __filename and __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -17,7 +18,7 @@ export default (env, argv) => {
 
     output: {
       filename: '[name].[contenthash].js',
-      path: resolve(__dirname, './dist'),
+      path: resolve(__dirname, 'dist'),
       publicPath: '/',
     },
 
@@ -49,27 +50,16 @@ export default (env, argv) => {
       new Dotenv({
         path: isProduction ? './.env.production' : './.env.development',
       }),
-      // {
-      //   apply: (compiler) => {
-      //     compiler.hooks.afterEmit.tap("CopyPublicFiles", () => {
-      //       const publicSource = resolve(__dirname, "public");
-      //       const serviceWorkerSource = resolve(__dirname, "src/service-worker.js");
-      //       const destination = resolve(__dirname, "dist");
-      
-      //       try {
-      //         // Copy the entire public folder
-      //         fs.cpSync(publicSource, destination, { recursive: true });
-      //         console.log("✔ Public files copied to /dist");
-      
-      //         // Copy service-worker.js separately
-      //         fs.copyFileSync(serviceWorkerSource, resolve(destination, "service-worker.js"));
-      //         console.log("✔ service-worker.js copied to /dist");
-      //       } catch (error) {
-      //         console.error("❌ Failed to copy files:", error);
-      //       }
-      //     });
-      //   },
-      // },
+      new CopyWebpackPlugin({
+        patterns: [
+          { 
+            from: path.resolve(__dirname, 'public'), 
+            to: path.resolve(__dirname, 'dist'), 
+            globOptions: { ignore: ['**/index.html'] } // Exclude index.html
+          },
+          { from: path.resolve(__dirname, 'src/service-worker.js'), to: path.resolve(__dirname, 'dist/service-worker.js') },
+        ],
+      }),      
     ],
 
     optimization: {
@@ -102,16 +92,10 @@ export default (env, argv) => {
     },
     devtool: isProduction ? 'hidden-source-map' : 'cheap-module-source-map',
     devServer: {
-      static: [
-        {
-          directory: resolve(__dirname, "public"), // Serve files from public/
-          publicPath: "/",
-        },
-        {
-          directory: resolve(__dirname, "src"), // Serve files from src/ (for service-worker.js)
-          publicPath: "/", 
-        }
-      ],
+      static: {
+        directory: resolve(__dirname, 'public'), // Serve only the public directory
+        publicPath: '/',
+      },
       compress: true,
       port: 8080,
       historyApiFallback: true,
