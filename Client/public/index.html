@@ -11,8 +11,8 @@
         height: 100%;
         width: 100%;
         overscroll-behavior: none; /* Prevent iOS bounce effect */
-        touch-action: none; /* Prevent gestures that trigger scroll */
-        -webkit-overflow-scrolling: none; /* Disable smooth scrolling on iOS */
+        background-color: #ffffff; /* Prevents black screen issue */
+        touch-action: manipulation;
       }
     </style>
 
@@ -30,7 +30,7 @@
     <meta name="apple-mobile-web-app-title" content="Our Shared Cal" />
 
     <!-- iOS Icon Support -->
-    <link rel="apple-touch-icon" href="icons/app-icon-512x512.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icons/app-icon-512x512.png" />
 
     <!-- Theme Color (Used for PWA and Mobile UI Styling) -->
     <meta name="theme-color" content="#ffffff" />
@@ -38,7 +38,6 @@
     <style>
       body {
         margin: 0;
-        background-color: #ffffff; /* Prevents black screen issue */
       }
 
       /* Ensures the safe area padding applies only if needed */
