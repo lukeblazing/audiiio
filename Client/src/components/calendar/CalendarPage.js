@@ -105,7 +105,7 @@ const CalendarPage = () => {
       return (
         <span
           style={{
-            fontWeight: isToday ? "bold" : "normal",
+            textDecoration: isToday ? "underline" : "none",
           }}
         >
           {label}
