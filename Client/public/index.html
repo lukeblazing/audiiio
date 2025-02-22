@@ -6,6 +6,7 @@
 
     <title>Our Shared Calendar</title>
 
+    <!-- Favicon -->
     <link rel="icon" href="icons/app-icon-512x512.png" type="image/png">
 
     <!-- PWA Manifest -->
@@ -13,23 +14,27 @@
 
     <!-- iOS Web App Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Our Shared Cal" />
 
-    <!-- iOS Splash Screen & Icon Support (Optional, but recommended) -->
+    <!-- iOS Icon Support -->
     <link rel="apple-touch-icon" href="icons/app-icon-512x512.png" />
 
     <!-- Theme Color (Used for PWA and Mobile UI Styling) -->
-    <meta name="theme-color" content="#000000" />
-
-    <!-- Fix for double <link rel="manifest"> (Removed the duplicate) -->
+    <meta name="theme-color" content="#ffffff" />
 
     <style>
       body {
         margin: 0;
-        padding: env(safe-area-inset-top) env(safe-area-inset-right) 
-                 env(safe-area-inset-bottom) env(safe-area-inset-left);
-        background-color: #ffffff; /* Improves loading experience */
+        background-color: #ffffff; /* Prevents black screen issue */
+      }
+
+      /* Ensures the safe area padding applies only if needed */
+      @supports (padding: env(safe-area-inset-top)) {
+        body {
+          padding: env(safe-area-inset-top) env(safe-area-inset-right) 
+                   env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
       }
     </style>
   </head>

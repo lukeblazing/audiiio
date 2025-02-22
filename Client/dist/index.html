@@ -1,6 +1,12 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><title>Our Shared Calendar</title><link rel="icon" href="icons/app-icon-512x512.png" type="image/png"><link rel="manifest" href="manifest.json"/><meta name="apple-mobile-web-app-capable" content="yes"/><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/><meta name="apple-mobile-web-app-title" content="Our Shared Cal"/><link rel="apple-touch-icon" href="icons/app-icon-512x512.png"/><meta name="theme-color" content="#000000"/><style>body {
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><title>Our Shared Calendar</title><link rel="icon" href="icons/app-icon-512x512.png" type="image/png"><link rel="manifest" href="manifest.json"/><meta name="apple-mobile-web-app-capable" content="yes"/><meta name="apple-mobile-web-app-status-bar-style" content="default"/><meta name="apple-mobile-web-app-title" content="Our Shared Cal"/><link rel="apple-touch-icon" href="icons/app-icon-512x512.png"/><meta name="theme-color" content="#ffffff"/><style>body {
         margin: 0;
-        padding: env(safe-area-inset-top) env(safe-area-inset-right) 
-                 env(safe-area-inset-bottom) env(safe-area-inset-left);
-        background-color: #ffffff; /* Improves loading experience */
+        background-color: #ffffff; /* Prevents black screen issue */
+      }
+
+      /* Ensures the safe area padding applies only if needed */
+      @supports (padding: env(safe-area-inset-top)) {
+        body {
+          padding: env(safe-area-inset-top) env(safe-area-inset-right) 
+                   env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
       }</style></head><body><div id="root"></div><script defer="defer" src="/vendors.1935573678447fc3dd2c.js"></script><script defer="defer" src="/main.ccc1a277e9f3526c31c0.js"></script></body></html>
