@@ -251,9 +251,7 @@ const CalendarPage = () => {
         }
         /* Default grayout on cell selection */
         .rbc-selected-cell {
-          background: linear-gradient(135deg, #4A4E69, #6D6875, #B5838D, #E5989B) !important;
-          border-radius: 6px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+          background: linear-gradient(135deg, rgba(224, 69, 103, 0.51), rgba(64, 68, 85, 0.4)) !important;
         }
         .rbc-month-view {
           border-radius: 0 0 8px 8px;
