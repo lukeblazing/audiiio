@@ -12,6 +12,10 @@ import {
   format,
   getDay,
   startOfWeek,
+  differenceInMinutes,
+  isBefore,
+  isSameDay,
+  isAfter
 } from "date-fns";
 import enUS from "date-fns/locale/en-US";
 import { useTheme } from "@mui/material/styles";
@@ -126,8 +130,6 @@ const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
   );
 };
 
-
-
 const locales = {
   "en-US": enUS,
 };
@@ -159,30 +161,41 @@ const style = {
   p: 4,
 };
 
-// Function to format event times for the modal
-const formatEventTime = (event) => {
-  if (event.allDay) {
-    return "All Day";
+const isAllDayEvent = (event, currentDay) => {
+  // Ensure the event spans at least one full day
+  const eventStart = startOfDay(event.start);
+  const eventEnd = startOfDay(event.end);
+  const viewingDay = startOfDay(currentDay);
+
+  const startsBeforeViewingDay = isBefore(eventStart, viewingDay);
+  const endsOnOrAfterViewingDay = isAfter(eventEnd, viewingDay) || isSameDay(eventEnd, viewingDay);
+
+  return startsBeforeViewingDay && endsOnOrAfterViewingDay;
+};
+
+const formatFullEventTime = (event, date) => {
+  if (isAllDayEvent(event, date)) {
+    return "All-day"; // More descriptive than "All Day"
   } else {
-    const startTime = format(event.start, "h:mm a");
-    const endTime = format(event.end, "h:mm a");
-    return `${startTime} - ${endTime}`;
+    const startTime = format(event.start, "h:mm a").toLowerCase();
+    const endTime = format(event.end, "h:mm a").toLowerCase();
+
+    // If event starts and ends on the hour, omit minutes for brevity
+    const formattedStart = startTime.includes(":00") ? format(event.start, "h a").toLowerCase() : startTime;
+    const formattedEnd = endTime.includes(":00") ? format(event.end, "h a").toLowerCase() : endTime;
+
+    return `${formattedStart} - ${formattedEnd}`;
   }
 };
 
-const formatCompressedEventTime = (event) => {
-  if (event.allDay) {
-    return "All Day";
+const formatCompressedEventTime = (event, date) => {
+  if (isAllDayEvent(event, date)) {
+    return "All-day"; // More intuitive than "All Day"
   } else {
-    const startTime = format(event.start, "h");
-    const endTime = format(event.end, "h");
+    const startHour = format(event.start, "h");
     const startPeriod = format(event.start, "a").toLowerCase();
-    const endPeriod = format(event.end, "a").toLowerCase();
 
-    // If both times are in the same period (AM/PM), only show the period once
-    return startPeriod === endPeriod
-      ? `${startTime}-${endTime}${endPeriod}`
-      : `${startTime}${startPeriod}-${endTime}${endPeriod}`;
+    return `${startHour}${startPeriod}`
   }
 };
 
@@ -304,7 +317,7 @@ const CalendarPage = () => {
                 paddingLeft: "4px", // Slight padding for spacing
               }}
             >
-              <strong>{formatCompressedEventTime(event)}:</strong> {event.title}
+              <strong>{formatCompressedEventTime(event, date)}:</strong> {event.title}
             </div>
           ))}
         </div>
@@ -357,7 +370,9 @@ const CalendarPage = () => {
         }
         /* Default grayout on cell selection */
         .rbc-selected-cell {
-          background: linear-gradient(135deg, rgba(224, 69, 103, 0.51), rgba(64, 68, 85, 0.4)) !important;
+          background: rgba(0, 128, 255, 0.88) !important;
+          border-radius: 4px; /* Slightly rounded for a modern look */
+          transition: background-color 0.2s ease-in-out;
         }
         .rbc-month-view {
           border-radius: 0 0 8px 8px;
@@ -421,7 +436,7 @@ const CalendarPage = () => {
             startAccessor="start"
             endAccessor="end"
             selectable
-            longPressThreshold={5}
+            longPressThreshold={0}
             onSelectSlot={handleSelectSlot}
             view={currentView}
             views={[Views.MONTH, Views.DAY]}
@@ -494,7 +509,7 @@ const CalendarPage = () => {
                     fontSize: "0.95rem",
                   }}
                 >
-                  <strong>{formatEventTime(event)}:</strong> {event.title}
+                  <strong>{formatFullEventTime(event, selectedDate)}:</strong> {event.title}
                   <br />• {event.description}
                 </Typography>
               ))
