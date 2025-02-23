@@ -458,67 +458,100 @@ const CalendarPage = () => {
         </Box>
       )}
 
-      <Modal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-        BackdropProps={{
-          sx: { backgroundColor: "transparent" }, // Removes gray background
-        }}
-      >
-        <Box
-          sx={{
-            background: "linear-gradient(135deg, #4A4E69, #6D6875, #B5838D, #E5989B)",
-            borderRadius: "12px",
-            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-            padding: "24px",
-            maxWidth: "500px",
-            margin: "auto",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            color: "#F8F8F8", // Light text for contrast
-            textAlign: "center",
-          }}
-        >
+<Modal
+  open={modalOpen}
+  onClose={() => setModalOpen(false)}
+  aria-labelledby="modal-modal-title"
+  aria-describedby="modal-modal-description"
+  BackdropProps={{
+    sx: { backgroundColor: "rgba(0,0,0,0.5)" }, // Slight dimming effect
+  }}
+>
+  <Box
+    sx={{
+      background: "white",
+      borderRadius: "16px",
+      boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
+      padding: "16px",
+      maxWidth: "90vw", // Prevents overflow on small screens
+      maxHeight: "80vh", // Ensures modal doesn't go offscreen
+      width: "100%", 
+      margin: "auto",
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      overflowY: "auto", // Enables scrolling for long content
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}
+  >
+    <Typography
+      id="modal-modal-title"
+      variant="h6"
+      component="h2"
+      sx={{
+        fontWeight: "600",
+        letterSpacing: "0.5px",
+        textAlign: "center",
+        width: "100%",
+      }}
+    >
+      Events on {selectedDate ? format(selectedDate, "MMMM d, yyyy") : ""}
+    </Typography>
+
+    <Box
+      id="modal-modal-description"
+      sx={{
+        mt: 2,
+        width: "100%",
+        maxHeight: "60vh", // Ensures list doesn't overflow
+        overflowY: "auto",
+        padding: "0 8px",
+      }}
+    >
+      {selectedEvents.length > 0 ? (
+        selectedEvents.map((event, index) => (
           <Typography
-            id="modal-modal-title"
-            variant="h6"
-            component="h2"
+            key={index}
             sx={{
-              fontWeight: "600",
-              letterSpacing: "0.5px",
-              color: "#F2E9E4", // Softer white
+              background: "rgba(0, 0, 0, 0.05)",
+              borderRadius: "8px",
+              padding: "12px",
+              marginBottom: "8px",
+              fontSize: "1rem",
+              textAlign: "left",
             }}
           >
-            Events on {selectedDate ? format(selectedDate, "MMMM d, yyyy") : ""}
+            <strong>{formatFullEventTime(event, selectedDate)}:</strong> {event.title}
+            <br />• {event.description}
           </Typography>
-          <Box id="modal-modal-description" sx={{ mt: 2 }}>
-            {selectedEvents.length > 0 ? (
-              selectedEvents.map((event, index) => (
-                <Typography
-                  key={index}
-                  sx={{
-                    background: "rgba(255, 255, 255, 0.1)",
-                    borderRadius: "8px",
-                    padding: "12px",
-                    marginBottom: "8px",
-                    color: "#F8F8F8",
-                    fontSize: "0.95rem",
-                  }}
-                >
-                  <strong>{formatFullEventTime(event, selectedDate)}:</strong> {event.title}
-                  <br />• {event.description}
-                </Typography>
-              ))
-            ) : (
-              <Typography sx={{ opacity: 0.8, fontSize: "1rem" }}>We're free!</Typography>
-            )}
-          </Box>
-        </Box>
-      </Modal>
+        ))
+      ) : (
+        <Typography sx={{ opacity: 0.8, fontSize: "1rem", textAlign: "center" }}>
+          We're free!
+        </Typography>
+      )}
+    </Box>
+
+    <Button
+      onClick={() => setModalOpen(false)}
+      variant="contained"
+      sx={{
+        mt: 2,
+        width: "100%",
+        maxWidth: "200px",
+        fontSize: "1rem",
+        textTransform: "none",
+        borderRadius: "8px",
+      }}
+    >
+      Close
+    </Button>
+  </Box>
+</Modal>
+
 
     </Box>
   );

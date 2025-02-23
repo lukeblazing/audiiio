@@ -105,24 +105,97 @@ app.get('/api/calendar/events', (req, res) => {
     console.log("luke got a request for events")
     res.status(200).json([
         {
-            "id": 1,
-            "title": "first",
-            "start": "2025-02-09T10:00:00Z",
-            "end": "2025-02-14T11:00:00Z"
+          "id": 1,
+          "title": "Morning Meeting",
+          "start": "2025-02-10T09:00:00Z",
+          "end": "2025-02-10T10:00:00Z",
+          "description": "A daily stand-up meeting to discuss ongoing projects and tasks."
         },
         {
-            "id": 2,
-            "title": "second",
-            "start": "2025-02-06T00:00:00Z",
-            "end": "2025-02-15T23:59:59Z"
+          "id": 2,
+          "title": "Team Lunch",
+          "start": "2025-02-10T12:00:00Z",
+          "end": "2025-02-10T13:00:00Z",
+          "description": "Casual lunch with the team to catch up and discuss non-work topics."
         },
         {
-            "id": 3,
-            "title": "third",
-            "start": "2025-02-06T00:00:00Z",
-            "end": "2025-02-07T23:59:59Z"
+          "id": 3,
+          "title": "Daily Briefing",
+          "start": "2025-02-11T08:30:00Z",
+          "end": "2025-02-11T09:00:00Z",
+          "description": "Quick morning check-in to align on priorities for the day."
+        },
+        {
+          "id": 4,
+          "title": "Project Kickoff",
+          "start": "2025-02-12T09:00:00Z",
+          "end": "2025-02-12T10:00:00Z",
+          "description": "Initial meeting to outline project goals, timelines, and responsibilities."
+        },
+        {
+          "id": 5,
+          "title": "Client Presentation",
+          "start": "2025-02-12T10:30:00Z",
+          "end": "2025-02-12T11:30:00Z",
+          "description": "A detailed presentation showcasing our latest project to potential clients."
+        },
+        {
+          "id": 6,
+          "title": "Workshop Session",
+          "start": "2025-02-12T12:00:00Z",
+          "end": "2025-02-12T13:00:00Z",
+          "description": "Hands-on workshop focused on team collaboration and skill-building."
+        },
+        {
+          "id": 7,
+          "title": "Strategy Discussion",
+          "start": "2025-02-12T14:00:00Z",
+          "end": "2025-02-12T15:00:00Z",
+          "description": "A brainstorming session to plan the company’s long-term strategy."
+        },
+        {
+          "id": 8,
+          "title": "Marketing Brainstorm",
+          "start": "2025-02-12T15:30:00Z",
+          "end": "2025-02-12T16:30:00Z",
+          "description": "A creative session to generate ideas for upcoming marketing campaigns."
+        },
+        {
+          "id": 9,
+          "title": "Product Demo",
+          "start": "2025-02-12T17:00:00Z",
+          "end": "2025-02-12T18:00:00Z",
+          "description": "Demonstration of the new product features to internal stakeholders."
+        },
+        {
+          "id": 10,
+          "title": "Team Sync-Up",
+          "start": "2025-02-13T09:00:00Z",
+          "end": "2025-02-13T09:30:00Z",
+          "description": "A quick meeting to align on the status of ongoing tasks and blockers."
+        },
+        {
+          "id": 11,
+          "title": "Client Call",
+          "start": "2025-02-14T11:00:00Z",
+          "end": "2025-02-14T12:00:00Z",
+          "description": "A scheduled call with a client to discuss their requirements and feedback."
+        },
+        {
+          "id": 12,
+          "title": "Wrap-Up Meeting",
+          "start": "2025-02-15T16:00:00Z",
+          "end": "2025-02-15T17:00:00Z",
+          "description": "Final meeting of the week to summarize progress and set next steps."
+        },
+        {
+          "id": 13,
+          "title": "Review Session",
+          "start": "2025-02-16T14:00:00Z",
+          "end": "2025-02-16T15:00:00Z",
+          "description": "A detailed review of completed tasks and areas for improvement."
         }
-    ])
+      ])
 });
 
 // Serve static files from the React app build directory
