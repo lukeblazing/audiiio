@@ -311,7 +311,7 @@ const CalendarPage = () => {
             startAccessor="start"
             endAccessor="end"
             selectable
-            longPressThreshold={10}
+            longPressThreshold={5}
             onSelectSlot={handleSelectSlot}
             view={currentView}
             views={[Views.MONTH, Views.DAY]}
