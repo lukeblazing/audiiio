@@ -249,6 +249,12 @@ const CalendarPage = () => {
         .rbc-today, .rbc-off-range-bg {
           background-color: transparent !important;
         }
+        /* Default grayout on cell selection */
+        .rbc-selected-cell {
+          background: linear-gradient(135deg, #4A4E69, #6D6875, #B5838D, #E5989B) !important;
+          border-radius: 6px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
         .rbc-month-view {
           border-radius: 0 0 8px 8px;
           border: 2px solid ${theme.palette.divider};
@@ -338,26 +344,63 @@ const CalendarPage = () => {
         onClose={() => setModalOpen(false)}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
+        BackdropProps={{
+          sx: { backgroundColor: "transparent" }, // Removes gray background
+        }}
       >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Events on{" "}
-            {selectedDate ? format(selectedDate, "MMMM d, yyyy") : ""}
+        <Box
+          sx={{
+            background: "linear-gradient(135deg, #4A4E69, #6D6875, #B5838D, #E5989B)",
+            borderRadius: "12px",
+            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
+            padding: "24px",
+            maxWidth: "500px",
+            margin: "auto",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            color: "#F8F8F8", // Light text for contrast
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            id="modal-modal-title"
+            variant="h6"
+            component="h2"
+            sx={{
+              fontWeight: "600",
+              letterSpacing: "0.5px",
+              color: "#F2E9E4", // Softer white
+            }}
+          >
+            Events on {selectedDate ? format(selectedDate, "MMMM d, yyyy") : ""}
           </Typography>
           <Box id="modal-modal-description" sx={{ mt: 2 }}>
             {selectedEvents.length > 0 ? (
               selectedEvents.map((event, index) => (
-                <Typography key={index}>
+                <Typography
+                  key={index}
+                  sx={{
+                    background: "rgba(255, 255, 255, 0.1)",
+                    borderRadius: "8px",
+                    padding: "12px",
+                    marginBottom: "8px",
+                    color: "#F8F8F8",
+                    fontSize: "0.95rem",
+                  }}
+                >
                   <strong>{formatEventTime(event)}:</strong> {event.title}
                   <br />• {event.description}
                 </Typography>
               ))
             ) : (
-              <Typography>We're free!</Typography>
+              <Typography sx={{ opacity: 0.8, fontSize: "1rem" }}>We're free!</Typography>
             )}
           </Box>
         </Box>
       </Modal>
+
     </Box>
   );
 };
