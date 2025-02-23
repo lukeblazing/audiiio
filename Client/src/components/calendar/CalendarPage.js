@@ -19,8 +19,114 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
 import LoadingBorder from "../loading-components/LoadingBorder.js";
-import CalendarToolbar from "./CalendarToolbar.js";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import Button from '@mui/material/Button';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { ArrowBack, ArrowForward } from '@mui/icons-material';
+
+const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const goToBack = () => onNavigate('PREV');
+  const goToNext = () => onNavigate('NEXT');
+  const goToToday = () => onNavigate('TODAY');
+
+  const label = () => localizer.format(date, 'MMMM yyyy');
+
+  return (
+    <Box
+      display="flex"
+      flexDirection="row"
+      justifyContent="space-between"
+      alignItems="center"
+      padding={1}
+      bgcolor="white"
+      border="2px solid"
+      borderColor={theme.palette.divider}
+      borderRadius="8px 8px 0 0"
+      borderBottom="none"
+      flexWrap="nowrap"
+    >
+      {/* Left: Back Button with Full Hitzone */}
+      <Box
+        onClick={goToBack}
+        sx={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          borderRadius: '8px',
+          transition: 'background-color 0.2s ease',
+          '&:hover': {
+            backgroundColor: 'rgba(0,0,0,0.1)',
+            cursor: 'pointer',
+          },
+        }}
+      >
+        <ArrowBack sx={{ color: theme.palette.primary.main, fontSize: '1.8rem' }} />
+      </Box>
+
+      {/* Center: Header and Today Button */}
+      <Box display="flex" flexDirection="column" alignItems="center" flexGrow={2}>
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{
+            textAlign: 'center',
+            fontSize: '1.5rem',
+            fontFamily: 'cursive',
+            userSelect: 'none',
+            WebkitTouchCallout: 'none',
+          }}
+        >
+          {label()}
+        </Typography>
+        <Button
+          onClick={goToToday}
+          variant="text"
+          size="small"
+          sx={{
+            padding: '6px 12px',
+            textTransform: 'none',
+            backgroundColor: 'transparent',
+            color: theme.palette.primary.main,
+            transition: 'background-color 0.2s ease',
+            '&:hover': {
+              backgroundColor: 'rgba(0,0,0,0.05)',
+            },
+            marginTop: '8px',
+          }}
+        >
+          Today
+        </Button>
+      </Box>
+
+      {/* Right: Next Button with Full Hitzone */}
+      <Box
+        onClick={goToNext}
+        sx={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          borderRadius: '8px',
+          transition: 'background-color 0.2s ease',
+          '&:hover': {
+            backgroundColor: 'rgba(0,0,0,0.1)',
+            cursor: 'pointer',
+          },
+        }}
+      >
+        <ArrowForward sx={{ color: theme.palette.primary.main, fontSize: '1.8rem' }} />
+      </Box>
+    </Box>
+  );
+};
+
+
 
 const locales = {
   "en-US": enUS,
