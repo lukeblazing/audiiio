@@ -59,7 +59,7 @@ function Dashboard() {
             height: 50, 
             borderRadius: '12px', 
             minWidth: 'auto',
-            transition: 'transform 0.1s ease-in-out',
+            transition: 'transform 0.2s ease-in-out',
             transform: pressedButton === 'remove' ? 'scale(0.7)' : 'scale(1)',
           }}
           disableRipple
@@ -78,7 +78,7 @@ function Dashboard() {
             height: 50, 
             borderRadius: '12px', 
             minWidth: 'auto',
-            transition: 'transform 0.1s ease-in-out',
+            transition: 'transform 0.2s ease-in-out',
             transform: pressedButton === 'add' ? 'scale(0.7)' : 'scale(1)',
           }}
           disableRipple
@@ -98,7 +98,7 @@ function Dashboard() {
             border: '2px solid transparent',
             background: 'linear-gradient(white, white) padding-box, linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245)) border-box',
             color: 'rgb(255, 0, 140)',
-            transition: 'transform 0.1s ease-in-out',
+            transition: 'transform 0.2s ease-in-out',
             transform: pressedButton === 'ai' ? 'scale(0.7)' : 'scale(1)',
           }}
           disableRipple
