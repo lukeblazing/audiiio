@@ -55,7 +55,7 @@ function Dashboard() {
             minWidth: 'auto',
             transition: 'transform 0.2s ease-in-out',
             '&:active': {
-              transform: 'scale(0.95)',
+              transform: 'scale(0.7)',
             },
           }}
           disableRipple
@@ -75,7 +75,7 @@ function Dashboard() {
             minWidth: 'auto',
             transition: 'transform 0.2s ease-in-out',
             '&:active': {
-              transform: 'scale(0.95)',
+              transform: 'scale(0.7)',
             },
           }}
           disableRipple
@@ -96,7 +96,7 @@ function Dashboard() {
             color: 'rgb(255, 0, 140)', // Matches gradient
             transition: 'transform 0.2s ease-in-out',
             '&:active': {
-              transform: 'scale(0.9)',
+              transform: 'scale(0.7)',
             },
           }}
           disableRipple
