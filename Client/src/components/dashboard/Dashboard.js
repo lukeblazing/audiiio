@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -6,14 +6,21 @@ import AppNavbar from './AppNavbar.js';
 import { useAuth } from '../authentication/AuthContext.js';
 import SignIn from '../authentication/SignIn.js';
 import CalendarPage from '../calendar/CalendarPage.js';
-import MagicWandIcon from '@mui/icons-material/AutoFixHigh'; // AI Magic Wand Icon
+import MagicWandIcon from '@mui/icons-material/AutoFixHigh';
 
 function Dashboard() {
   const { isAuthenticated } = useAuth();
+  const [pressedButton, setPressedButton] = useState(null);
 
   if (!isAuthenticated) {
     return <SignIn />;
   }
+
+  // Function to trigger animation manually
+  const handlePress = (button) => {
+    setPressedButton(button);
+    setTimeout(() => setPressedButton(null), 200);
+  };
 
   return (
     <Box 
@@ -26,39 +33,37 @@ function Dashboard() {
         width: '100vw',
       }}
     >
-      {/* Navbar at the top */}
       <AppNavbar />
 
-      {/* Buttons Container - Positioned right below the navbar */}
+      {/* Buttons Container */}
       <Box
         sx={{
-          position: 'absolute', // Keeps it positioned correctly
-          top: 60, // Below navbar
+          position: 'absolute',
+          top: 60,
           left: 0,
           right: 0,
           display: 'flex',
-          justifyContent: 'center', // Centered row
+          justifyContent: 'center',
           alignItems: 'center',
-          gap: '12px', // Even spacing
-          zIndex: 10, // Ensures it's above the calendar
-          pointerEvents: 'auto', // Fix for clickability
+          gap: '12px',
+          zIndex: 10,
+          pointerEvents: 'auto',
         }}
       >
         {/* Remove Event Button */}
         <Button 
           variant="outlined" 
-          color="error" 
+          color="error"
           sx={{ 
             width: 150, 
             height: 50, 
             borderRadius: '12px', 
             minWidth: 'auto',
             transition: 'transform 0.2s ease-in-out',
-            '&:active': {
-              transform: 'scale(0.7)',
-            },
+            transform: pressedButton === 'remove' ? 'scale(0.4)' : 'scale(1)',
           }}
           disableRipple
+          onMouseDown={() => handlePress('remove')}
           onClick={() => console.log('Remove Event Clicked')}
         >
           Remove Event
@@ -74,32 +79,30 @@ function Dashboard() {
             borderRadius: '12px', 
             minWidth: 'auto',
             transition: 'transform 0.2s ease-in-out',
-            '&:active': {
-              transform: 'scale(0.7)',
-            },
+            transform: pressedButton === 'add' ? 'scale(0.4)' : 'scale(1)',
           }}
           disableRipple
+          onMouseDown={() => handlePress('add')}
           onClick={() => console.log('Add Event Clicked')}
         >
           Add Event
         </Button>
 
-        {/* AI Magic Wand Button with Gradient Outline */}
+        {/* AI Magic Wand Button */}
         <IconButton 
           sx={{ 
             width: 50, 
             height: 50, 
             borderRadius: '12px',
             minWidth: 'auto',
-            border: '2px solid transparent', // Transparent border initially
-            background: 'linear-gradient(white, white) padding-box, linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245)) border-box', // Gradient outline
-            color: 'rgb(255, 0, 140)', // Matches gradient
+            border: '2px solid transparent',
+            background: 'linear-gradient(white, white) padding-box, linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245)) border-box',
+            color: 'rgb(255, 0, 140)',
             transition: 'transform 0.2s ease-in-out',
-            '&:active': {
-              transform: 'scale(0.7)',
-            },
+            transform: pressedButton === 'ai' ? 'scale(0.4)' : 'scale(1)',
           }}
           disableRipple
+          onMouseDown={() => handlePress('ai')}
           onClick={() => console.log('AI Clicked')}
         >
           <MagicWandIcon />
@@ -115,9 +118,9 @@ function Dashboard() {
           display: 'flex',
           flexDirection: 'column',
           minHeight: 0,
-          marginTop: '120px', // Push the calendar down below buttons
+          marginTop: '120px',
           maxHeight: '50vh',
-          zIndex: 1, // Ensures it's below buttons
+          zIndex: 1,
         }}
       >
         <CalendarPage />
