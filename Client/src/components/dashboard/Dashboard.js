@@ -26,6 +26,10 @@ function Dashboard() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [aiModalOpen, setAiModalOpen] = useState(false);
 
+  // Additional state for confirmation modal when deleting an event
+  const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
+  const [selectedEventForDelete, setSelectedEventForDelete] = useState(null);
+
   // State for Remove Event modal: list of events and search query
   const [events, setEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,14 +51,22 @@ function Dashboard() {
   // State for available calendars (for dropdown)
   const [calendars, setCalendars] = useState([]);
 
-  // Predefined category colors for selection
+  // Predefined category colors with sample names
   const categoryColors = [
-    { id: 'red', color: '#f44336' },
-    { id: 'blue', color: '#2196f3' },
-    { id: 'green', color: '#4caf50' },
-    { id: 'purple', color: '#9c27b0' },
-    { id: 'orange', color: '#ff9800' },
+    { id: 'red', color: '#f44336', name: 'Urgent' },
+    { id: 'blue', color: '#2196f3', name: 'Work' },
+    { id: 'green', color: '#4caf50', name: 'Personal' },
+    { id: 'purple', color: '#9c27b0', name: 'Fun' },
+    { id: 'orange', color: '#ff9800', name: 'Misc' },
   ];
+
+  const commonButtonStyle = {
+    width: "100%",
+    maxWidth: "200px",
+    fontSize: "1rem",
+    textTransform: "none",
+    borderRadius: "8px",
+  };
 
   if (!isAuthenticated) {
     return <SignIn />;
@@ -120,10 +132,8 @@ function Dashboard() {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  // Handle deleting an event after user confirms
-  const handleDeleteEvent = async (eventId) => {
-    const confirmed = window.confirm('Are you sure you want to delete this event?');
-    if (!confirmed) return;
+  // Function to actually delete an event (called from the confirmation modal)
+  const deleteEvent = async (eventId) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
         method: 'DELETE',
@@ -131,8 +141,8 @@ function Dashboard() {
         body: JSON.stringify({ event: { id: eventId } })
       });
       if (!response.ok) throw new Error('Failed to delete event');
-      // Remove the deleted event from the list
       setEvents(prev => prev.filter(event => event.id !== eventId));
+      setConfirmDeleteModalOpen(false);
     } catch (err) {
       console.error(err);
       alert('Error deleting event');
@@ -206,43 +216,39 @@ function Dashboard() {
         }}
       >
         {/* Remove Event Button */}
-        <Button 
+        <Button
           variant="outlined"
-          sx={{ 
-            width: 150, 
-            height: 50, 
-            borderRadius: '12px', 
+          sx={{
+            width: 150,
+            height: 50,
+            borderRadius: '12px',
             minWidth: 'auto',
             transition: 'transform 0.2s ease-in-out',
             transform: pressedButton === 'remove' ? 'scale(0.7)' : 'scale(1)',
-            backgroundColor: 'transparent',
-            border: '2px solid transparent',
-            backgroundImage: 'linear-gradient(white, white), linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245))',
-            backgroundOrigin: 'border-box',
-            backgroundClip: 'padding-box, border-box',
+            backgroundColor: '#fff',
+            border: '2px solid',
+            fontSize: '3rem',
           }}
           disableRipple
           onMouseDown={() => handlePress('remove')}
           onClick={() => setRemoveModalOpen(true)}
         >
-          -
+          –
         </Button>
 
         {/* Add Event Button */}
-        <Button 
-          variant="outlined" 
-          sx={{ 
-            width: 150, 
-            height: 50, 
-            borderRadius: '12px', 
+        <Button
+          variant="outlined"
+          sx={{
+            width: 150,
+            height: 50,
+            borderRadius: '12px',
             minWidth: 'auto',
             transition: 'transform 0.2s ease-in-out',
             transform: pressedButton === 'add' ? 'scale(0.7)' : 'scale(1)',
-            backgroundColor: 'transparent',
-            border: '2px solid transparent',
-            backgroundImage: 'linear-gradient(white, white), linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245))',
-            backgroundOrigin: 'border-box',
-            backgroundClip: 'padding-box, border-box',
+            backgroundColor: '#fff',
+            border: '2px solid',
+            fontSize: '3rem',
           }}
           disableRipple
           onMouseDown={() => handlePress('add')}
@@ -251,11 +257,11 @@ function Dashboard() {
           +
         </Button>
 
-        {/* AI Magic Wand Button (unchanged) */}
-        <IconButton 
-          sx={{ 
-            width: 50, 
-            height: 50, 
+        {/* AI Magic Wand Button */}
+        <IconButton
+          sx={{
+            width: 50,
+            height: 50,
             borderRadius: '12px',
             minWidth: 'auto',
             border: '2px solid transparent',
@@ -317,10 +323,7 @@ function Dashboard() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            border: '2px solid transparent',
-            backgroundImage: 'linear-gradient(white, white), linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245))',
-            backgroundOrigin: 'border-box',
-            backgroundClip: 'padding-box, border-box',
+            border: '1px solid #ccc'
           }}
         >
           <Typography
@@ -329,7 +332,7 @@ function Dashboard() {
             component="h2"
             sx={{
               fontWeight: "600",
-              fontFamily: "cursive",
+              fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
               letterSpacing: "0.5px",
               textAlign: "center",
               width: "100%",
@@ -366,7 +369,10 @@ function Dashboard() {
                     marginBottom: "8px",
                     cursor: "pointer",
                   }}
-                  onClick={() => handleDeleteEvent(event.id)}
+                  onClick={() => {
+                    setSelectedEventForDelete(event);
+                    setConfirmDeleteModalOpen(true);
+                  }}
                 >
                   <Typography variant="subtitle1">
                     <strong>{event.title}</strong>
@@ -385,6 +391,7 @@ function Dashboard() {
           <Button
             onClick={() => setRemoveModalOpen(false)}
             variant="contained"
+            disableRipple
             sx={{
               mt: 2,
               width: "100%",
@@ -396,6 +403,92 @@ function Dashboard() {
           >
             Close
           </Button>
+        </Box>
+      </Modal>
+
+      {/* Confirmation Modal for Deleting an Event */}
+      <Modal
+        open={confirmDeleteModalOpen}
+        onClose={() => setConfirmDeleteModalOpen(false)}
+        aria-labelledby="confirm-delete-modal-title"
+        aria-describedby="confirm-delete-modal-description"
+        BackdropProps={{
+          sx: { backgroundColor: "rgba(0,0,0,0.5)" },
+        }}
+      >
+        <Box
+          sx={{
+            background: "white",
+            borderRadius: "16px",
+            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
+            padding: "16px",
+            maxWidth: "90vw",
+            maxHeight: "80vh",
+            width: "100%",
+            margin: "auto",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            id="confirm-delete-modal-title"
+            variant="h6"
+            component="h2"
+            sx={{
+              fontWeight: "600",
+              letterSpacing: "0.5px",
+              textAlign: "center",
+              width: "100%",
+            }}
+          >
+            Confirm Cancellation
+          </Typography>
+          {selectedEventForDelete && (
+            <Box
+              sx={{
+                mt: 2,
+                width: "100%",
+                background: "rgba(0, 0, 0, 0.05)",
+                borderRadius: "8px",
+                padding: "12px",
+                textAlign: "left",
+              }}
+            >
+              <Typography variant="subtitle1">
+                <strong>{selectedEventForDelete.title}</strong>
+              </Typography>
+              {selectedEventForDelete.description && (
+                <Typography variant="body2">
+                  {selectedEventForDelete.description}
+                </Typography>
+              )}
+              {/* You can add more event details here if desired */}
+            </Box>
+          )}
+          <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', maxWidth: '200px' }}>
+            <Button
+              onClick={() => setConfirmDeleteModalOpen(false)}
+              variant="outlined"
+              disableRipple
+              sx={commonButtonStyle}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => deleteEvent(selectedEventForDelete.id)}
+              variant="contained"
+              disableRipple
+              sx={commonButtonStyle}
+            >
+              Confirm
+            </Button>
+          </Box>
         </Box>
       </Modal>
 
@@ -429,10 +522,7 @@ function Dashboard() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            border: '2px solid transparent',
-            backgroundImage: 'linear-gradient(white, white), linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245))',
-            backgroundOrigin: 'border-box',
-            backgroundClip: 'padding-box, border-box',
+            border: '1px solid #ccc'
           }}
         >
           <Typography
@@ -441,7 +531,7 @@ function Dashboard() {
             component="h2"
             sx={{
               fontWeight: "600",
-              fontFamily: "cursive",
+              fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
               letterSpacing: "0.5px",
               textAlign: "center",
               width: "100%",
@@ -450,21 +540,25 @@ function Dashboard() {
             New Event!
           </Typography>
 
-          {/* Category Selection as Circles */}
+          {/* Category Selection with names */}
           <Box sx={{ display: 'flex', gap: 2, mt: 1, mb: 2 }}>
             {categoryColors.map((cat) => (
               <Box
                 key={cat.id}
+                sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}
                 onClick={() => setNewEvent({ ...newEvent, category_id: cat.id })}
-                sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
-                  backgroundColor: cat.color,
-                  border: newEvent.category_id === cat.id ? '3px solid black' : '2px solid transparent',
-                  cursor: 'pointer',
-                }}
-              />
+              >
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    backgroundColor: cat.color,
+                    border: newEvent.category_id === cat.id ? '3px solid black' : '2px solid transparent',
+                  }}
+                />
+                <Typography variant="caption" sx={{ mt: 0.5 }}>{cat.name}</Typography>
+              </Box>
             ))}
           </Box>
 
@@ -533,34 +627,25 @@ function Dashboard() {
             onChange={(e) => setNewEvent({ ...newEvent, end_time: e.target.value })}
           />
 
-          <Button
-            type="submit"
-            variant="contained"
-            sx={{
-              mt: 2,
-              width: "100%",
-              maxWidth: "200px",
-              fontSize: "1rem",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-          >
-            Create Event
-          </Button>
-          <Button
-            onClick={() => setCreateModalOpen(false)}
-            variant="outlined"
-            sx={{
-              mt: 1,
-              width: "100%",
-              maxWidth: "200px",
-              fontSize: "1rem",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-          >
-            Cancel
-          </Button>
+<Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', justifyContent: 'center' }}>
+  <Button
+    onClick={() => setCreateModalOpen(false)}
+    variant="outlined"
+    disableRipple
+    sx={commonButtonStyle}
+  >
+    Cancel
+  </Button>
+  <Button
+    type="submit"
+    variant="contained"
+    disableRipple
+    sx={commonButtonStyle}
+  >
+    Create Event
+  </Button>
+</Box>
+
         </Box>
       </Modal>
 
@@ -594,10 +679,7 @@ function Dashboard() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            border: '2px solid transparent',
-            backgroundImage: 'linear-gradient(white, white), linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245))',
-            backgroundOrigin: 'border-box',
-            backgroundClip: 'padding-box, border-box',
+            border: '1px solid #ccc'
           }}
         >
           <Typography
@@ -606,12 +688,13 @@ function Dashboard() {
             component="h2"
             sx={{
               fontWeight: "600",
+              fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
               letterSpacing: "0.5px",
               textAlign: "center",
               width: "100%",
             }}
           >
-            AI Magic Wand
+            Let us schedule for you!
           </Typography>
           <TextField
             fullWidth
@@ -621,37 +704,28 @@ function Dashboard() {
             value={aiInput}
             onChange={(e) => setAiInput(e.target.value)}
           />
-          <Button
-            type="submit"
-            variant="contained"
-            sx={{
-              mt: 2,
-              width: "100%",
-              maxWidth: "200px",
-              fontSize: "1rem",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-          >
-            Submit
-          </Button>
-          <Button
-            onClick={() => setAiModalOpen(false)}
-            variant="outlined"
-            sx={{
-              mt: 1,
-              width: "100%",
-              maxWidth: "200px",
-              fontSize: "1rem",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-          >
-            Cancel
-          </Button>
+<Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', justifyContent: 'center' }}>
+  <Button
+    onClick={() => setAiModalOpen(false)}
+    variant="outlined"
+    disableRipple
+    sx={commonButtonStyle}
+  >
+    Cancel
+  </Button>
+  <Button
+    type="submit"
+    variant="contained"
+    disableRipple
+    sx={commonButtonStyle}
+  >
+    Submit
+  </Button>
+</Box>
+
         </Box>
-      </Modal>
-    </Box>
+      </Modal >
+    </Box >
   );
 }
 

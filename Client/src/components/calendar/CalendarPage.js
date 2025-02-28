@@ -25,12 +25,10 @@ import Typography from "@mui/material/Typography";
 import LoadingBorder from "../loading-components/LoadingBorder.js";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import Button from '@mui/material/Button';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 
 const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const goToBack = () => onNavigate('PREV');
   const goToNext = () => onNavigate('NEXT');
@@ -80,7 +78,7 @@ const CalendarToolbar = ({ date, view, onNavigate, onView, localizer }) => {
           sx={{
             textAlign: 'center',
             fontSize: '1.5rem',
-            fontFamily: 'cursive',
+            fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
             userSelect: 'none',
             WebkitTouchCallout: 'none',
           }}
@@ -145,7 +143,7 @@ const localizer = dateFnsLocalizer({
 const calendarAppleStyle = {
   color: "#000",
   transition: "background-color 0.2s ease",
-  fontFamily: "cursive",
+  fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
   backgroundColor: "inherit",
 };
 
@@ -313,7 +311,7 @@ const CalendarPage = () => {
                 textOverflow: "ellipsis",
                 fontWeight: "normal",
                 textAlign: "left", // Ensure left alignment
-                fontFamily: "Arial, sans-serif", // More readable font
+                fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif', // More readable font
                 paddingLeft: "4px", // Slight padding for spacing
               }}
             >
