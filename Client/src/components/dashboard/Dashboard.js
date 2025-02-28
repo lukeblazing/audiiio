@@ -204,7 +204,7 @@ function Dashboard() {
       <Box
         sx={{
           position: 'absolute',
-          top: 60,
+          top: 70,
           left: 0,
           right: 0,
           display: 'flex',
@@ -219,15 +219,15 @@ function Dashboard() {
         <Button
           variant="outlined"
           sx={{
-            width: 150,
+            width: 100,
             height: 50,
             borderRadius: '12px',
             minWidth: 'auto',
             transition: 'transform 0.2s ease-in-out',
             transform: pressedButton === 'remove' ? 'scale(0.7)' : 'scale(1)',
             backgroundColor: '#fff',
-            border: '2px solid',
-            fontSize: '3rem',
+            border: '1px solid',
+            fontSize: '2rem',
           }}
           disableRipple
           onMouseDown={() => handlePress('remove')}
@@ -240,15 +240,15 @@ function Dashboard() {
         <Button
           variant="outlined"
           sx={{
-            width: 150,
+            width: 100,
             height: 50,
             borderRadius: '12px',
             minWidth: 'auto',
             transition: 'transform 0.2s ease-in-out',
             transform: pressedButton === 'add' ? 'scale(0.7)' : 'scale(1)',
             backgroundColor: '#fff',
-            border: '2px solid',
-            fontSize: '3rem',
+            border: '1px solid',
+            fontSize: '2rem',
           }}
           disableRipple
           onMouseDown={() => handlePress('add')}
