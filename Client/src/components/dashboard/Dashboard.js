@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Box, Typography, Button, TextField, IconButton, Checkbox, FormControlLabel } from '@mui/material';
+import {
+  Modal,
+  Box,
+  Typography,
+  Button,
+  TextField,
+  IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
+} from '@mui/material';
 import MagicWandIcon from '@mui/icons-material/AutoFixHigh';
 import AppNavbar from './AppNavbar';
 import CalendarPage from '../calendar/CalendarPage';
@@ -27,12 +38,23 @@ function Dashboard() {
     description: '',
     start: '',
     end_time: '',
-    all_day: false,
     recurrence_rule: ''
   });
 
   // State for AI modal input
   const [aiInput, setAiInput] = useState('');
+
+  // State for available calendars (for dropdown)
+  const [calendars, setCalendars] = useState([]);
+
+  // Predefined category colors for selection
+  const categoryColors = [
+    { id: 'red', color: '#f44336' },
+    { id: 'blue', color: '#2196f3' },
+    { id: 'green', color: '#4caf50' },
+    { id: 'purple', color: '#9c27b0' },
+    { id: 'orange', color: '#ff9800' },
+  ];
 
   if (!isAuthenticated) {
     return <SignIn />;
@@ -63,11 +85,40 @@ function Dashboard() {
     }
   }, [removeModalOpen]);
 
+  // Fetch calendars when create modal opens
+  const fetchCalendars = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/getCalendarsForUser`);
+      if (!response.ok) throw new Error('Failed to fetch calendars');
+      const data = await response.json();
+      setCalendars(data.calendars || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (createModalOpen) {
+      fetchCalendars();
+    }
+  }, [createModalOpen]);
+
   // Filter events based on the search query (by title or description)
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  // Helper function to format a Date object into a "YYYY-MM-DDTHH:mm" string for datetime-local inputs
+  const formatDateLocal = (date) => {
+    const pad = (num) => num.toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
 
   // Handle deleting an event after user confirms
   const handleDeleteEvent = async (eventId) => {
@@ -91,16 +142,23 @@ function Dashboard() {
   // Handle Create Event form submission
   const handleCreateEvent = async (e) => {
     e.preventDefault();
-    // Validate required fields
-    if (!newEvent.calendar_id || !newEvent.title || !newEvent.start || !newEvent.end_time) {
-      alert('Please fill in required fields: Calendar ID, Title, Start, and End Time.');
+    // Validate required fields (calendar, title, and start time are required)
+    if (!newEvent.calendar_id || !newEvent.title || !newEvent.start) {
+      alert('Please fill in required fields: Calendar, Title, and Start Time.');
       return;
+    }
+    // If no end time provided, set it to 23:59 on the same day as start
+    let endTime = newEvent.end_time;
+    if (!endTime) {
+      const startDate = new Date(newEvent.start);
+      startDate.setHours(23, 59, 0, 0);
+      endTime = formatDateLocal(startDate);
     }
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: newEvent })
+        body: JSON.stringify({ event: { ...newEvent, end_time: endTime } })
       });
       if (!response.ok) throw new Error('Failed to create event');
       // Reset form and close modal on success
@@ -111,7 +169,6 @@ function Dashboard() {
         description: '',
         start: '',
         end_time: '',
-        all_day: false,
         recurrence_rule: ''
       });
       setCreateModalOpen(false);
@@ -150,8 +207,7 @@ function Dashboard() {
       >
         {/* Remove Event Button */}
         <Button 
-          variant="outlined" 
-          color="error"
+          variant="outlined"
           sx={{ 
             width: 150, 
             height: 50, 
@@ -159,18 +215,22 @@ function Dashboard() {
             minWidth: 'auto',
             transition: 'transform 0.2s ease-in-out',
             transform: pressedButton === 'remove' ? 'scale(0.7)' : 'scale(1)',
+            backgroundColor: 'transparent',
+            border: '2px solid transparent',
+            backgroundImage: 'linear-gradient(white, white), linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245))',
+            backgroundOrigin: 'border-box',
+            backgroundClip: 'padding-box, border-box',
           }}
           disableRipple
           onMouseDown={() => handlePress('remove')}
           onClick={() => setRemoveModalOpen(true)}
         >
-          Remove Event
+          -
         </Button>
 
         {/* Add Event Button */}
         <Button 
           variant="outlined" 
-          color="primary" 
           sx={{ 
             width: 150, 
             height: 50, 
@@ -178,15 +238,20 @@ function Dashboard() {
             minWidth: 'auto',
             transition: 'transform 0.2s ease-in-out',
             transform: pressedButton === 'add' ? 'scale(0.7)' : 'scale(1)',
+            backgroundColor: 'transparent',
+            border: '2px solid transparent',
+            backgroundImage: 'linear-gradient(white, white), linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245))',
+            backgroundOrigin: 'border-box',
+            backgroundClip: 'padding-box, border-box',
           }}
           disableRipple
           onMouseDown={() => handlePress('add')}
           onClick={() => setCreateModalOpen(true)}
         >
-          Add Event
+          +
         </Button>
 
-        {/* AI Magic Wand Button */}
+        {/* AI Magic Wand Button (unchanged) */}
         <IconButton 
           sx={{ 
             width: 50, 
@@ -252,6 +317,10 @@ function Dashboard() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            border: '2px solid transparent',
+            backgroundImage: 'linear-gradient(white, white), linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245))',
+            backgroundOrigin: 'border-box',
+            backgroundClip: 'padding-box, border-box',
           }}
         >
           <Typography
@@ -260,6 +329,7 @@ function Dashboard() {
             component="h2"
             sx={{
               fontWeight: "600",
+              fontFamily: "cursive",
               letterSpacing: "0.5px",
               textAlign: "center",
               width: "100%",
@@ -359,6 +429,10 @@ function Dashboard() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            border: '2px solid transparent',
+            backgroundImage: 'linear-gradient(white, white), linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245))',
+            backgroundOrigin: 'border-box',
+            backgroundClip: 'padding-box, border-box',
           }}
         >
           <Typography
@@ -367,30 +441,53 @@ function Dashboard() {
             component="h2"
             sx={{
               fontWeight: "600",
+              fontFamily: "cursive",
               letterSpacing: "0.5px",
               textAlign: "center",
               width: "100%",
             }}
           >
-            Create Event
+            New Event!
           </Typography>
-          <TextField
-            label="Calendar ID"
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            value={newEvent.calendar_id}
-            onChange={(e) => setNewEvent({ ...newEvent, calendar_id: e.target.value })}
-            required
-          />
-          <TextField
-            label="Category ID"
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            value={newEvent.category_id}
-            onChange={(e) => setNewEvent({ ...newEvent, category_id: e.target.value })}
-          />
+
+          {/* Category Selection as Circles */}
+          <Box sx={{ display: 'flex', gap: 2, mt: 1, mb: 2 }}>
+            {categoryColors.map((cat) => (
+              <Box
+                key={cat.id}
+                onClick={() => setNewEvent({ ...newEvent, category_id: cat.id })}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  backgroundColor: cat.color,
+                  border: newEvent.category_id === cat.id ? '3px solid black' : '2px solid transparent',
+                  cursor: 'pointer',
+                }}
+              />
+            ))}
+          </Box>
+
+          {/* Calendar Dropdown */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="calendar-select-label">Calendar</InputLabel>
+            <Select
+              labelId="calendar-select-label"
+              id="calendar-select"
+              value={newEvent.calendar_id}
+              label="Calendar"
+              onChange={(e) => setNewEvent({ ...newEvent, calendar_id: e.target.value })}
+              required
+            >
+              {calendars.map((cal) => (
+                <MenuItem key={cal.id} value={cal.id}>
+                  {cal.title}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Title */}
           <TextField
             label="Title"
             variant="outlined"
@@ -400,16 +497,18 @@ function Dashboard() {
             onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
             required
           />
+
+          {/* Description (Single Line) */}
           <TextField
             label="Description"
             variant="outlined"
             margin="normal"
             fullWidth
-            multiline
-            rows={3}
             value={newEvent.description}
             onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
           />
+
+          {/* Start Time (Required) */}
           <TextField
             label="Start"
             type="datetime-local"
@@ -421,8 +520,10 @@ function Dashboard() {
             onChange={(e) => setNewEvent({ ...newEvent, start: e.target.value })}
             required
           />
+
+          {/* End Time (Optional) */}
           <TextField
-            label="End Time"
+            label="End Time (Optional)"
             type="datetime-local"
             variant="outlined"
             margin="normal"
@@ -430,25 +531,8 @@ function Dashboard() {
             InputLabelProps={{ shrink: true }}
             value={newEvent.end_time}
             onChange={(e) => setNewEvent({ ...newEvent, end_time: e.target.value })}
-            required
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={newEvent.all_day}
-                onChange={(e) => setNewEvent({ ...newEvent, all_day: e.target.checked })}
-              />
-            }
-            label="All Day Event"
-          />
-          <TextField
-            label="Recurrence Rule"
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            value={newEvent.recurrence_rule}
-            onChange={(e) => setNewEvent({ ...newEvent, recurrence_rule: e.target.value })}
-          />
+
           <Button
             type="submit"
             variant="contained"
@@ -510,6 +594,10 @@ function Dashboard() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            border: '2px solid transparent',
+            backgroundImage: 'linear-gradient(white, white), linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245))',
+            backgroundOrigin: 'border-box',
+            backgroundClip: 'padding-box, border-box',
           }}
         >
           <Typography

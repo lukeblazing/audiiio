@@ -362,9 +362,9 @@ app.get('/api/calendar/events', (req, res) => {
 app.use(express.static(path.join(__dirname, '../public/build')));
 
 // Catch-all handler to serve the React app
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/build/index.html'));
-});
+// app.get('*', (req, res) => {
+//     res.sendFile(path.join(__dirname, '../public/build/index.html'));
+// });
 
 // Start the server
 app.listen(PORT, () => {
