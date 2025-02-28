@@ -204,7 +204,7 @@ function Dashboard() {
       <Box
         sx={{
           position: 'absolute',
-          top: 70,
+          top: 60,
           left: 0,
           right: 0,
           display: 'flex',
