@@ -12,6 +12,12 @@ self.addEventListener("install", (event) => {
 
 // Fetch event - Serve cached assets
 self.addEventListener("fetch", (event) => {
+  // Only handle GET requests with cache logic
+  if (event.request.method !== "GET") {
+    return event.respondWith(fetch(event.request));
+  }
+
+  
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
