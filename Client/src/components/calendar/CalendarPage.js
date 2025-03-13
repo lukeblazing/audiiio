@@ -87,11 +87,10 @@ function CalendarPage() {
     setTimeout(() => setPressedButton(null), 200);
   };
 
-  // Function to fetch all events for the user (called when remove modal opens)
+  // Function to fetch all events for the user (called when remove modal opens or after changes)
   const fetchEvents = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getAllEventsForUser`,           
-      {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getAllEventsForUser`, {
         method: "GET",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -114,12 +113,11 @@ function CalendarPage() {
   // Fetch calendars when create modal, calendar switcher modal, or create calendar modal opens
   const fetchCalendars = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getCalendarsForUser`,           
-        {
-          method: "GET",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-        });
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getCalendarsForUser`, {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
       if (!response.ok) throw new Error('Failed to fetch calendars');
       const data = await response.json();
       setCalendars(data.calendars || []);
@@ -256,7 +254,6 @@ function CalendarPage() {
       {!isAuthenticated ? (
         <SignIn />
       ) : (
-        
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', position: 'fixed', width: '100vw' }}>
           <AppNavbar />
 
@@ -380,9 +377,7 @@ function CalendarPage() {
             onClose={() => setCalendarSwitcherModalOpen(false)}
             aria-labelledby="calendar-switcher-modal-title"
             aria-describedby="calendar-switcher-modal-description"
-            BackdropProps={{
-              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
-            }}
+            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
           >
             <Box
               sx={{
@@ -408,11 +403,7 @@ function CalendarPage() {
                 id="calendar-switcher-modal-title"
                 variant="h6"
                 component="h2"
-                sx={{
-                  fontWeight: "600",
-                  textAlign: "center",
-                  width: "100%",
-                }}
+                sx={{ fontWeight: "600", textAlign: "center", width: "100%" }}
               >
                 Calendar Filter
               </Typography>
@@ -476,9 +467,7 @@ function CalendarPage() {
             onClose={() => setRemoveModalOpen(false)}
             aria-labelledby="remove-event-modal-title"
             aria-describedby="remove-event-modal-description"
-            BackdropProps={{
-              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
-            }}
+            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
           >
             <Box
               sx={{
@@ -587,9 +576,7 @@ function CalendarPage() {
             onClose={() => setConfirmDeleteModalOpen(false)}
             aria-labelledby="confirm-delete-modal-title"
             aria-describedby="confirm-delete-modal-description"
-            BackdropProps={{
-              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
-            }}
+            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
           >
             <Box
               sx={{
@@ -672,9 +659,7 @@ function CalendarPage() {
             onClose={() => setCreateModalOpen(false)}
             aria-labelledby="create-event-modal-title"
             aria-describedby="create-event-modal-description"
-            BackdropProps={{
-              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
-            }}
+            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
           >
             <Box
               component="form"
@@ -766,7 +751,7 @@ function CalendarPage() {
                 required
               />
 
-              {/* Description (Single Line) */}
+              {/* Description */}
               <TextField
                 label="Description"
                 variant="outlined"
@@ -819,7 +804,6 @@ function CalendarPage() {
                   Create Event
                 </Button>
               </Box>
-
             </Box>
           </Modal>
 
@@ -829,9 +813,7 @@ function CalendarPage() {
             onClose={() => setCreateCalendarModalOpen(false)}
             aria-labelledby="create-calendar-modal-title"
             aria-describedby="create-calendar-modal-description"
-            BackdropProps={{
-              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
-            }}
+            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
           >
             <Box
               component="form"
@@ -860,11 +842,7 @@ function CalendarPage() {
                 id="create-calendar-modal-title"
                 variant="h6"
                 component="h2"
-                sx={{
-                  fontWeight: "600",
-                  textAlign: "center",
-                  width: "100%",
-                }}
+                sx={{ fontWeight: "600", textAlign: "center", width: "100%" }}
               >
                 Create New Calendar
               </Typography>
@@ -912,9 +890,7 @@ function CalendarPage() {
             onClose={() => setAiModalOpen(false)}
             aria-labelledby="ai-modal-title"
             aria-describedby="ai-modal-description"
-            BackdropProps={{
-              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
-            }}
+            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
           >
             <Box
               component="form"
@@ -979,7 +955,6 @@ function CalendarPage() {
                   Submit
                 </Button>
               </Box>
-
             </Box>
           </Modal>
         </Box>

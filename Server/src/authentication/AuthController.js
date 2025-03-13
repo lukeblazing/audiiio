@@ -21,7 +21,7 @@ class AuthController {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV !== 'development',
-      sameSite: 'lax', // Protect against CSRF attacks
+      sameSite: 'Strict', // Protect against CSRF attacks
       maxAge: 3600000, // 1 hour expiration in milliseconds
     });
 
@@ -102,7 +102,7 @@ class AuthController {
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
-        sameSite: 'lax', // Protect against CSRF attacks
+        sameSite: 'Strict', // Protect against CSRF attacks
         maxAge: 3600000, // 1 hour expiration in milliseconds
       });
   
@@ -137,7 +137,7 @@ class AuthController {
     res.clearCookie('token', {
       httpOnly: true,
       secure: process.env.NODE_ENV !== 'development',
-      sameSite: 'lax',
+      sameSite: 'Strict',
     });
     res.status(200).json({ message: 'Logout successful' });
   }
