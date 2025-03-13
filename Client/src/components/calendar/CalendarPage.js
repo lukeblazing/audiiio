@@ -9,9 +9,12 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel
+  InputLabel,
+  Checkbox,
+  FormControlLabel
 } from '@mui/material';
 import MagicWandIcon from '@mui/icons-material/AutoFixHigh';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AppNavbar from '../dashboard/AppNavbar';
 import CalendarComponent from './CalendarComponent';
 import SignIn from '../authentication/SignIn';
@@ -25,6 +28,8 @@ function CalendarPage() {
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [calendarSwitcherModalOpen, setCalendarSwitcherModalOpen] = useState(false);
+  const [createCalendarModalOpen, setCreateCalendarModalOpen] = useState(false);
 
   // Additional state for confirmation modal when deleting an event
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
@@ -45,11 +50,19 @@ function CalendarPage() {
     recurrence_rule: ''
   });
 
+  // State for Create Calendar modal: new calendar form
+  const [newCalendar, setNewCalendar] = useState({
+    name: '',
+    description: ''
+  });
+
   // State for AI modal input
   const [aiInput, setAiInput] = useState('');
 
-  // State for available calendars (for dropdown)
+  // State for available calendars (for dropdown and filtering)
   const [calendars, setCalendars] = useState([]);
+  // State for selected calendars for filtering the events displayed
+  const [selectedCalendarFilters, setSelectedCalendarFilters] = useState([]);
 
   // Predefined category colors with sample names
   const categoryColors = [
@@ -68,10 +81,6 @@ function CalendarPage() {
     borderRadius: "8px",
   };
 
-  if (!isAuthenticated) {
-    return <SignIn />;
-  }
-
   // Animate buttons on press
   const handlePress = (button) => {
     setPressedButton(button);
@@ -81,7 +90,12 @@ function CalendarPage() {
   // Function to fetch all events for the user (called when remove modal opens)
   const fetchEvents = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getAllEventsForUser`);
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getAllEventsForUser`,           
+      {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
       if (!response.ok) throw new Error('Failed to fetch events');
       const data = await response.json();
       setEvents(data.events || []);
@@ -97,10 +111,15 @@ function CalendarPage() {
     }
   }, [removeModalOpen]);
 
-  // Fetch calendars when create modal opens
+  // Fetch calendars when create modal, calendar switcher modal, or create calendar modal opens
   const fetchCalendars = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/getCalendarsForUser`);
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getCalendarsForUser`,           
+        {
+          method: "GET",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
       if (!response.ok) throw new Error('Failed to fetch calendars');
       const data = await response.json();
       setCalendars(data.calendars || []);
@@ -110,10 +129,10 @@ function CalendarPage() {
   };
 
   useEffect(() => {
-    if (createModalOpen) {
+    if (createModalOpen || calendarSwitcherModalOpen || createCalendarModalOpen) {
       fetchCalendars();
     }
-  }, [createModalOpen]);
+  }, [createModalOpen, calendarSwitcherModalOpen, createCalendarModalOpen]);
 
   // Filter events based on the search query (by title or description)
   const filteredEvents = events.filter(event =>
@@ -138,7 +157,8 @@ function CalendarPage() {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: { id: eventId } })
+        body: JSON.stringify({ event: { id: eventId } }),
+        credentials: "include",
       });
       if (!response.ok) throw new Error('Failed to delete event');
       setEvents(prev => prev.filter(event => event.id !== eventId));
@@ -168,7 +188,8 @@ function CalendarPage() {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: { ...newEvent, end_time: endTime } })
+        body: JSON.stringify({ event: { ...newEvent, end_time: endTime } }),
+        credentials: "include",
       });
       if (!response.ok) throw new Error('Failed to create event');
       // Reset form and close modal on success
@@ -188,6 +209,31 @@ function CalendarPage() {
     }
   };
 
+  // Handle Create Calendar form submission
+  const handleCreateCalendar = async (e) => {
+    e.preventDefault();
+    if (!newCalendar.name) {
+      alert('Calendar name is required.');
+      return;
+    }
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/calendar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ calendar: newCalendar }),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error('Failed to create calendar');
+      // Reset form, close modal, and refresh calendars list
+      setNewCalendar({ name: '', description: '' });
+      setCreateCalendarModalOpen(false);
+      fetchCalendars();
+    } catch (err) {
+      console.error(err);
+      alert('Error creating calendar');
+    }
+  };
+
   // Handle AI modal submission
   const handleAiSubmit = (e) => {
     e.preventDefault();
@@ -196,536 +242,749 @@ function CalendarPage() {
     setAiModalOpen(false);
   };
 
+  // Toggle calendar filter selection
+  const toggleCalendarFilter = (calendarId) => {
+    setSelectedCalendarFilters(prev =>
+      prev.includes(calendarId)
+        ? prev.filter(id => id !== calendarId)
+        : [...prev, calendarId]
+    );
+  };
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', position: 'fixed', width: '100vw' }}>
-      <AppNavbar />
+    <>
+      {!isAuthenticated ? (
+        <SignIn />
+      ) : (
+        
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', position: 'fixed', width: '100vw' }}>
+          <AppNavbar />
 
-      {/* Buttons Container */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 60,
-          left: 0,
-          right: 0,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '12px',
-          zIndex: 10,
-          pointerEvents: 'auto',
-        }}
-      >
-        {/* Remove Event Button */}
-        <Button
-          variant="outlined"
-          sx={{
-            width: 100,
-            height: 50,
-            borderRadius: '12px',
-            minWidth: 'auto',
-            transition: 'transform 0.2s ease-in-out',
-            transform: pressedButton === 'remove' ? 'scale(0.7)' : 'scale(1)',
-            backgroundColor: '#fff',
-            border: '1px solid',
-            fontSize: '2rem',
-          }}
-          disableRipple
-          onMouseDown={() => handlePress('remove')}
-          onClick={() => setRemoveModalOpen(true)}
-        >
-          –
-        </Button>
-
-        {/* Add Event Button */}
-        <Button
-          variant="outlined"
-          sx={{
-            width: 100,
-            height: 50,
-            borderRadius: '12px',
-            minWidth: 'auto',
-            transition: 'transform 0.2s ease-in-out',
-            transform: pressedButton === 'add' ? 'scale(0.7)' : 'scale(1)',
-            backgroundColor: '#fff',
-            border: '1px solid',
-            fontSize: '2rem',
-          }}
-          disableRipple
-          onMouseDown={() => handlePress('add')}
-          onClick={() => setCreateModalOpen(true)}
-        >
-          +
-        </Button>
-
-        {/* AI Magic Wand Button */}
-        <IconButton
-          sx={{
-            width: 50,
-            height: 50,
-            borderRadius: '12px',
-            minWidth: 'auto',
-            border: '2px solid transparent',
-            background: 'linear-gradient(white, white) padding-box, linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245)) border-box',
-            color: 'rgb(255, 0, 140)',
-            transition: 'transform 0.2s ease-in-out',
-            transform: pressedButton === 'ai' ? 'scale(0.7)' : 'scale(1)',
-          }}
-          disableRipple
-          onMouseDown={() => handlePress('ai')}
-          onClick={() => setAiModalOpen(true)}
-        >
-          <MagicWandIcon />
-        </IconButton>
-      </Box>
-
-      {/* Calendar Container */}
-      <Box
-        sx={{
-          width: '100%',
-          maxWidth: 900,
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 0,
-          marginTop: '120px',
-          maxHeight: '50vh',
-          zIndex: 1,
-        }}
-      >
-        <CalendarComponent />
-      </Box>
-
-      {/* Remove Event Modal */}
-      <Modal
-        open={removeModalOpen}
-        onClose={() => setRemoveModalOpen(false)}
-        aria-labelledby="remove-event-modal-title"
-        aria-describedby="remove-event-modal-description"
-        BackdropProps={{
-          sx: { backgroundColor: "rgba(0,0,0,0.5)" },
-        }}
-      >
-        <Box
-          sx={{
-            background: "white",
-            borderRadius: "16px",
-            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-            padding: "16px",
-            maxWidth: "90vw",
-            maxHeight: "80vh",
-            width: "100%",
-            margin: "auto",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            border: '1px solid #ccc'
-          }}
-        >
-          <Typography
-            id="remove-event-modal-title"
-            variant="h6"
-            component="h2"
-            sx={{
-              fontWeight: "600",
-              fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-              letterSpacing: "0.5px",
-              textAlign: "center",
-              width: "100%",
-            }}
-          >
-            Remove Event
-          </Typography>
-          <TextField
-            fullWidth
-            placeholder="Search events..."
-            variant="outlined"
-            margin="normal"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+          {/* Buttons Container */}
           <Box
-            id="remove-event-modal-description"
             sx={{
-              mt: 2,
-              width: "100%",
-              maxHeight: "60vh",
-              overflowY: "auto",
-              padding: "0 8px",
+              position: 'absolute',
+              top: 60,
+              left: 0,
+              right: 0,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '12px',
+              zIndex: 10,
+              pointerEvents: 'auto',
             }}
           >
-            {filteredEvents.length > 0 ? (
-              filteredEvents.map((event, index) => (
+            {/* Calendar Switcher Button */}
+            <IconButton
+              sx={{
+                width: 50,
+                height: 50,
+                borderRadius: '12px',
+                minWidth: 'auto',
+                border: '1px solid #ccc',
+                backgroundColor: '#fff',
+                transition: 'transform 0.2s ease-in-out',
+                transform: pressedButton === 'calendar' ? 'scale(0.7)' : 'scale(1)',
+              }}
+              disableRipple
+              onMouseDown={() => handlePress('calendar')}
+              onClick={() => setCalendarSwitcherModalOpen(true)}
+            >
+              <CalendarTodayIcon />
+            </IconButton>
+
+            {/* Remove Event Button */}
+            <Button
+              variant="outlined"
+              sx={{
+                width: 100,
+                height: 50,
+                borderRadius: '12px',
+                minWidth: 'auto',
+                transition: 'transform 0.2s ease-in-out',
+                transform: pressedButton === 'remove' ? 'scale(0.7)' : 'scale(1)',
+                backgroundColor: '#fff',
+                border: '1px solid',
+                fontSize: '2rem',
+              }}
+              disableRipple
+              onMouseDown={() => handlePress('remove')}
+              onClick={() => setRemoveModalOpen(true)}
+            >
+              –
+            </Button>
+
+            {/* Add Event Button */}
+            <Button
+              variant="outlined"
+              sx={{
+                width: 100,
+                height: 50,
+                borderRadius: '12px',
+                minWidth: 'auto',
+                transition: 'transform 0.2s ease-in-out',
+                transform: pressedButton === 'add' ? 'scale(0.7)' : 'scale(1)',
+                backgroundColor: '#fff',
+                border: '1px solid',
+                fontSize: '2rem',
+              }}
+              disableRipple
+              onMouseDown={() => handlePress('add')}
+              onClick={() => setCreateModalOpen(true)}
+            >
+              +
+            </Button>
+
+            {/* AI Magic Wand Button */}
+            <IconButton
+              sx={{
+                width: 50,
+                height: 50,
+                borderRadius: '12px',
+                minWidth: 'auto',
+                border: '2px solid transparent',
+                background: 'linear-gradient(white, white) padding-box, linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245)) border-box',
+                color: 'rgb(255, 0, 140)',
+                transition: 'transform 0.2s ease-in-out',
+                transform: pressedButton === 'ai' ? 'scale(0.7)' : 'scale(1)',
+              }}
+              disableRipple
+              onMouseDown={() => handlePress('ai')}
+              onClick={() => setAiModalOpen(true)}
+            >
+              <MagicWandIcon />
+            </IconButton>
+          </Box>
+
+          {/* Calendar Container */}
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: 900,
+              margin: '0 auto',
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 0,
+              marginTop: '120px',
+              maxHeight: '50vh',
+              zIndex: 1,
+            }}
+          >
+            <CalendarComponent selectedCalendars={selectedCalendarFilters} />
+          </Box>
+
+          {/* Calendar Switcher Modal */}
+          <Modal
+            open={calendarSwitcherModalOpen}
+            onClose={() => setCalendarSwitcherModalOpen(false)}
+            aria-labelledby="calendar-switcher-modal-title"
+            aria-describedby="calendar-switcher-modal-description"
+            BackdropProps={{
+              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
+            }}
+          >
+            <Box
+              sx={{
+                background: "white",
+                borderRadius: "16px",
+                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
+                padding: "16px",
+                maxWidth: "90vw",
+                maxHeight: "80vh",
+                width: "100%",
+                margin: "auto",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <Typography
+                id="calendar-switcher-modal-title"
+                variant="h6"
+                component="h2"
+                sx={{
+                  fontWeight: "600",
+                  textAlign: "center",
+                  width: "100%",
+                }}
+              >
+                Calendar Filter
+              </Typography>
+              <Box id="calendar-switcher-modal-description" sx={{ mt: 2, width: '100%' }}>
+                {calendars.length > 0 ? (
+                  calendars.map(cal => (
+                    <FormControlLabel
+                      key={cal.id}
+                      control={
+                        <Checkbox
+                          checked={selectedCalendarFilters.includes(cal.id)}
+                          onChange={() => toggleCalendarFilter(cal.id)}
+                        />
+                      }
+                      label={cal.name}
+                    />
+                  ))
+                ) : (
+                  <Typography>No calendars available.</Typography>
+                )}
+              </Box>
+              <Button
+                onClick={() => {
+                  setCalendarSwitcherModalOpen(false);
+                  setCreateCalendarModalOpen(true);
+                }}
+                variant="contained"
+                disableRipple
+                sx={{
+                  mt: 2,
+                  width: "100%",
+                  maxWidth: "200px",
+                  fontSize: "1rem",
+                  textTransform: "none",
+                  borderRadius: "8px",
+                }}
+              >
+                New Calendar
+              </Button>
+              <Button
+                onClick={() => setCalendarSwitcherModalOpen(false)}
+                variant="contained"
+                disableRipple
+                sx={{
+                  mt: 2,
+                  width: "100%",
+                  maxWidth: "200px",
+                  fontSize: "1rem",
+                  textTransform: "none",
+                  borderRadius: "8px",
+                }}
+              >
+                Close
+              </Button>
+            </Box>
+          </Modal>
+
+          {/* Remove Event Modal */}
+          <Modal
+            open={removeModalOpen}
+            onClose={() => setRemoveModalOpen(false)}
+            aria-labelledby="remove-event-modal-title"
+            aria-describedby="remove-event-modal-description"
+            BackdropProps={{
+              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
+            }}
+          >
+            <Box
+              sx={{
+                background: "white",
+                borderRadius: "16px",
+                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
+                padding: "16px",
+                maxWidth: "90vw",
+                maxHeight: "80vh",
+                width: "100%",
+                margin: "auto",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                border: '1px solid #ccc'
+              }}
+            >
+              <Typography
+                id="remove-event-modal-title"
+                variant="h6"
+                component="h2"
+                sx={{
+                  fontWeight: "600",
+                  fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+                  letterSpacing: "0.5px",
+                  textAlign: "center",
+                  width: "100%",
+                }}
+              >
+                Remove Event
+              </Typography>
+              <TextField
+                fullWidth
+                placeholder="Search events..."
+                variant="outlined"
+                margin="normal"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Box
+                id="remove-event-modal-description"
+                sx={{
+                  mt: 2,
+                  width: "100%",
+                  maxHeight: "60vh",
+                  overflowY: "auto",
+                  padding: "0 8px",
+                }}
+              >
+                {filteredEvents.length > 0 ? (
+                  filteredEvents.map((event, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        background: "rgba(0, 0, 0, 0.05)",
+                        borderRadius: "8px",
+                        padding: "12px",
+                        marginBottom: "8px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setSelectedEventForDelete(event);
+                        setConfirmDeleteModalOpen(true);
+                      }}
+                    >
+                      <Typography variant="subtitle1">
+                        <strong>{event.title}</strong>
+                      </Typography>
+                      {event.description && (
+                        <Typography variant="body2">{event.description}</Typography>
+                      )}
+                    </Box>
+                  ))
+                ) : (
+                  <Typography sx={{ opacity: 0.8, fontSize: "1rem", textAlign: "center" }}>
+                    No events found.
+                  </Typography>
+                )}
+              </Box>
+              <Button
+                onClick={() => setRemoveModalOpen(false)}
+                variant="contained"
+                disableRipple
+                sx={{
+                  mt: 2,
+                  width: "100%",
+                  maxWidth: "200px",
+                  fontSize: "1rem",
+                  textTransform: "none",
+                  borderRadius: "8px",
+                }}
+              >
+                Close
+              </Button>
+            </Box>
+          </Modal>
+
+          {/* Confirmation Modal for Deleting an Event */}
+          <Modal
+            open={confirmDeleteModalOpen}
+            onClose={() => setConfirmDeleteModalOpen(false)}
+            aria-labelledby="confirm-delete-modal-title"
+            aria-describedby="confirm-delete-modal-description"
+            BackdropProps={{
+              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
+            }}
+          >
+            <Box
+              sx={{
+                background: "white",
+                borderRadius: "16px",
+                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
+                padding: "16px",
+                maxWidth: "90vw",
+                maxHeight: "80vh",
+                width: "100%",
+                margin: "auto",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <Typography
+                id="confirm-delete-modal-title"
+                variant="h6"
+                component="h2"
+                sx={{
+                  fontWeight: "600",
+                  letterSpacing: "0.5px",
+                  textAlign: "center",
+                  width: "100%",
+                }}
+              >
+                Confirm Cancellation
+              </Typography>
+              {selectedEventForDelete && (
                 <Box
-                  key={index}
                   sx={{
+                    mt: 2,
+                    width: "100%",
                     background: "rgba(0, 0, 0, 0.05)",
                     borderRadius: "8px",
                     padding: "12px",
-                    marginBottom: "8px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {
-                    setSelectedEventForDelete(event);
-                    setConfirmDeleteModalOpen(true);
+                    textAlign: "left",
                   }}
                 >
                   <Typography variant="subtitle1">
-                    <strong>{event.title}</strong>
+                    <strong>{selectedEventForDelete.title}</strong>
                   </Typography>
-                  {event.description && (
-                    <Typography variant="body2">{event.description}</Typography>
+                  {selectedEventForDelete.description && (
+                    <Typography variant="body2">
+                      {selectedEventForDelete.description}
+                    </Typography>
                   )}
                 </Box>
-              ))
-            ) : (
-              <Typography sx={{ opacity: 0.8, fontSize: "1rem", textAlign: "center" }}>
-                No events found.
-              </Typography>
-            )}
-          </Box>
-          <Button
-            onClick={() => setRemoveModalOpen(false)}
-            variant="contained"
-            disableRipple
-            sx={{
-              mt: 2,
-              width: "100%",
-              maxWidth: "200px",
-              fontSize: "1rem",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-          >
-            Close
-          </Button>
-        </Box>
-      </Modal>
+              )}
+              <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', maxWidth: '200px' }}>
+                <Button
+                  onClick={() => setConfirmDeleteModalOpen(false)}
+                  variant="outlined"
+                  disableRipple
+                  sx={commonButtonStyle}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => deleteEvent(selectedEventForDelete.id)}
+                  variant="contained"
+                  disableRipple
+                  sx={commonButtonStyle}
+                >
+                  Confirm
+                </Button>
+              </Box>
+            </Box>
+          </Modal>
 
-      {/* Confirmation Modal for Deleting an Event */}
-      <Modal
-        open={confirmDeleteModalOpen}
-        onClose={() => setConfirmDeleteModalOpen(false)}
-        aria-labelledby="confirm-delete-modal-title"
-        aria-describedby="confirm-delete-modal-description"
-        BackdropProps={{
-          sx: { backgroundColor: "rgba(0,0,0,0.5)" },
-        }}
-      >
-        <Box
-          sx={{
-            background: "white",
-            borderRadius: "16px",
-            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-            padding: "16px",
-            maxWidth: "90vw",
-            maxHeight: "80vh",
-            width: "100%",
-            margin: "auto",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Typography
-            id="confirm-delete-modal-title"
-            variant="h6"
-            component="h2"
-            sx={{
-              fontWeight: "600",
-              letterSpacing: "0.5px",
-              textAlign: "center",
-              width: "100%",
+          {/* Create Event Modal */}
+          <Modal
+            open={createModalOpen}
+            onClose={() => setCreateModalOpen(false)}
+            aria-labelledby="create-event-modal-title"
+            aria-describedby="create-event-modal-description"
+            BackdropProps={{
+              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
             }}
           >
-            Confirm Cancellation
-          </Typography>
-          {selectedEventForDelete && (
             <Box
+              component="form"
+              onSubmit={handleCreateEvent}
               sx={{
-                mt: 2,
+                background: "white",
+                borderRadius: "16px",
+                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
+                padding: "16px",
+                maxWidth: "90vw",
+                maxHeight: "80vh",
                 width: "100%",
-                background: "rgba(0, 0, 0, 0.05)",
-                borderRadius: "8px",
-                padding: "12px",
-                textAlign: "left",
+                margin: "auto",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                border: '1px solid #ccc'
               }}
             >
-              <Typography variant="subtitle1">
-                <strong>{selectedEventForDelete.title}</strong>
-              </Typography>
-              {selectedEventForDelete.description && (
-                <Typography variant="body2">
-                  {selectedEventForDelete.description}
-                </Typography>
-              )}
-              {/* You can add more event details here if desired */}
-            </Box>
-          )}
-          <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', maxWidth: '200px' }}>
-            <Button
-              onClick={() => setConfirmDeleteModalOpen(false)}
-              variant="outlined"
-              disableRipple
-              sx={commonButtonStyle}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => deleteEvent(selectedEventForDelete.id)}
-              variant="contained"
-              disableRipple
-              sx={commonButtonStyle}
-            >
-              Confirm
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-
-      {/* Create Event Modal */}
-      <Modal
-        open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        aria-labelledby="create-event-modal-title"
-        aria-describedby="create-event-modal-description"
-        BackdropProps={{
-          sx: { backgroundColor: "rgba(0,0,0,0.5)" },
-        }}
-      >
-        <Box
-          component="form"
-          onSubmit={handleCreateEvent}
-          sx={{
-            background: "white",
-            borderRadius: "16px",
-            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-            padding: "16px",
-            maxWidth: "90vw",
-            maxHeight: "80vh",
-            width: "100%",
-            margin: "auto",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            border: '1px solid #ccc'
-          }}
-        >
-          <Typography
-            id="create-event-modal-title"
-            variant="h6"
-            component="h2"
-            sx={{
-              fontWeight: "600",
-              fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-              letterSpacing: "0.5px",
-              textAlign: "center",
-              width: "100%",
-            }}
-          >
-            New Event!
-          </Typography>
-
-          {/* Category Selection with names */}
-          <Box sx={{ display: 'flex', gap: 2, mt: 1, mb: 2 }}>
-            {categoryColors.map((cat) => (
-              <Box
-                key={cat.id}
-                sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}
-                onClick={() => setNewEvent({ ...newEvent, category_id: cat.id })}
+              <Typography
+                id="create-event-modal-title"
+                variant="h6"
+                component="h2"
+                sx={{
+                  fontWeight: "600",
+                  fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+                  letterSpacing: "0.5px",
+                  textAlign: "center",
+                  width: "100%",
+                }}
               >
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: '50%',
-                    backgroundColor: cat.color,
-                    border: newEvent.category_id === cat.id ? '3px solid black' : '2px solid transparent',
-                  }}
-                />
-                <Typography variant="caption" sx={{ mt: 0.5 }}>{cat.name}</Typography>
+                New Event!
+              </Typography>
+
+              {/* Category Selection with names */}
+              <Box sx={{ display: 'flex', gap: 2, mt: 1, mb: 2 }}>
+                {categoryColors.map((cat) => (
+                  <Box
+                    key={cat.id}
+                    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}
+                    onClick={() => setNewEvent({ ...newEvent, category_id: cat.id })}
+                  >
+                    <Box
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        backgroundColor: cat.color,
+                        border: newEvent.category_id === cat.id ? '3px solid black' : '2px solid transparent',
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ mt: 0.5 }}>{cat.name}</Typography>
+                  </Box>
+                ))}
               </Box>
-            ))}
-          </Box>
 
-          {/* Calendar Dropdown */}
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="calendar-select-label">Calendar</InputLabel>
-            <Select
-              labelId="calendar-select-label"
-              id="calendar-select"
-              value={newEvent.calendar_id}
-              label="Calendar"
-              onChange={(e) => setNewEvent({ ...newEvent, calendar_id: e.target.value })}
-              required
-            >
-              {calendars.map((cal) => (
-                <MenuItem key={cal.id} value={cal.id}>
-                  {cal.title}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              {/* Calendar Dropdown */}
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="calendar-select-label">Calendar</InputLabel>
+                <Select
+                  labelId="calendar-select-label"
+                  id="calendar-select"
+                  value={newEvent.calendar_id}
+                  label="Calendar"
+                  onChange={(e) => setNewEvent({ ...newEvent, calendar_id: e.target.value })}
+                  required
+                >
+                  {calendars.map((cal) => (
+                    <MenuItem key={cal.id} value={cal.id}>
+                      {cal.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-          {/* Title */}
-          <TextField
-            label="Title"
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            value={newEvent.title}
-            onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-            required
-          />
+              {/* Title */}
+              <TextField
+                label="Title"
+                variant="outlined"
+                margin="normal"
+                fullWidth
+                value={newEvent.title}
+                onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                required
+              />
 
-          {/* Description (Single Line) */}
-          <TextField
-            label="Description"
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            value={newEvent.description}
-            onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-          />
+              {/* Description (Single Line) */}
+              <TextField
+                label="Description"
+                variant="outlined"
+                margin="normal"
+                fullWidth
+                value={newEvent.description}
+                onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+              />
 
-          {/* Start Time (Required) */}
-          <TextField
-            label="Start"
-            type="datetime-local"
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            value={newEvent.start}
-            onChange={(e) => setNewEvent({ ...newEvent, start: e.target.value })}
-            required
-          />
+              {/* Start Time (Required) */}
+              <TextField
+                label="Start"
+                type="datetime-local"
+                variant="outlined"
+                margin="normal"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                value={newEvent.start}
+                onChange={(e) => setNewEvent({ ...newEvent, start: e.target.value })}
+                required
+              />
 
-          {/* End Time (Optional) */}
-          <TextField
-            label="End Time (Optional)"
-            type="datetime-local"
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            value={newEvent.end_time}
-            onChange={(e) => setNewEvent({ ...newEvent, end_time: e.target.value })}
-          />
+              {/* End Time (Optional) */}
+              <TextField
+                label="End Time (Optional)"
+                type="datetime-local"
+                variant="outlined"
+                margin="normal"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                value={newEvent.end_time}
+                onChange={(e) => setNewEvent({ ...newEvent, end_time: e.target.value })}
+              />
 
-<Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', justifyContent: 'center' }}>
-  <Button
-    onClick={() => setCreateModalOpen(false)}
-    variant="outlined"
-    disableRipple
-    sx={commonButtonStyle}
-  >
-    Cancel
-  </Button>
-  <Button
-    type="submit"
-    variant="contained"
-    disableRipple
-    sx={commonButtonStyle}
-  >
-    Create Event
-  </Button>
-</Box>
+              <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', justifyContent: 'center' }}>
+                <Button
+                  onClick={() => setCreateModalOpen(false)}
+                  variant="outlined"
+                  disableRipple
+                  sx={commonButtonStyle}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disableRipple
+                  sx={commonButtonStyle}
+                >
+                  Create Event
+                </Button>
+              </Box>
 
-        </Box>
-      </Modal>
+            </Box>
+          </Modal>
 
-      {/* AI Modal */}
-      <Modal
-        open={aiModalOpen}
-        onClose={() => setAiModalOpen(false)}
-        aria-labelledby="ai-modal-title"
-        aria-describedby="ai-modal-description"
-        BackdropProps={{
-          sx: { backgroundColor: "rgba(0,0,0,0.5)" },
-        }}
-      >
-        <Box
-          component="form"
-          onSubmit={handleAiSubmit}
-          sx={{
-            background: "white",
-            borderRadius: "16px",
-            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-            padding: "16px",
-            maxWidth: "90vw",
-            maxHeight: "80vh",
-            width: "100%",
-            margin: "auto",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            border: '1px solid #ccc'
-          }}
-        >
-          <Typography
-            id="ai-modal-title"
-            variant="h6"
-            component="h2"
-            sx={{
-              fontWeight: "600",
-              fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-              letterSpacing: "0.5px",
-              textAlign: "center",
-              width: "100%",
+          {/* Create Calendar Modal */}
+          <Modal
+            open={createCalendarModalOpen}
+            onClose={() => setCreateCalendarModalOpen(false)}
+            aria-labelledby="create-calendar-modal-title"
+            aria-describedby="create-calendar-modal-description"
+            BackdropProps={{
+              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
             }}
           >
-            Let us schedule for you!
-          </Typography>
-          <TextField
-            fullWidth
-            placeholder="What's up?"
-            variant="outlined"
-            margin="normal"
-            value={aiInput}
-            onChange={(e) => setAiInput(e.target.value)}
-          />
-<Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', justifyContent: 'center' }}>
-  <Button
-    onClick={() => setAiModalOpen(false)}
-    variant="outlined"
-    disableRipple
-    sx={commonButtonStyle}
-  >
-    Cancel
-  </Button>
-  <Button
-    type="submit"
-    variant="contained"
-    disableRipple
-    sx={commonButtonStyle}
-  >
-    Submit
-  </Button>
-</Box>
+            <Box
+              component="form"
+              onSubmit={handleCreateCalendar}
+              sx={{
+                background: "white",
+                borderRadius: "16px",
+                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
+                padding: "16px",
+                maxWidth: "90vw",
+                maxHeight: "80vh",
+                width: "100%",
+                margin: "auto",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                border: '1px solid #ccc'
+              }}
+            >
+              <Typography
+                id="create-calendar-modal-title"
+                variant="h6"
+                component="h2"
+                sx={{
+                  fontWeight: "600",
+                  textAlign: "center",
+                  width: "100%",
+                }}
+              >
+                Create New Calendar
+              </Typography>
+              <TextField
+                label="Calendar Name"
+                variant="outlined"
+                margin="normal"
+                fullWidth
+                value={newCalendar.name}
+                onChange={(e) => setNewCalendar({ ...newCalendar, name: e.target.value })}
+                required
+              />
+              <TextField
+                label="Description"
+                variant="outlined"
+                margin="normal"
+                fullWidth
+                value={newCalendar.description}
+                onChange={(e) => setNewCalendar({ ...newCalendar, description: e.target.value })}
+              />
+              <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', justifyContent: 'center' }}>
+                <Button
+                  onClick={() => setCreateCalendarModalOpen(false)}
+                  variant="outlined"
+                  disableRipple
+                  sx={commonButtonStyle}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disableRipple
+                  sx={commonButtonStyle}
+                >
+                  Create Calendar
+                </Button>
+              </Box>
+            </Box>
+          </Modal>
 
+          {/* AI Modal */}
+          <Modal
+            open={aiModalOpen}
+            onClose={() => setAiModalOpen(false)}
+            aria-labelledby="ai-modal-title"
+            aria-describedby="ai-modal-description"
+            BackdropProps={{
+              sx: { backgroundColor: "rgba(0,0,0,0.5)" },
+            }}
+          >
+            <Box
+              component="form"
+              onSubmit={handleAiSubmit}
+              sx={{
+                background: "white",
+                borderRadius: "16px",
+                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
+                padding: "16px",
+                maxWidth: "90vw",
+                maxHeight: "80vh",
+                width: "100%",
+                margin: "auto",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                border: '1px solid #ccc'
+              }}
+            >
+              <Typography
+                id="ai-modal-title"
+                variant="h6"
+                component="h2"
+                sx={{
+                  fontWeight: "600",
+                  fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+                  letterSpacing: "0.5px",
+                  textAlign: "center",
+                  width: "100%",
+                }}
+              >
+                Let us schedule for you!
+              </Typography>
+              <TextField
+                fullWidth
+                placeholder="What's up?"
+                variant="outlined"
+                margin="normal"
+                value={aiInput}
+                onChange={(e) => setAiInput(e.target.value)}
+              />
+              <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', justifyContent: 'center' }}>
+                <Button
+                  onClick={() => setAiModalOpen(false)}
+                  variant="outlined"
+                  disableRipple
+                  sx={commonButtonStyle}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disableRipple
+                  sx={commonButtonStyle}
+                >
+                  Submit
+                </Button>
+              </Box>
+
+            </Box>
+          </Modal>
         </Box>
-      </Modal >
-    </Box >
+      )}
+    </>
   );
 }
 

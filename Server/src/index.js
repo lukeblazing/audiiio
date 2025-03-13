@@ -258,104 +258,64 @@ app.delete('/api/calendar/calendar', AuthController.verifyToken, async (req, res
   }
 });
 
-/**
- * deprecated
- */
-app.get('/api/calendar/events', (req, res) => {
-    console.log("luke got a request for events")
-    res.status(200).json([
-        {
-          "id": 1,
-          "title": "Morning Meeting",
-          "start": "2025-02-10T09:00:00Z",
-          "end": "2025-02-10T10:00:00Z",
-          "description": "A daily stand-up meeting to discuss ongoing projects and tasks."
-        },
-        {
-          "id": 2,
-          "title": "Team Lunch",
-          "start": "2025-02-10T12:00:00Z",
-          "end": "2025-02-10T13:00:00Z",
-          "description": "Casual lunch with the team to catch up and discuss non-work topics."
-        },
-        {
-          "id": 3,
-          "title": "Daily Briefing",
-          "start": "2025-02-11T08:30:00Z",
-          "end": "2025-02-11T09:00:00Z",
-          "description": "Quick morning check-in to align on priorities for the day."
-        },
-        {
-          "id": 4,
-          "title": "Project Kickoff",
-          "start": "2025-02-12T09:00:00Z",
-          "end": "2025-02-12T10:00:00Z",
-          "description": "Initial meeting to outline project goals, timelines, and responsibilities."
-        },
-        {
-          "id": 5,
-          "title": "Client Presentation",
-          "start": "2025-02-12T10:30:00Z",
-          "end": "2025-02-12T11:30:00Z",
-          "description": "A detailed presentation showcasing our latest project to potential clients."
-        },
-        {
-          "id": 6,
-          "title": "Workshop Session",
-          "start": "2025-02-12T12:00:00Z",
-          "end": "2025-02-12T13:00:00Z",
-          "description": "Hands-on workshop focused on team collaboration and skill-building."
-        },
-        {
-          "id": 7,
-          "title": "Strategy Discussion",
-          "start": "2025-02-12T14:00:00Z",
-          "end": "2025-02-12T15:00:00Z",
-          "description": "A brainstorming session to plan the company’s long-term strategy."
-        },
-        {
-          "id": 8,
-          "title": "Marketing Brainstorm",
-          "start": "2025-02-12T15:30:00Z",
-          "end": "2025-02-12T16:30:00Z",
-          "description": "A creative session to generate ideas for upcoming marketing campaigns."
-        },
-        {
-          "id": 9,
-          "title": "Product Demo",
-          "start": "2025-02-12T17:00:00Z",
-          "end": "2025-02-12T18:00:00Z",
-          "description": "Demonstration of the new product features to internal stakeholders."
-        },
-        {
-          "id": 10,
-          "title": "Team Sync-Up",
-          "start": "2025-02-13T09:00:00Z",
-          "end": "2025-02-13T09:30:00Z",
-          "description": "A quick meeting to align on the status of ongoing tasks and blockers."
-        },
-        {
-          "id": 11,
-          "title": "Client Call",
-          "start": "2025-02-14T11:00:00Z",
-          "end": "2025-02-14T12:00:00Z",
-          "description": "A scheduled call with a client to discuss their requirements and feedback."
-        },
-        {
-          "id": 12,
-          "title": "Wrap-Up Meeting",
-          "start": "2025-02-15T16:00:00Z",
-          "end": "2025-02-15T17:00:00Z",
-          "description": "Final meeting of the week to summarize progress and set next steps."
-        },
-        {
-          "id": 13,
-          "title": "Review Session",
-          "start": "2025-02-16T14:00:00Z",
-          "end": "2025-02-16T15:00:00Z",
-          "description": "A detailed review of completed tasks and areas for improvement."
-        }
-      ])
+// GET /api/calendar/getCalendarsForUser
+// Retrieve all calendars that the user owns or is added to.
+app.get('/api/calendar/getCalendarsForUser', AuthController.verifyToken, async (req, res) => {
+  if (!req?.user?.email) {
+    return res.status(401).json({ message: 'Access denied. No email provided.' });
+  }
+  const userEmail = req.user.email;
+  try {
+    const query = `
+      SELECT * FROM calendars
+      WHERE owner_id = $1
+         OR id IN (
+              SELECT calendar_id FROM calendar_users WHERE user_id = $1
+         )
+    `;
+    const result = await db.query(query, [userEmail]);
+    return res.status(200).json({ calendars: result.rows });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.get('/api/calendar/events', async (req, res) => {
+  console.log("Received a request for events");
+  try {
+    // Query the events table. Adjust the SELECT statement if you need to filter or join data.
+    const result = await db.query(`
+      SELECT 
+        id, 
+        title, 
+        description, 
+        start, 
+        end_time, 
+        all_day, 
+        recurrence_rule 
+      FROM events
+    `);
+
+    // Map the returned rows to match the expected JSON format,
+    // renaming end_time to end for client-side compatibility.
+    const events = result.rows.map(event => ({
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      start: event.start,
+      end: event.end_time,
+      // Optional: Include additional fields if needed
+      allDay: event.all_day,
+      recurrenceRule: event.recurrence_rule
+    }));
+
+    res.status(200).json(events);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 // Serve static files from the React app build directory

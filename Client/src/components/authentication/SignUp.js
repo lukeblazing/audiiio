@@ -133,6 +133,7 @@ export default function SignUp() {
       // Sending Sign Up data to the server for verification
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/signUp`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
