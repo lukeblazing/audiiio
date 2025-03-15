@@ -121,13 +121,12 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyToken, async (
   if (!req?.user?.email) {
     return res.status(401).json({ message: 'Access denied. No email provided.' });
   }
-  const userEmail = req.user.email;
   try {
     const query = `
       SELECT *
       FROM events
     `;
-    const result = await db.query(query, [userEmail]);
+    const result = await db.query(query);
     return res.status(200).json({ events: result.rows });
   } catch (err) {
     console.error(err);
@@ -269,12 +268,11 @@ app.get('/api/calendar/getCalendarsForUser', AuthController.verifyToken, async (
   if (!req?.user?.email) {
     return res.status(401).json({ message: 'Access denied. No email provided.' });
   }
-  const userEmail = req.user.email;
   try {
     const query = `
       SELECT * FROM calendars
     `;
-    const result = await db.query(query, [userEmail]);
+    const result = await db.query(query);
     return res.status(200).json({ calendars: result.rows });
   } catch (err) {
     console.error(err);
