@@ -124,11 +124,8 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyToken, async (
   const userEmail = req.user.email;
   try {
     const query = `
-      SELECT e.*
-      FROM events e
-      JOIN calendars c ON e.calendar_id = c.id
-      WHERE c.owner_id = $1
-         OR c.id IN (SELECT calendar_id FROM calendar_users WHERE user_id = $1)
+      SELECT *
+      FROM events
     `;
     const result = await db.query(query, [userEmail]);
     return res.status(200).json({ events: result.rows });
@@ -276,10 +273,6 @@ app.get('/api/calendar/getCalendarsForUser', AuthController.verifyToken, async (
   try {
     const query = `
       SELECT * FROM calendars
-      WHERE owner_id = $1
-         OR id IN (
-              SELECT calendar_id FROM calendar_users WHERE user_id = $1
-         )
     `;
     const result = await db.query(query, [userEmail]);
     return res.status(200).json({ calendars: result.rows });
