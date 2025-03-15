@@ -80,3 +80,13 @@ Indexes:
 Foreign-key constraints:
     "events_calendar_id_fkey" FOREIGN KEY (calendar_id) REFERENCES calendars(id) ON DELETE CASCADE
     "events_category_id_fkey" FOREIGN KEY (category_id) REFERENCES categories(id)
+
+
+                    Table "public.push_subscriptions"
+    Column    |           Type           | Collation | Nullable | Default 
+--------------+--------------------------+-----------+----------+---------
+ user_email   | character varying(255)   |           | not null | 
+ subscription | jsonb                    |           | not null | 
+ created_at   | timestamp with time zone |           |          | now()
+Indexes:
+    "push_subscriptions_pkey" PRIMARY KEY, btree (user_email)

@@ -12,8 +12,9 @@ import {
   InputLabel,
   Checkbox,
   FormControlLabel,
+  Stack,
 } from '@mui/material';
-import MagicWandIcon from '@mui/icons-material/AutoFixHigh';
+import AddUnits from '@mui/icons-material/AdUnits';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AppNavbar from '../dashboard/AppNavbar';
 import CalendarComponent from './CalendarComponent';
@@ -27,10 +28,14 @@ function CalendarPage() {
   // Modal open/close states
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [calendarSwitcherModalOpen, setCalendarSwitcherModalOpen] = useState(false);
   const [createCalendarModalOpen, setCreateCalendarModalOpen] = useState(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
+  const [selectedRecipient, setSelectedRecipient] = useState('');
+  const [messageInput, setMessageInput] = useState('');
+  const [availableUsers, setAvailableUsers] = useState([]);
+
 
   // Event fetching state: events and loading flag
   const [calendarEvents, setCalendarEvents] = useState([]);
@@ -53,9 +58,6 @@ function CalendarPage() {
     name: '',
     description: '',
   });
-
-  // State for AI modal input
-  const [aiInput, setAiInput] = useState('');
 
   // State for available calendars (for dropdown and filtering)
   const [calendars, setCalendars] = useState([]);
@@ -94,9 +96,9 @@ function CalendarPage() {
       const fetchedEvents = (data.events || []).map((event) => ({
         ...event,
         start: new Date(event.start),
-        end: event.end 
-        ? new Date(event.end)
-        : new Date(new Date(event.start).setHours(23, 59, 0, 0)),
+        end: event.end
+          ? new Date(event.end)
+          : new Date(new Date(event.start).setHours(23, 59, 0, 0)),
       }));
       setCalendarEvents(fetchedEvents);
     } catch (err) {
@@ -140,12 +142,42 @@ function CalendarPage() {
     }
   }, [createModalOpen, calendarSwitcherModalOpen, createCalendarModalOpen]);
 
+    // Function to fetch available users from subscriptions table
+    const fetchAvailableUsers = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/availableUsers`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) throw new Error('Failed to fetch available users');
+        const data = await response.json();
+        setAvailableUsers(data.users || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+  
+    // Fetch available users when the message modal opens.
+    useEffect(() => {
+      if (messageModalOpen) {
+        fetchAvailableUsers();
+      }
+    }, [messageModalOpen]);
+
   // Filter events for Remove Event modal based on search query
   const filteredEvents = calendarEvents.filter(
     (event) =>
       event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  // Filter calendar events based on the selected calendar filters.
+  // If no filters are selected, show all events.
+  const filteredCalendarEvents =
+    selectedCalendarFilters.length > 0
+      ? calendarEvents.filter((event) => selectedCalendarFilters.includes(event.calendar_id))
+      : calendarEvents;
 
   // Helper function to format Date objects for datetime-local inputs
   const formatDateLocal = (date) => {
@@ -246,14 +278,6 @@ function CalendarPage() {
     }
   };
 
-  // Handle AI modal submission
-  const handleAiSubmit = (e) => {
-    e.preventDefault();
-    console.log('AI input:', aiInput);
-    setAiInput('');
-    setAiModalOpen(false);
-  };
-
   // Toggle calendar filter selection
   const toggleCalendarFilter = (calendarId) => {
     setSelectedCalendarFilters((prev) =>
@@ -261,6 +285,53 @@ function CalendarPage() {
         ? prev.filter((id) => id !== calendarId)
         : [...prev, calendarId]
     );
+  };
+
+  // Updated message submission handler: call /api/sendNotification
+  const handleMessageSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedRecipient || !messageInput) {
+      alert('Please select a recipient and enter a message.');
+      return;
+    }
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/sendNotification`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetEmail: selectedRecipient,
+          title: 'New Message',
+          body: messageInput,
+          url: '/messages', // adjust as needed
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        if (Notification.permission === 'granted') {
+          new Notification('Notification sent successfully!');
+        }
+      } else {
+        if (Notification.permission === 'granted') {
+          new Notification('Notification sent successfully!');
+        }
+      }
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      alert('Error sending notification');
+    }
+    setMessageInput('');
+    setSelectedRecipient('');
+    setMessageModalOpen(false);
+  };
+
+  // Toggle Select All functionality for calendar filters
+  const handleSelectAllToggle = () => {
+    if (selectedCalendarFilters.length === calendars.length) {
+      setSelectedCalendarFilters([]);
+    } else {
+      setSelectedCalendarFilters(calendars.map((cal) => cal.id));
+    }
   };
 
   return (
@@ -301,8 +372,10 @@ function CalendarPage() {
                 height: 50,
                 borderRadius: '12px',
                 minWidth: 'auto',
-                border: '1px solid #ccc',
-                backgroundColor: '#fff',
+                border: '2px solid transparent',
+                background:
+                  'linear-gradient(white, white) padding-box, linear-gradient(45deg, #2196F3, #21CBF3) border-box',
+                color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
                 transform: pressedButton === 'calendar' ? 'scale(0.7)' : 'scale(1)',
               }}
@@ -320,11 +393,13 @@ function CalendarPage() {
                 height: 50,
                 borderRadius: '12px',
                 minWidth: 'auto',
+                border: '2px solid transparent',
+                background:
+                  'linear-gradient(white, white) padding-box, linear-gradient(45deg, #2196F3, #21CBF3) border-box',
+                color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
-                transform: pressedButton === 'remove' ? 'scale(0.7)' : 'scale(1)',
-                backgroundColor: '#fff',
-                border: '1px solid',
                 fontSize: '2rem',
+                transform: pressedButton === 'remove' ? 'scale(0.7)' : 'scale(1)',
               }}
               disableRipple
               onMouseDown={() => handlePress('remove')}
@@ -340,11 +415,13 @@ function CalendarPage() {
                 height: 50,
                 borderRadius: '12px',
                 minWidth: 'auto',
+                border: '2px solid transparent',
+                background:
+                  'linear-gradient(white, white) padding-box, linear-gradient(45deg, #2196F3, #21CBF3) border-box',
+                color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
-                transform: pressedButton === 'add' ? 'scale(0.7)' : 'scale(1)',
-                backgroundColor: '#fff',
-                border: '1px solid',
                 fontSize: '2rem',
+                transform: pressedButton === 'add' ? 'scale(0.7)' : 'scale(1)',
               }}
               disableRipple
               onMouseDown={() => handlePress('add')}
@@ -361,16 +438,16 @@ function CalendarPage() {
                 minWidth: 'auto',
                 border: '2px solid transparent',
                 background:
-                  'linear-gradient(white, white) padding-box, linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245)) border-box',
-                color: 'rgb(255, 0, 140)',
+                  'linear-gradient(white, white) padding-box, linear-gradient(45deg, #2196F3, #21CBF3) border-box',
+                color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
-                transform: pressedButton === 'ai' ? 'scale(0.7)' : 'scale(1)',
+                transform: pressedButton === 'message' ? 'scale(0.7)' : 'scale(1)',
               }}
               disableRipple
-              onMouseDown={() => handlePress('ai')}
-              onClick={() => setAiModalOpen(true)}
+              onMouseDown={() => handlePress('message')}
+              onClick={() => setMessageModalOpen(true)}
             >
-              <MagicWandIcon />
+              <AddUnits />
             </IconButton>
           </Box>
 
@@ -389,7 +466,7 @@ function CalendarPage() {
             }}
           >
             <CalendarComponent
-              events={calendarEvents}
+              events={filteredCalendarEvents}
               isLoading={isEventsLoading}
               selectedCalendars={selectedCalendarFilters}
             />
@@ -432,22 +509,41 @@ function CalendarPage() {
                 Calendar Filter
               </Typography>
               <Box id="calendar-switcher-modal-description" sx={{ mt: 2, width: '100%' }}>
-                {calendars.length > 0 ? (
-                  calendars.map((cal) => (
+                <Stack spacing={1}>
+                  {/* Select All toggle */}
+                  {calendars.length > 0 && (
                     <FormControlLabel
-                      key={cal.id}
                       control={
                         <Checkbox
-                          checked={selectedCalendarFilters.includes(cal.id)}
-                          onChange={() => toggleCalendarFilter(cal.id)}
+                          checked={selectedCalendarFilters.length === calendars.length}
+                          indeterminate={
+                            selectedCalendarFilters.length > 0 &&
+                            selectedCalendarFilters.length < calendars.length
+                          }
+                          onChange={handleSelectAllToggle}
                         />
                       }
-                      label={cal.name}
+                      label="Select All"
                     />
-                  ))
-                ) : (
-                  <Typography>No calendars available.</Typography>
-                )}
+                  )}
+                  {/* List individual calendars */}
+                  {calendars.length > 0 ? (
+                    calendars.map((cal) => (
+                      <FormControlLabel
+                        key={cal.id}
+                        control={
+                          <Checkbox
+                            checked={selectedCalendarFilters.includes(cal.id)}
+                            onChange={() => toggleCalendarFilter(cal.id)}
+                          />
+                        }
+                        label={cal.name}
+                      />
+                    ))
+                  ) : (
+                    <Typography>No calendars available.</Typography>
+                  )}
+                </Stack>
               </Box>
               <Button
                 onClick={() => {
@@ -871,17 +967,17 @@ function CalendarPage() {
             </Box>
           </Modal>
 
-          {/* AI Modal */}
+          {/* Messages Modal */}
           <Modal
-            open={aiModalOpen}
-            onClose={() => setAiModalOpen(false)}
-            aria-labelledby="ai-modal-title"
-            aria-describedby="ai-modal-description"
+            open={messageModalOpen}
+            onClose={() => setMessageModalOpen(false)}
+            aria-labelledby="message-modal-title"
+            aria-describedby="message-modal-description"
             BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.5)' } }}
           >
             <Box
               component="form"
-              onSubmit={handleAiSubmit}
+              onSubmit={handleMessageSubmit}
               sx={{
                 background: 'white',
                 borderRadius: '16px',
@@ -903,38 +999,55 @@ function CalendarPage() {
               }}
             >
               <Typography
-                id="ai-modal-title"
+                id="message-modal-title"
                 variant="h6"
                 component="h2"
-                sx={{
-                  fontWeight: '600',
-                  fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                  letterSpacing: '0.5px',
-                  textAlign: 'center',
-                  width: '100%',
-                }}
+                sx={{ fontWeight: '600', textAlign: 'center', width: '100%' }}
               >
-                Let us schedule for you!
+                Send Message
               </Typography>
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="recipient-select-label">Recipient</InputLabel>
+                <Select
+                  labelId="recipient-select-label"
+                  id="recipient-select"
+                  value={selectedRecipient}
+                  label="Recipient"
+                  onChange={(e) => setSelectedRecipient(e.target.value)}
+                  required
+                >
+                  {availableUsers.map((user) => (
+                    <MenuItem key={user.id} value={user.email}>
+                      {user.email}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <TextField
                 fullWidth
-                placeholder="What's up?"
+                placeholder="Enter your message"
                 variant="outlined"
                 margin="normal"
-                value={aiInput}
-                onChange={(e) => setAiInput(e.target.value)}
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                required
               />
               <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', justifyContent: 'center' }}>
                 <Button
-                  onClick={() => setAiModalOpen(false)}
+                  onClick={() => setMessageModalOpen(false)}
                   variant="outlined"
                   disableRipple
-                  sx={commonButtonStyle}
+                  sx={{ width: '100%', maxWidth: '200px', fontSize: '1rem', textTransform: 'none', borderRadius: '8px' }}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="contained" disableRipple sx={commonButtonStyle}>
-                  Submit
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disableRipple
+                  sx={{ width: '100%', maxWidth: '200px', fontSize: '1rem', textTransform: 'none', borderRadius: '8px' }}
+                >
+                  Send Message
                 </Button>
               </Box>
             </Box>

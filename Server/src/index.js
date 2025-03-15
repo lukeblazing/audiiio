@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import AuthController from './authentication/AuthController.js'
 import db from './database/db.js';
+import webpush from 'web-push';
 
 // Create __dirname equivalent in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -42,6 +43,13 @@ if (process.env.NODE_ENV === 'development') {
 
 // Start the cron jobs
 startCronJobs();
+
+// Configure VAPID details
+webpush.setVapidDetails(
+  'mailto:lukeblazing@yahoo.com',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 // Middleware to force HTTPS
 app.use((req, res, next) => {
@@ -337,6 +345,107 @@ app.get('/api/calendar/categories', AuthController.verifyToken, async (req, res)
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+// ------------------------------
+// Push Notification Endpoints
+// ------------------------------
+
+// POST /api/subscribe
+// Registers a push subscription for the authenticated user.
+app.post('/api/subscribe', AuthController.verifyToken, async (req, res) => {
+  console.log("/api/subscribe");
+  const subscription = req.body.subscription;
+  if (!subscription) {
+    return res.status(400).json({ message: 'Subscription object is required.' });
+  }
+  try {
+    // Use an upsert query to insert or update the subscription for the user.
+    await db.query(
+      `
+      INSERT INTO push_subscriptions (user_email, subscription)
+      VALUES ($1, $2)
+      ON CONFLICT (user_email)
+      DO UPDATE SET subscription = $2, created_at = now()
+      `,
+      [req.user.email, subscription]
+    );
+    console.log(`Stored subscription for user: ${req.user.email}`);
+    return res.status(201).json({ message: 'Subscription registered.' });
+  } catch (error) {
+    console.error('Error saving subscription:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// POST /api/unsubscribe
+// Removes the push subscription for the authenticated user.
+app.post('/api/unsubscribe', AuthController.verifyToken, async (req, res) => {
+  console.log("/api/unsubscribe");
+  try {
+    // Delete the subscription record from the database for the authenticated user.
+    await db.query(
+      `DELETE FROM push_subscriptions WHERE user_email = $1`,
+      [req.user.email]
+    );
+    console.log(`Removed subscription for user: ${req.user.email}`);
+    return res.status(200).json({ message: 'Subscription removed.' });
+  } catch (error) {
+    console.error('Error removing subscription:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// POST /api/sendNotification
+// Sends a push notification to a target user.
+// Expects { targetEmail, title, body, url } in the request body.
+app.post('/api/sendNotification', AuthController.verifyToken, async (req, res) => {
+  const { targetEmail, title, body: messageBody, url } = req.body;
+  if (!targetEmail || !messageBody) {
+    return res.status(400).json({ message: 'targetEmail and message body are required.' });
+  }
+  try {
+    // Retrieve the subscription from the database for the target user.
+    const result = await db.query(
+      'SELECT subscription FROM push_subscriptions WHERE user_email = $1',
+      [targetEmail]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'No subscription found for target user.' });
+    }
+    const subscription = result.rows[0].subscription;
+    const payload = JSON.stringify({
+      title: title || 'New Notification',
+      body: messageBody,
+      icon: '/icon.png', // Update with your icon path if needed
+      url: url || '/',   // URL to open when the notification is clicked
+    });
+    await webpush.sendNotification(subscription, payload);
+    return res.status(200).json({ message: 'Notification sent.' });
+  } catch (error) {
+    console.error('Error sending notification:', error);
+    return res.status(500).json({ message: 'Failed to send notification', error: error.message });
+  }
+});
+
+// GET /api/availableUsers
+app.get('/api/availableUsers', AuthController.verifyToken, async (req, res) => {
+  try {
+    const result = await db.query('SELECT user_email FROM push_subscriptions');
+    // Map the result into a format suitable for your select box.
+    const users = result.rows.map(row => ({
+      id: row.user_email,
+      email: row.user_email,
+    }));
+    return res.status(200).json({ users });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// ------------------------------
+// End Push Notification Endpoints
+// ------------------------------
 
 
 // Serve static files from the React app build directory

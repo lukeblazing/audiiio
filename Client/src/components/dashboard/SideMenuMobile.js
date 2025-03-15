@@ -11,9 +11,11 @@ import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import MenuButton from './MenuButton.js';
 import MenuContent from './MenuContent.js';
 import { useAuth } from '../authentication/AuthContext.js';
+import usePushSubscription from '../calendar/usePushSubscription';
 
 function SideMenuMobile({ open, toggleDrawer }) {
   const { handleLogout } = useAuth();
+  const { enablePushSubscription } = usePushSubscription();
 
   const attemptLogout = async () => {
     try {
@@ -68,7 +70,7 @@ function SideMenuMobile({ open, toggleDrawer }) {
               Luke B
             </Typography>
           </Stack>
-          <MenuButton showBadge>
+          <MenuButton onClick={enablePushSubscription}>
             <NotificationsRoundedIcon />
           </MenuButton>
         </Stack>
