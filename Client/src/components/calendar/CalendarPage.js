@@ -463,7 +463,7 @@ function CalendarPage() {
               display: 'flex',
               flexDirection: 'column',
               minHeight: 0,
-              marginTop: '120px',
+              marginTop: '130px',
               maxHeight: '50vh',
               zIndex: 1,
             }}
