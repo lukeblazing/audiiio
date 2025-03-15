@@ -11,7 +11,7 @@ import {
   FormControl,
   InputLabel,
   Checkbox,
-  FormControlLabel
+  FormControlLabel,
 } from '@mui/material';
 import MagicWandIcon from '@mui/icons-material/AutoFixHigh';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -30,13 +30,11 @@ function CalendarPage() {
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [calendarSwitcherModalOpen, setCalendarSwitcherModalOpen] = useState(false);
   const [createCalendarModalOpen, setCreateCalendarModalOpen] = useState(false);
-
-  // Additional state for confirmation modal when deleting an event
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
-  const [selectedEventForDelete, setSelectedEventForDelete] = useState(null);
 
-  // State for Remove Event modal: list of events and search query
-  const [events, setEvents] = useState([]);
+  // Event fetching state: events and loading flag
+  const [calendarEvents, setCalendarEvents] = useState([]);
+  const [isEventsLoading, setIsEventsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   // State for Create Event modal: new event form
@@ -47,13 +45,13 @@ function CalendarPage() {
     description: '',
     start: '',
     end_time: '',
-    recurrence_rule: ''
+    recurrence_rule: '',
   });
 
   // State for Create Calendar modal: new calendar form
   const [newCalendar, setNewCalendar] = useState({
     name: '',
-    description: ''
+    description: '',
   });
 
   // State for AI modal input
@@ -64,21 +62,15 @@ function CalendarPage() {
   // State for selected calendars for filtering the events displayed
   const [selectedCalendarFilters, setSelectedCalendarFilters] = useState([]);
 
-  // Predefined category colors with sample names
-  const categoryColors = [
-    { id: 'red', color: '#f44336', name: 'Urgent' },
-    { id: 'blue', color: '#2196f3', name: 'Work' },
-    { id: 'green', color: '#4caf50', name: 'Personal' },
-    { id: 'purple', color: '#9c27b0', name: 'Fun' },
-    { id: 'orange', color: '#ff9800', name: 'Misc' },
-  ];
+  // State for deletion: selected event to delete
+  const [selectedEventForDelete, setSelectedEventForDelete] = useState(null);
 
   const commonButtonStyle = {
-    width: "100%",
-    maxWidth: "200px",
-    fontSize: "1rem",
-    textTransform: "none",
-    borderRadius: "8px",
+    width: '100%',
+    maxWidth: '200px',
+    fontSize: '1rem',
+    textTransform: 'none',
+    borderRadius: '8px',
   };
 
   // Animate buttons on press
@@ -87,36 +79,52 @@ function CalendarPage() {
     setTimeout(() => setPressedButton(null), 200);
   };
 
-  // Function to fetch all events for the user (called when remove modal opens or after changes)
-  const fetchEvents = async () => {
+  // Function to fetch all events for the user
+  const fetchCalendarEvents = async () => {
+    setIsEventsLoading(true);
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getAllEventsForUser`, {
-        method: "GET",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
       if (!response.ok) throw new Error('Failed to fetch events');
       const data = await response.json();
-      setEvents(data.events || []);
+      // Convert event dates to Date objects
+      const fetchedEvents = (data.events || []).map((event) => ({
+        ...event,
+        start: new Date(event.start),
+        end: event.end 
+        ? new Date(event.end)
+        : new Date(new Date(event.start).setHours(23, 59, 0, 0)),
+      }));
+      setCalendarEvents(fetchedEvents);
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsEventsLoading(false);
     }
   };
 
-  // When remove modal opens, fetch events
+  // Fetch events when remove modal opens
   useEffect(() => {
     if (removeModalOpen) {
-      fetchEvents();
+      fetchCalendarEvents();
     }
   }, [removeModalOpen]);
 
-  // Fetch calendars when create modal, calendar switcher modal, or create calendar modal opens
+  // Initial fetch on mount
+  useEffect(() => {
+    fetchCalendarEvents();
+  }, []);
+
+  // Fetch calendars when create, calendar switcher, or create calendar modal opens
   const fetchCalendars = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getCalendarsForUser`, {
-        method: "GET",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
       if (!response.ok) throw new Error('Failed to fetch calendars');
       const data = await response.json();
@@ -132,13 +140,14 @@ function CalendarPage() {
     }
   }, [createModalOpen, calendarSwitcherModalOpen, createCalendarModalOpen]);
 
-  // Filter events based on the search query (by title or description)
-  const filteredEvents = events.filter(event =>
-    event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  // Filter events for Remove Event modal based on search query
+  const filteredEvents = calendarEvents.filter(
+    (event) =>
+      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // Helper function to format a Date object into a "YYYY-MM-DDTHH:mm" string for datetime-local inputs
+  // Helper function to format Date objects for datetime-local inputs
   const formatDateLocal = (date) => {
     const pad = (num) => num.toString().padStart(2, '0');
     const year = date.getFullYear();
@@ -149,17 +158,17 @@ function CalendarPage() {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  // Function to actually delete an event (called from the confirmation modal)
+  // Function to delete an event
   const deleteEvent = async (eventId) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ event: { id: eventId } }),
-        credentials: "include",
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to delete event');
-      setEvents(prev => prev.filter(event => event.id !== eventId));
+      setCalendarEvents((prev) => prev.filter((event) => event.id !== eventId));
       setConfirmDeleteModalOpen(false);
     } catch (err) {
       console.error(err);
@@ -170,12 +179,10 @@ function CalendarPage() {
   // Handle Create Event form submission
   const handleCreateEvent = async (e) => {
     e.preventDefault();
-    // Validate required fields (calendar, title, and start time are required)
     if (!newEvent.calendar_id || !newEvent.title || !newEvent.start) {
       alert('Please fill in required fields: Calendar, Title, and Start Time.');
       return;
     }
-    // If no end time provided, set it to 23:59 on the same day as start
     let endTime = newEvent.end_time;
     if (!endTime) {
       const startDate = new Date(newEvent.start);
@@ -186,8 +193,14 @@ function CalendarPage() {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: { ...newEvent, end_time: endTime } }),
-        credentials: "include",
+        body: JSON.stringify({
+          event: {
+            ...newEvent,
+            start: new Date(newEvent.start).toISOString(),
+            end_time: endTime,
+          },
+        }),
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to create event');
       // Reset form and close modal on success
@@ -198,9 +211,11 @@ function CalendarPage() {
         description: '',
         start: '',
         end_time: '',
-        recurrence_rule: ''
+        recurrence_rule: '',
       });
       setCreateModalOpen(false);
+      // Refresh events after creation
+      fetchCalendarEvents();
     } catch (err) {
       console.error(err);
       alert('Error creating event');
@@ -216,13 +231,12 @@ function CalendarPage() {
     }
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/calendar`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ calendar: newCalendar }),
-        credentials: "include",
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to create calendar');
-      // Reset form, close modal, and refresh calendars list
       setNewCalendar({ name: '', description: '' });
       setCreateCalendarModalOpen(false);
       fetchCalendars();
@@ -235,16 +249,16 @@ function CalendarPage() {
   // Handle AI modal submission
   const handleAiSubmit = (e) => {
     e.preventDefault();
-    console.log("AI input:", aiInput);
+    console.log('AI input:', aiInput);
     setAiInput('');
     setAiModalOpen(false);
   };
 
   // Toggle calendar filter selection
   const toggleCalendarFilter = (calendarId) => {
-    setSelectedCalendarFilters(prev =>
+    setSelectedCalendarFilters((prev) =>
       prev.includes(calendarId)
-        ? prev.filter(id => id !== calendarId)
+        ? prev.filter((id) => id !== calendarId)
         : [...prev, calendarId]
     );
   };
@@ -254,7 +268,16 @@ function CalendarPage() {
       {!isAuthenticated ? (
         <SignIn />
       ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', position: 'fixed', width: '100vw' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100vh',
+            overflow: 'hidden',
+            position: 'fixed',
+            width: '100vw',
+          }}
+        >
           <AppNavbar />
 
           {/* Buttons Container */}
@@ -272,7 +295,6 @@ function CalendarPage() {
               pointerEvents: 'auto',
             }}
           >
-            {/* Calendar Switcher Button */}
             <IconButton
               sx={{
                 width: 50,
@@ -291,7 +313,6 @@ function CalendarPage() {
               <CalendarTodayIcon />
             </IconButton>
 
-            {/* Remove Event Button */}
             <Button
               variant="outlined"
               sx={{
@@ -312,7 +333,6 @@ function CalendarPage() {
               –
             </Button>
 
-            {/* Add Event Button */}
             <Button
               variant="outlined"
               sx={{
@@ -333,7 +353,6 @@ function CalendarPage() {
               +
             </Button>
 
-            {/* AI Magic Wand Button */}
             <IconButton
               sx={{
                 width: 50,
@@ -341,7 +360,8 @@ function CalendarPage() {
                 borderRadius: '12px',
                 minWidth: 'auto',
                 border: '2px solid transparent',
-                background: 'linear-gradient(white, white) padding-box, linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245)) border-box',
+                background:
+                  'linear-gradient(white, white) padding-box, linear-gradient(45deg, rgb(255, 0, 140), #FF69B4, rgb(247, 0, 255), rgb(245, 89, 245)) border-box',
                 color: 'rgb(255, 0, 140)',
                 transition: 'transform 0.2s ease-in-out',
                 transform: pressedButton === 'ai' ? 'scale(0.7)' : 'scale(1)',
@@ -368,7 +388,11 @@ function CalendarPage() {
               zIndex: 1,
             }}
           >
-            <CalendarComponent selectedCalendars={selectedCalendarFilters} />
+            <CalendarComponent
+              events={calendarEvents}
+              isLoading={isEventsLoading}
+              selectedCalendars={selectedCalendarFilters}
+            />
           </Box>
 
           {/* Calendar Switcher Modal */}
@@ -377,39 +401,39 @@ function CalendarPage() {
             onClose={() => setCalendarSwitcherModalOpen(false)}
             aria-labelledby="calendar-switcher-modal-title"
             aria-describedby="calendar-switcher-modal-description"
-            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
+            BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.5)' } }}
           >
             <Box
               sx={{
-                background: "white",
-                borderRadius: "16px",
-                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-                padding: "16px",
-                maxWidth: "90vw",
-                maxHeight: "80vh",
-                width: "100%",
-                margin: "auto",
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                overflowY: "auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
+                background: 'white',
+                borderRadius: '16px',
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
+                padding: '16px',
+                maxWidth: '90vw',
+                maxHeight: '80vh',
+                width: '100%',
+                margin: 'auto',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
               }}
             >
               <Typography
                 id="calendar-switcher-modal-title"
                 variant="h6"
                 component="h2"
-                sx={{ fontWeight: "600", textAlign: "center", width: "100%" }}
+                sx={{ fontWeight: '600', textAlign: 'center', width: '100%' }}
               >
                 Calendar Filter
               </Typography>
               <Box id="calendar-switcher-modal-description" sx={{ mt: 2, width: '100%' }}>
                 {calendars.length > 0 ? (
-                  calendars.map(cal => (
+                  calendars.map((cal) => (
                     <FormControlLabel
                       key={cal.id}
                       control={
@@ -434,11 +458,11 @@ function CalendarPage() {
                 disableRipple
                 sx={{
                   mt: 2,
-                  width: "100%",
-                  maxWidth: "200px",
-                  fontSize: "1rem",
-                  textTransform: "none",
-                  borderRadius: "8px",
+                  width: '100%',
+                  maxWidth: '200px',
+                  fontSize: '1rem',
+                  textTransform: 'none',
+                  borderRadius: '8px',
                 }}
               >
                 New Calendar
@@ -449,11 +473,11 @@ function CalendarPage() {
                 disableRipple
                 sx={{
                   mt: 2,
-                  width: "100%",
-                  maxWidth: "200px",
-                  fontSize: "1rem",
-                  textTransform: "none",
-                  borderRadius: "8px",
+                  width: '100%',
+                  maxWidth: '200px',
+                  fontSize: '1rem',
+                  textTransform: 'none',
+                  borderRadius: '8px',
                 }}
               >
                 Close
@@ -467,27 +491,27 @@ function CalendarPage() {
             onClose={() => setRemoveModalOpen(false)}
             aria-labelledby="remove-event-modal-title"
             aria-describedby="remove-event-modal-description"
-            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
+            BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.5)' } }}
           >
             <Box
               sx={{
-                background: "white",
-                borderRadius: "16px",
-                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-                padding: "16px",
-                maxWidth: "90vw",
-                maxHeight: "80vh",
-                width: "100%",
-                margin: "auto",
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                overflowY: "auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                border: '1px solid #ccc'
+                background: 'white',
+                borderRadius: '16px',
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
+                padding: '16px',
+                maxWidth: '90vw',
+                maxHeight: '80vh',
+                width: '100%',
+                margin: 'auto',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                border: '1px solid #ccc',
               }}
             >
               <Typography
@@ -495,11 +519,11 @@ function CalendarPage() {
                 variant="h6"
                 component="h2"
                 sx={{
-                  fontWeight: "600",
+                  fontWeight: '600',
                   fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                  letterSpacing: "0.5px",
-                  textAlign: "center",
-                  width: "100%",
+                  letterSpacing: '0.5px',
+                  textAlign: 'center',
+                  width: '100%',
                 }}
               >
                 Remove Event
@@ -516,10 +540,10 @@ function CalendarPage() {
                 id="remove-event-modal-description"
                 sx={{
                   mt: 2,
-                  width: "100%",
-                  maxHeight: "60vh",
-                  overflowY: "auto",
-                  padding: "0 8px",
+                  width: '100%',
+                  maxHeight: '60vh',
+                  overflowY: 'auto',
+                  padding: '0 8px',
                 }}
               >
                 {filteredEvents.length > 0 ? (
@@ -527,11 +551,11 @@ function CalendarPage() {
                     <Box
                       key={index}
                       sx={{
-                        background: "rgba(0, 0, 0, 0.05)",
-                        borderRadius: "8px",
-                        padding: "12px",
-                        marginBottom: "8px",
-                        cursor: "pointer",
+                        background: 'rgba(0, 0, 0, 0.05)',
+                        borderRadius: '8px',
+                        padding: '12px',
+                        marginBottom: '8px',
+                        cursor: 'pointer',
                       }}
                       onClick={() => {
                         setSelectedEventForDelete(event);
@@ -547,7 +571,7 @@ function CalendarPage() {
                     </Box>
                   ))
                 ) : (
-                  <Typography sx={{ opacity: 0.8, fontSize: "1rem", textAlign: "center" }}>
+                  <Typography sx={{ opacity: 0.8, fontSize: '1rem', textAlign: 'center' }}>
                     No events found.
                   </Typography>
                 )}
@@ -558,11 +582,11 @@ function CalendarPage() {
                 disableRipple
                 sx={{
                   mt: 2,
-                  width: "100%",
-                  maxWidth: "200px",
-                  fontSize: "1rem",
-                  textTransform: "none",
-                  borderRadius: "8px",
+                  width: '100%',
+                  maxWidth: '200px',
+                  fontSize: '1rem',
+                  textTransform: 'none',
+                  borderRadius: '8px',
                 }}
               >
                 Close
@@ -576,26 +600,26 @@ function CalendarPage() {
             onClose={() => setConfirmDeleteModalOpen(false)}
             aria-labelledby="confirm-delete-modal-title"
             aria-describedby="confirm-delete-modal-description"
-            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
+            BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.5)' } }}
           >
             <Box
               sx={{
-                background: "white",
-                borderRadius: "16px",
-                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-                padding: "16px",
-                maxWidth: "90vw",
-                maxHeight: "80vh",
-                width: "100%",
-                margin: "auto",
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                overflowY: "auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
+                background: 'white',
+                borderRadius: '16px',
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
+                padding: '16px',
+                maxWidth: '90vw',
+                maxHeight: '80vh',
+                width: '100%',
+                margin: 'auto',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
               }}
             >
               <Typography
@@ -603,10 +627,10 @@ function CalendarPage() {
                 variant="h6"
                 component="h2"
                 sx={{
-                  fontWeight: "600",
-                  letterSpacing: "0.5px",
-                  textAlign: "center",
-                  width: "100%",
+                  fontWeight: '600',
+                  letterSpacing: '0.5px',
+                  textAlign: 'center',
+                  width: '100%',
                 }}
               >
                 Confirm Cancellation
@@ -615,11 +639,11 @@ function CalendarPage() {
                 <Box
                   sx={{
                     mt: 2,
-                    width: "100%",
-                    background: "rgba(0, 0, 0, 0.05)",
-                    borderRadius: "8px",
-                    padding: "12px",
-                    textAlign: "left",
+                    width: '100%',
+                    background: 'rgba(0, 0, 0, 0.05)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    textAlign: 'left',
                   }}
                 >
                   <Typography variant="subtitle1">
@@ -659,29 +683,29 @@ function CalendarPage() {
             onClose={() => setCreateModalOpen(false)}
             aria-labelledby="create-event-modal-title"
             aria-describedby="create-event-modal-description"
-            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
+            BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.5)' } }}
           >
             <Box
               component="form"
               onSubmit={handleCreateEvent}
               sx={{
-                background: "white",
-                borderRadius: "16px",
-                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-                padding: "16px",
-                maxWidth: "90vw",
-                maxHeight: "80vh",
-                width: "100%",
-                margin: "auto",
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                overflowY: "auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                border: '1px solid #ccc'
+                background: 'white',
+                borderRadius: '16px',
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
+                padding: '16px',
+                maxWidth: '90vw',
+                maxHeight: '80vh',
+                width: '100%',
+                margin: 'auto',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                border: '1px solid #ccc',
               }}
             >
               <Typography
@@ -689,39 +713,16 @@ function CalendarPage() {
                 variant="h6"
                 component="h2"
                 sx={{
-                  fontWeight: "600",
+                  fontWeight: '600',
                   fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                  letterSpacing: "0.5px",
-                  textAlign: "center",
-                  width: "100%",
+                  letterSpacing: '0.5px',
+                  textAlign: 'center',
+                  width: '100%',
                 }}
               >
                 New Event!
               </Typography>
 
-              {/* Category Selection with names */}
-              <Box sx={{ display: 'flex', gap: 2, mt: 1, mb: 2 }}>
-                {categoryColors.map((cat) => (
-                  <Box
-                    key={cat.id}
-                    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}
-                    onClick={() => setNewEvent({ ...newEvent, category_id: cat.id })}
-                  >
-                    <Box
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: '50%',
-                        backgroundColor: cat.color,
-                        border: newEvent.category_id === cat.id ? '3px solid black' : '2px solid transparent',
-                      }}
-                    />
-                    <Typography variant="caption" sx={{ mt: 0.5 }}>{cat.name}</Typography>
-                  </Box>
-                ))}
-              </Box>
-
-              {/* Calendar Dropdown */}
               <FormControl fullWidth margin="normal">
                 <InputLabel id="calendar-select-label">Calendar</InputLabel>
                 <Select
@@ -740,7 +741,6 @@ function CalendarPage() {
                 </Select>
               </FormControl>
 
-              {/* Title */}
               <TextField
                 label="Title"
                 variant="outlined"
@@ -751,7 +751,6 @@ function CalendarPage() {
                 required
               />
 
-              {/* Description */}
               <TextField
                 label="Description"
                 variant="outlined"
@@ -761,7 +760,6 @@ function CalendarPage() {
                 onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
               />
 
-              {/* Start Time (Required) */}
               <TextField
                 label="Start"
                 type="datetime-local"
@@ -774,7 +772,6 @@ function CalendarPage() {
                 required
               />
 
-              {/* End Time (Optional) */}
               <TextField
                 label="End Time (Optional)"
                 type="datetime-local"
@@ -795,12 +792,7 @@ function CalendarPage() {
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disableRipple
-                  sx={commonButtonStyle}
-                >
+                <Button type="submit" variant="contained" disableRipple sx={commonButtonStyle}>
                   Create Event
                 </Button>
               </Box>
@@ -813,36 +805,36 @@ function CalendarPage() {
             onClose={() => setCreateCalendarModalOpen(false)}
             aria-labelledby="create-calendar-modal-title"
             aria-describedby="create-calendar-modal-description"
-            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
+            BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.5)' } }}
           >
             <Box
               component="form"
               onSubmit={handleCreateCalendar}
               sx={{
-                background: "white",
-                borderRadius: "16px",
-                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-                padding: "16px",
-                maxWidth: "90vw",
-                maxHeight: "80vh",
-                width: "100%",
-                margin: "auto",
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                overflowY: "auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                border: '1px solid #ccc'
+                background: 'white',
+                borderRadius: '16px',
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
+                padding: '16px',
+                maxWidth: '90vw',
+                maxHeight: '80vh',
+                width: '100%',
+                margin: 'auto',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                border: '1px solid #ccc',
               }}
             >
               <Typography
                 id="create-calendar-modal-title"
                 variant="h6"
                 component="h2"
-                sx={{ fontWeight: "600", textAlign: "center", width: "100%" }}
+                sx={{ fontWeight: '600', textAlign: 'center', width: '100%' }}
               >
                 Create New Calendar
               </Typography>
@@ -872,12 +864,7 @@ function CalendarPage() {
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disableRipple
-                  sx={commonButtonStyle}
-                >
+                <Button type="submit" variant="contained" disableRipple sx={commonButtonStyle}>
                   Create Calendar
                 </Button>
               </Box>
@@ -890,29 +877,29 @@ function CalendarPage() {
             onClose={() => setAiModalOpen(false)}
             aria-labelledby="ai-modal-title"
             aria-describedby="ai-modal-description"
-            BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
+            BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.5)' } }}
           >
             <Box
               component="form"
               onSubmit={handleAiSubmit}
               sx={{
-                background: "white",
-                borderRadius: "16px",
-                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-                padding: "16px",
-                maxWidth: "90vw",
-                maxHeight: "80vh",
-                width: "100%",
-                margin: "auto",
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                overflowY: "auto",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                border: '1px solid #ccc'
+                background: 'white',
+                borderRadius: '16px',
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
+                padding: '16px',
+                maxWidth: '90vw',
+                maxHeight: '80vh',
+                width: '100%',
+                margin: 'auto',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                border: '1px solid #ccc',
               }}
             >
               <Typography
@@ -920,11 +907,11 @@ function CalendarPage() {
                 variant="h6"
                 component="h2"
                 sx={{
-                  fontWeight: "600",
+                  fontWeight: '600',
                   fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                  letterSpacing: "0.5px",
-                  textAlign: "center",
-                  width: "100%",
+                  letterSpacing: '0.5px',
+                  textAlign: 'center',
+                  width: '100%',
                 }}
               >
                 Let us schedule for you!
@@ -946,12 +933,7 @@ function CalendarPage() {
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disableRipple
-                  sx={commonButtonStyle}
-                >
+                <Button type="submit" variant="contained" disableRipple sx={commonButtonStyle}>
                   Submit
                 </Button>
               </Box>

@@ -318,6 +318,27 @@ app.get('/api/calendar/events', async (req, res) => {
   }
 });
 
+// GET /api/calendar/categories
+// Retrieve all categories for a given calendar.
+app.get('/api/calendar/categories', AuthController.verifyToken, async (req, res) => {
+  if (!req?.user?.email) {
+    return res.status(401).json({ message: 'Access denied. No email provided.' });
+  }
+  const { calendar_id } = req.query;
+  if (!calendar_id) {
+    return res.status(400).json({ message: 'calendar_id query parameter is required.' });
+  }
+  try {
+    const query = 'SELECT id, calendar_id, name, color FROM categories WHERE calendar_id = $1';
+    const result = await db.query(query, [calendar_id]);
+    return res.status(200).json({ categories: result.rows });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, '../public/build')));
 
