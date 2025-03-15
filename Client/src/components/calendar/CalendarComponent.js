@@ -342,14 +342,14 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                         <span
                           style={{
                             display: "inline-block",
-                            width: "8px",
-                            height: "8px",
+                            width: "6px",
+                            height: "6px",
                             borderRadius: "50%",
-                            backgroundColor: event.category?.color || "dodgerblue",
+                            backgroundColor: event.category_id || "dodgerblue",
                             marginRight: "4px",
                           }}
                         />
-                        <strong>{formatCompressedEventTime(event, date)}</strong>
+                        <strong>{event.title}</strong>
                       </div>
                       ))}
                   </div>
