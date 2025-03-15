@@ -54,7 +54,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
       alignItems="center"
       padding={1}
       bgcolor="white"
-      border="2px solid"
+      border="4px solid"
       borderColor={theme.palette.divider}
       borderRadius="8px 8px 0 0"
       borderBottom="none"
@@ -249,7 +249,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
         }
         .rbc-month-view {
           border-radius: 0 0 8px 8px;
-          border: 2px solid ${theme.palette.divider};
+          border: 4px solid ${theme.palette.divider};
         }
         .rbc-day-bg {
           border-right: 1px solid ${theme.palette.divider} !important;

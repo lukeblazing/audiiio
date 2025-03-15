@@ -10,9 +10,12 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Checkbox,
-  FormControlLabel,
-  Stack,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Switch,
+  Slide
 } from '@mui/material';
 import AddUnits from '@mui/icons-material/AdUnits';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -142,28 +145,28 @@ function CalendarPage() {
     }
   }, [createModalOpen, calendarSwitcherModalOpen, createCalendarModalOpen]);
 
-    // Function to fetch available users from subscriptions table
-    const fetchAvailableUsers = async () => {
-      try {
-        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/availableUsers`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!response.ok) throw new Error('Failed to fetch available users');
-        const data = await response.json();
-        setAvailableUsers(data.users || []);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-  
-    // Fetch available users when the message modal opens.
-    useEffect(() => {
-      if (messageModalOpen) {
-        fetchAvailableUsers();
-      }
-    }, [messageModalOpen]);
+  // Function to fetch available users from subscriptions table
+  const fetchAvailableUsers = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/availableUsers`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to fetch available users');
+      const data = await response.json();
+      setAvailableUsers(data.users || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Fetch available users when the message modal opens.
+  useEffect(() => {
+    if (messageModalOpen) {
+      fetchAvailableUsers();
+    }
+  }, [messageModalOpen]);
 
   // Filter events for Remove Event modal based on search query
   const filteredEvents = calendarEvents.filter(
@@ -478,108 +481,180 @@ function CalendarPage() {
             onClose={() => setCalendarSwitcherModalOpen(false)}
             aria-labelledby="calendar-switcher-modal-title"
             aria-describedby="calendar-switcher-modal-description"
-            BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.5)' } }}
+            BackdropProps={{
+              sx: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                backdropFilter: 'blur(8px)',
+              },
+            }}
           >
+            {/* A container to center the slide */}
             <Box
               sx={{
-                background: 'white',
-                borderRadius: '16px',
-                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
-                padding: '16px',
-                maxWidth: '90vw',
-                maxHeight: '80vh',
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
                 width: '100%',
-                margin: 'auto',
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                overflowY: 'auto',
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              <Typography
-                id="calendar-switcher-modal-title"
-                variant="h6"
-                component="h2"
-                sx={{ fontWeight: '600', textAlign: 'center', width: '100%' }}
-              >
-                Calendar Filter
-              </Typography>
-              <Box id="calendar-switcher-modal-description" sx={{ mt: 2, width: '100%' }}>
-                <Stack spacing={1}>
-                  {/* Select All toggle */}
-                  {calendars.length > 0 && (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={selectedCalendarFilters.length === calendars.length}
-                          indeterminate={
-                            selectedCalendarFilters.length > 0 &&
-                            selectedCalendarFilters.length < calendars.length
-                          }
-                          onChange={handleSelectAllToggle}
-                        />
-                      }
-                      label="Select All"
-                    />
-                  )}
-                  {/* List individual calendars */}
-                  {calendars.length > 0 ? (
-                    calendars.map((cal) => (
-                      <FormControlLabel
-                        key={cal.id}
-                        control={
-                          <Checkbox
-                            checked={selectedCalendarFilters.includes(cal.id)}
-                            onChange={() => toggleCalendarFilter(cal.id)}
+              <Slide direction="up" in={calendarSwitcherModalOpen} mountOnEnter unmountOnExit>
+                <Box
+                  sx={{
+                    width: '100%',
+                    maxWidth: 480,
+                    background: '#fff',
+                    borderTopLeftRadius: '16px',
+                    borderTopRightRadius: '16px',
+                    p: 4,
+                    boxShadow: '0px -5px 15px rgba(0, 0, 0, 0.25)',
+                  }}
+                >
+                  <Typography
+                    id="calendar-switcher-modal-title"
+                    variant="h5"
+                    sx={{
+                      fontWeight: 600,
+                      textAlign: 'center',
+                      mb: 3,
+                    }}
+                  >
+                    Select Calendar
+                  </Typography>
+                  <List
+                    id="calendar-switcher-modal-description"
+                    sx={{
+                      maxHeight: '50vh',
+                      overflowY: 'auto',
+                      mb: 3,
+                      padding: 0,
+                    }}
+                  >
+                    {calendars.length > 0 ? (
+                      calendars.map((cal) => (
+                        <ListItem
+                          key={cal.id}
+                          button
+                          onClick={() => toggleCalendarFilter(cal.id)}
+                          sx={{
+                            padding: '8px 12px',
+                            cursor: 'pointer',
+                            '&:hover': { backgroundColor: '#f9f9f9' },
+                          }}
+                        >
+                          <ListItemIcon sx={{ minWidth: '40px' }}>
+                            <Switch
+                              edge="start"
+                              checked={selectedCalendarFilters.includes(cal.id)}
+                              inputProps={{ 'aria-label': cal.name }}
+                              sx={{
+                                '& .MuiSwitch-switchBase.Mui-checked': {
+                                  color: '#fff',
+                                },
+                                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                  backgroundColor: '#007BFF',
+                                },
+                                '& .MuiSwitch-thumb': {
+                                  backgroundColor: '#007BFF',
+                                },
+                                '& .MuiSwitch-track': {
+                                  backgroundColor: '#ccc',
+                                },
+                              }}
+                            />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={cal.name}
+                            primaryTypographyProps={{ variant: 'body1', fontWeight: 500 }}
                           />
-                        }
-                        label={cal.name}
-                      />
-                    ))
-                  ) : (
-                    <Typography>No calendars available.</Typography>
-                  )}
-                </Stack>
-              </Box>
-              <Button
-                onClick={() => {
-                  setCalendarSwitcherModalOpen(false);
-                  setCreateCalendarModalOpen(true);
-                }}
-                variant="contained"
-                disableRipple
-                sx={{
-                  mt: 2,
-                  width: '100%',
-                  maxWidth: '200px',
-                  fontSize: '1rem',
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                }}
-              >
-                New Calendar
-              </Button>
-              <Button
-                onClick={() => setCalendarSwitcherModalOpen(false)}
-                variant="contained"
-                disableRipple
-                sx={{
-                  mt: 2,
-                  width: '100%',
-                  maxWidth: '200px',
-                  fontSize: '1rem',
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                }}
-              >
-                Close
-              </Button>
+                        </ListItem>
+                      ))
+                    ) : (
+                      <ListItem sx={{ padding: '8px 12px' }}>
+                        <ListItemText
+                          primary="No calendars available"
+                          primaryTypographyProps={{ variant: 'body1' }}
+                        />
+                      </ListItem>
+                    )}
+                    {calendars.length > 0 && (
+                      <ListItem
+                        button
+                        onClick={handleSelectAllToggle}
+                        sx={{
+                          padding: '8px 12px',
+                          cursor: 'pointer',
+                          '&:hover': { backgroundColor: '#f9f9f9' },
+                        }}
+                      >
+                        <ListItemIcon sx={{ minWidth: '40px' }}>
+                          <Switch
+                            edge="start"
+                            checked={selectedCalendarFilters.length === calendars.length}
+                            inputProps={{ 'aria-label': 'Select All' }}
+                            sx={{
+                              '& .MuiSwitch-switchBase.Mui-checked': {
+                                color: '#fff',
+                              },
+                              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                backgroundColor: '#007BFF',
+                              },
+                              '& .MuiSwitch-thumb': {
+                                backgroundColor: '#007BFF',
+                              },
+                              '& .MuiSwitch-track': {
+                                backgroundColor: '#ccc',
+                              },
+                            }}
+                          />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary="Select All"
+                          primaryTypographyProps={{ variant: 'body1', fontWeight: 500 }}
+                        />
+                      </ListItem>
+                    )}
+                  </List>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2}}>
+                    <Button disableRipple
+                      onClick={() => {
+                        setCalendarSwitcherModalOpen(false);
+                        setCreateCalendarModalOpen(true);
+                      }}
+                      sx={{
+                        backgroundColor: '#007BFF',
+                        color: '#fff',
+                        borderRadius: '8px',
+                        padding: '8px 16px',
+                        textTransform: 'none',
+                        boxShadow: 'none',
+                        '&:hover': { backgroundColor: '#0069d9' },
+                      }}
+                    >
+                      New Calendar
+                    </Button>
+                    <Button disableRipple
+                      onClick={() => setCalendarSwitcherModalOpen(false)}
+                      sx={{
+                        border: '1px solid #ccc',
+                        color: '#333',
+                        borderRadius: '8px',
+                        padding: '8px 16px',
+                        textTransform: 'none',
+                        boxShadow: 'none',
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Close
+                    </Button>
+                  </Box>
+                </Box>
+              </Slide>
             </Box>
           </Modal>
+
+
 
           {/* Remove Event Modal */}
           <Modal
