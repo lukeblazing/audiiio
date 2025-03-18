@@ -129,7 +129,7 @@ class AuthController {
 
   // Generate JWT for the response cookie
   generateToken(payload) {
-    return jwt.sign(payload, process.env.JWT_SECRET, { algorithm: 'HS256', expiresIn: '1h' });
+    return jwt.sign(payload, process.env.JWT_SECRET, { algorithm: 'HS256', expiresIn: '3d' });
   }
 
   // Handle Logout, clear the cookie in the user's browser
