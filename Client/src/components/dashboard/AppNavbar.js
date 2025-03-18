@@ -4,6 +4,8 @@ import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import IconButton from '@mui/material/IconButton';
 import SideMenuMobile from './SideMenuMobile.js';
 import MenuButton from './MenuButton.js';
 
@@ -39,7 +41,15 @@ const Title = styled(Typography)(({ theme }) => ({
   transform: 'translateX(-50%)', // Center the title by shifting it left by 50% of its width
 
   letterSpacing: '2px', // Adds spacing between letters
-  // Remove flexGrow and textAlign as they're no longer needed
+}));
+
+// Styled Refresh Button with an aesthetic rotation animation on hover
+const RefreshButton = styled(IconButton)(({ theme }) => ({
+  marginRight: '16px',
+  transition: 'transform 0.5s ease',
+  '&:hover': {
+    transform: 'rotate(360deg)',
+  },
 }));
 
 export default function AppNavbar() {
@@ -50,19 +60,24 @@ export default function AppNavbar() {
     setOpen(newOpen);
   };
 
+  // Function to refresh the page
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   return (
     <>
       <NavbarContainer>
         {/* Hamburger Menu Button on the Left with left spacing */}
-        <Box sx={{ marginLeft: '16px' }}> {/* Adjust spacing as needed */}
+        <Box sx={{ marginLeft: '16px' }}>
           <MenuButton aria-label="menu" onClick={toggleDrawer(true)} size="large">
-            {/* Increase the icon size using the sx prop */}
             <MenuRoundedIcon sx={{ fontSize: '2.5rem' }} />
           </MenuButton>
         </Box>
 
-        {/* Placeholder to balance the layout */}
-        <Box sx={{ width: '48px' }}></Box> {/* Adjust width to match MenuButton */}
+        <RefreshButton aria-label="refresh" onClick={handleRefresh}>
+          <RefreshIcon sx={{ fontSize: '2.5rem' }} />
+        </RefreshButton>
       </NavbarContainer>
 
       {/* Side Drawer Component */}

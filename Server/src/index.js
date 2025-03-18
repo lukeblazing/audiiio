@@ -405,7 +405,7 @@ app.post('/api/sendNotification', AuthController.verifyToken, async (req, res) =
     }
     const subscription = result.rows[0].subscription;
     const payload = JSON.stringify({
-      title: title || 'New Notification',
+      title: req.user.name,
       body: messageBody,
       icon: '/icon.png', // Update with your icon path if needed
       url: url || '/',   // URL to open when the notification is clicked

@@ -15,7 +15,7 @@ class AuthController {
     }
 
     // Generate a JWT token
-    const token = this.generateToken({ email, role: credentialsResult.storedUserRole });
+    const token = this.generateToken({ email, name: credentialsResult.storedName, role: credentialsResult.storedUserRole });
 
     // Set the token in an HTTP-only, secure cookie
     res.cookie('token', token, {
@@ -96,7 +96,7 @@ class AuthController {
       const newUser = result.rows[0];
   
       // Generate a JWT token for the new user
-      const token = this.generateToken({ email: newUser.email, role: 'user' });
+      const token = this.generateToken({ name: newUser.name, email: newUser.email, role: 'user' });
   
       // Set the token in an HTTP-only, secure cookie
       res.cookie('token', token, {
@@ -157,6 +157,7 @@ class AuthController {
 
       // Attach user info (email and role) to the request object
       req.user = {
+        name: decoded.name,
         email: decoded.email,
         role: decoded.role
       };
