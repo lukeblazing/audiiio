@@ -99,8 +99,8 @@ function CalendarPage() {
       const fetchedEvents = (data.events || []).map((event) => ({
         ...event,
         start: new Date(event.start),
-        end: event.end
-          ? new Date(event.end)
+        end: event.end_time
+          ? new Date(event.end_time)
           : new Date(new Date(event.start).setHours(23, 59, 0, 0)),
       }));
       setCalendarEvents(fetchedEvents);
