@@ -87,6 +87,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
             fontSize: "1.5rem",
             fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
             userSelect: "none",
+            fontWeight: 800,
           }}
         >
           {label()}
@@ -209,6 +210,8 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
   );
 
   const getEventStyle = (startsToday, endsToday, event) => {
+    const borderColor = event.category_id || "dodgerblue";
+
     const baseStyle = {
       fontSize: "0.5rem",
       whiteSpace: "nowrap",
@@ -224,8 +227,6 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
       alignItems: "center",
       background: "transparent",
     };
-
-    const borderColor = event.category_id || "lightgray";
 
     if (startsToday && !endsToday) {
       return {
@@ -298,61 +299,84 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
         overflow: "hidden",
       }}
     >
-      <style>{`
-        .rbc-today, .rbc-off-range-bg {
-          background-color: transparent !important;
-        }
-        .rbc-selected-cell {
-          background: rgba(15, 116, 218, 0.88) !important;
-          border-radius: 4px;
-          transition: background-color 0.2s ease-in-out;
-        }
-        .rbc-month-view {
-          border-radius: 0 0 8px 8px;
-          border: 4px solid ${theme.palette.divider};
-        }
-        .rbc-day-bg {
-          border-right: 1px solid ${theme.palette.divider} !important;
-          border-bottom: 1px solid ${theme.palette.divider} !important;
-        }
-        .rbc-month-view .rbc-day-bg:last-child {
-          border-right: none !important;
-        }
-        .rbc-header {
-          font-size: 1rem;
-          font-weight: bold;
-          border-right: 1px solid ${theme.palette.divider} !important;
-          border-bottom: 1px solid ${theme.palette.divider} !important;
-        }
-        .rbc-show-more {
-          display: none;
-        }
-        .rbc-date-cell {
-          font-size: 1rem;
-          font-weight: normal;
-          transition: font-size 0.2s ease;
-        }
-        @media (max-width: 1024px) {
-          .rbc-header, .rbc-date-cell {
-            font-size: 0.8rem;
-          }
-        }
-        @media (max-width: 768px) {
-          .rbc-header, .rbc-date-cell {
-            font-size: 0.7rem;
-          }
-        }
-        @media (max-width: 480px) {
-          .rbc-header, .rbc-date-cell {
-            font-size: 0.6rem;
-          }
-        }
-        @media (max-width: 360px) {
-          .rbc-header, .rbc-date-cell {
-            font-size: 0.5rem;
-          }
-        }
-      `}</style>
+<style>{`
+  /* Remove any existing backgrounds */
+  .rbc-today,
+  .rbc-off-range-bg {
+    background-color: transparent !important;
+  }
+
+  .rbc-row {
+  border: none !important;
+}
+
+.rbc-month-row + .rbc-month-row {
+  border-top: 1px solid ${theme.palette.divider} !important;
+}
+
+
+  /* Selected cell styling */
+  .rbc-selected-cell {
+    background: rgba(16, 85, 153, 0.88) !important;
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  /* Month view wrapper */
+  .rbc-month-view {
+    border-radius: 0 0 8px 8px;
+    border: 4px solid ${theme.palette.divider};
+  }
+
+  .rbc-day-bg {
+    border: 1px solid ${theme.palette.divider} !important;
+  }
+
+  .rbc-month-view .rbc-day-bg:last-child {
+    border-right: none !important;
+  }
+
+  /* Header cell (day names) */
+  .rbc-header {
+    font-size: 1rem;
+    font-weight: bold;
+    border: 1px solid ${theme.palette.divider} !important;
+  }
+
+  /* Hide 'show more' link */
+  .rbc-show-more {
+    display: none;
+  }
+
+  /* Date cell text styling */
+  .rbc-date-cell {
+    font-size: 1rem;
+    font-weight: normal;
+    transition: font-size 0.2s ease;
+  }
+
+  /* Responsive font sizes */
+  @media (max-width: 1024px) {
+    .rbc-header, .rbc-date-cell {
+      font-size: 0.8rem;
+    }
+  }
+  @media (max-width: 768px) {
+    .rbc-header, .rbc-date-cell {
+      font-size: 0.7rem;
+    }
+  }
+  @media (max-width: 480px) {
+    .rbc-header, .rbc-date-cell {
+      font-size: 0.6rem;
+    }
+  }
+  @media (max-width: 360px) {
+    .rbc-header, .rbc-date-cell {
+      font-size: 0.5rem;
+    }
+  }
+`}</style>
 
       {isLoading ? (
         <LoadingBorder />

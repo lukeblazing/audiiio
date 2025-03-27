@@ -62,7 +62,7 @@ Referenced by:
 
 
 
-                                 Table "public.events"
+                                Table "public.events"
      Column      |           Type           | Collation | Nullable |      Default      
 -----------------+--------------------------+-----------+----------+-------------------
  id              | uuid                     |           | not null | gen_random_uuid()
@@ -75,6 +75,7 @@ Referenced by:
  all_day         | boolean                  |           |          | false
  recurrence_rule | text                     |           |          | 
  created_at      | timestamp with time zone |           |          | now()
+ created_by      | text                     |           |          | 
 Indexes:
     "events_pkey" PRIMARY KEY, btree (id)
 Foreign-key constraints:

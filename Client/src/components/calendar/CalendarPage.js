@@ -23,10 +23,12 @@ import AppNavbar from '../dashboard/AppNavbar';
 import CalendarComponent from './CalendarComponent';
 import SignIn from '../authentication/SignIn';
 import { useAuth } from '../authentication/AuthContext';
+import { useTheme } from "@mui/material/styles";
 
 function CalendarPage() {
   const { isAuthenticated, userData } = useAuth();
   const [pressedButton, setPressedButton] = useState(null);
+  const theme = useTheme();
 
   // Modal open/close states
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
@@ -353,7 +355,7 @@ function CalendarPage() {
                 height: 50,
                 borderRadius: '12px',
                 minWidth: 'auto',
-                border: '2px solid ${theme.palette.divider}',
+                border: `2px solid ${theme.palette.divider}`,
                 background: 'transparent',
                 color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
@@ -373,7 +375,7 @@ function CalendarPage() {
                 height: 50,
                 borderRadius: '12px',
                 minWidth: 'auto',
-                border: '2px solid ${theme.palette.divider}',
+                border: `2px solid ${theme.palette.divider}`,
                 background: 'transparent',
                 color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
@@ -394,7 +396,7 @@ function CalendarPage() {
                 height: 50,
                 borderRadius: '12px',
                 minWidth: 'auto',
-                border: '2px solid ${theme.palette.divider}',
+                border: `2px solid ${theme.palette.divider}`,
                 background: 'transparent',
                 color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
@@ -414,7 +416,7 @@ function CalendarPage() {
                 height: 50,
                 borderRadius: '12px',
                 minWidth: 'auto',
-                border: '2px solid ${theme.palette.divider}',
+                border: `2px solid ${theme.palette.divider}`,
                 background: 'transparent',
                 color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
@@ -457,7 +459,7 @@ function CalendarPage() {
             aria-describedby="calendar-switcher-modal-description"
             BackdropProps={{
               sx: {
-                backgroundColor: '${theme.palette.divider}',
+                backgroundColor: "transparent",
                 backdropFilter: 'blur(20px)',
               },
             }}
@@ -700,7 +702,7 @@ function CalendarPage() {
                       key={index}
                       sx={{
                         backdropFilter: 'blur(20px)',
-                        border: '1px solid #ccc',
+                        border: `1px solid ${event.category_id ? event.category_id : '#ccc'}`,
                         borderRadius: '8px',
                         padding: '12px',
                         marginBottom: '8px',
@@ -790,7 +792,7 @@ function CalendarPage() {
                     mt: 2,
                     width: '100%',
                     borderRadius: '8px',
-                    border: '1px solid #ccc',
+                    border: `1px solid ${selectedEventForDelete.category_id ? selectedEventForDelete.category_id : '#ccc'}`,
                     padding: '12px',
                     textAlign: 'left',
                   }}
