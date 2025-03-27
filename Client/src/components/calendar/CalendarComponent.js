@@ -299,10 +299,14 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
         overflow: "hidden",
       }}
     >
-<style>{`
+      <style>{`
   /* Remove any existing backgrounds */
-  .rbc-today,
+
   .rbc-off-range-bg {
+    background-color: transparent !important;
+  }
+
+  .rbc-today {
     background-color: transparent !important;
   }
 
