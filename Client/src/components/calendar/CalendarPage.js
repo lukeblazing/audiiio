@@ -39,7 +39,6 @@ function CalendarPage() {
   const [messageInput, setMessageInput] = useState('');
   const [availableUsers, setAvailableUsers] = useState([]);
 
-
   // Event fetching state: events and loading flag
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [isEventsLoading, setIsEventsLoading] = useState(true);
@@ -69,14 +68,6 @@ function CalendarPage() {
 
   // State for deletion: selected event to delete
   const [selectedEventForDelete, setSelectedEventForDelete] = useState(null);
-
-  // const commonButtonStyle = {
-  //   width: '100%',
-  //   maxWidth: '200px',
-  //   fontSize: '1rem',
-  //   textTransform: 'none',
-  //   borderRadius: '8px',
-  // };
 
   // Animate buttons on press
   const handlePress = (button) => {
@@ -118,8 +109,6 @@ function CalendarPage() {
     }
   }, [isAuthenticated, removeModalOpen]);
   
-  
-
   // Fetch calendars when create, calendar switcher, or create calendar modal opens
   const fetchCalendars = async () => {
     try {
@@ -635,8 +624,6 @@ function CalendarPage() {
             </Box>
           </Modal>
 
-
-
           {/* Remove Event Modal */}
           <Modal
             open={removeModalOpen}
@@ -687,6 +674,15 @@ function CalendarPage() {
                 margin="normal"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{
+                  input: {
+                    color: 'white',
+                    '&::placeholder': { color: 'white', opacity: 1 },
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
+                  },
+                }}
               />
               <Box
                 id="remove-event-modal-description"
@@ -822,7 +818,6 @@ function CalendarPage() {
                   onClick={() => deleteEvent(selectedEventForDelete.id)}
                   variant="contained"
                   disableRipple
-                  //sx={commonButtonStyle}
                 >
                   Confirm
                 </Button>
@@ -876,6 +871,7 @@ function CalendarPage() {
                 New Event!
               </Typography>
 
+              {/* Calendar select with updated dropdown styling */}
               <FormControl fullWidth margin="normal">
                 <InputLabel sx={{ color: 'white' }} id="calendar-select-label">Calendar</InputLabel>
                 <Select
@@ -885,6 +881,20 @@ function CalendarPage() {
                   label="Calendar"
                   onChange={(e) => setNewEvent({ ...newEvent, calendar_id: e.target.value })}
                   required
+                  sx={{
+                    backgroundColor: 'transparent',
+                    backdropFilter: 'blur(8px)',
+                    color: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'white',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'white',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'white',
+                    },
+                  }}
                 >
                   {calendars.map((cal) => (
                     <MenuItem key={cal.id} value={cal.id}>
@@ -916,16 +926,11 @@ function CalendarPage() {
                   '& label.Mui-focused': {
                     color: 'white',
                   },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'white',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'white',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'white',
-                    },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
                   },
                 }}
               />
@@ -951,16 +956,11 @@ function CalendarPage() {
                   '& label.Mui-focused': {
                     color: 'white',
                   },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'white',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'white',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'white',
-                    },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
                   },
                 }}
               />
@@ -986,16 +986,11 @@ function CalendarPage() {
                   '& label.Mui-focused': {
                     color: 'white',
                   },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'white',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'white',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'white',
-                    },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
                   },
                 }}
               />
@@ -1006,10 +1001,14 @@ function CalendarPage() {
                 variant="outlined"
                 margin="normal"
                 fullWidth
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{ shrink: true, style: { color: 'white' } }}
                 value={newEvent.start}
                 onChange={(e) => setNewEvent({ ...newEvent, start: e.target.value })}
                 required
+                sx={{
+                  input: { color: 'white' },
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+                }}
               />
 
               <TextField
@@ -1018,9 +1017,13 @@ function CalendarPage() {
                 variant="outlined"
                 margin="normal"
                 fullWidth
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{ shrink: true, style: { color: 'white' } }}
                 value={newEvent.end_time}
                 onChange={(e) => setNewEvent({ ...newEvent, end_time: e.target.value })}
+                sx={{
+                  input: { color: 'white' },
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+                }}
               />
 
               <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', justifyContent: 'center' }}>
@@ -1086,6 +1089,13 @@ function CalendarPage() {
                 value={newCalendar.name}
                 onChange={(e) => setNewCalendar({ ...newCalendar, name: e.target.value })}
                 required
+                sx={{
+                  input: {
+                    color: 'white',
+                    '&::placeholder': { color: 'white', opacity: 1 },
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+                }}
               />
               <TextField
                 label="Description"
@@ -1094,6 +1104,13 @@ function CalendarPage() {
                 fullWidth
                 value={newCalendar.description}
                 onChange={(e) => setNewCalendar({ ...newCalendar, description: e.target.value })}
+                sx={{
+                  input: {
+                    color: 'white',
+                    '&::placeholder': { color: 'white', opacity: 1 },
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+                }}
               />
               <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', justifyContent: 'center' }}>
                 <Button
@@ -1150,6 +1167,7 @@ function CalendarPage() {
               >
                 Send Message
               </Typography>
+              {/* Recipient select with updated dropdown styling */}
               <FormControl fullWidth margin="normal">
                 <InputLabel sx={{ color: 'white' }} id="recipient-select-label">Recipient</InputLabel>
                 <Select
@@ -1160,7 +1178,19 @@ function CalendarPage() {
                   onChange={(e) => setSelectedRecipient(e.target.value)}
                   required
                   sx={{
-                    color: 'white',}}
+                    backgroundColor: 'transparent',
+                    backdropFilter: 'blur(8px)',
+                    color: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'white',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'white',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'white',
+                    },
+                  }}
                 >
                   {availableUsers.map((user) => (
                     <MenuItem key={user.id} value={user.email}>
@@ -1177,6 +1207,13 @@ function CalendarPage() {
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
                 required
+                sx={{
+                  input: {
+                    color: 'white',
+                    '&::placeholder': { color: 'white', opacity: 1 },
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+                }}
               />
               <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', justifyContent: 'center' }}>
                 <Button
