@@ -305,7 +305,8 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
         boxShadow: isToday
           ? `inset 0 0 2px lightgray`
           : "none",
-        backgroundColor: "transparent"
+        backgroundColor: "transparent",
+        borderRadius: "0px",
       },
     };
   }, []);
