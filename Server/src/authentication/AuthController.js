@@ -22,7 +22,7 @@ class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV !== 'development',
       sameSite: 'Strict', // Protect against CSRF attacks
-      maxAge: 3600000, // 1 hour expiration in milliseconds
+      maxAge: 360000000, // 1 hour expiration in milliseconds
     });
 
     // Respond with success
