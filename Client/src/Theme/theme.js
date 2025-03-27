@@ -2,25 +2,32 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#3b82f6', // A refined shadcn-style blue (Tailwind blue-500)
+      main: '#3b82f6', // Tailwind blue-500
     },
-    divider: 'rgba(184, 186, 187, 0.69)',
+    background: {
+      default: 'transparent', // handled by your HTML/CSS gradient
+      paper: '#1e293b', // slightly lighter than the base background
+    },
     text: {
-      primary: '#fff', // Set default text color to white
+      primary: '#ffffff',     // Main body text
+      secondary: '#cbd5e1',   // Tailwind slate-300
+      disabled: '#94a3b8',    // Tailwind slate-400
+    },
+    divider: 'rgba(255, 255, 255, 0.12)',
+  },
+  typography: {
+    fontFamily: 'Roboto, sans-serif',
+    button: {
+      textTransform: 'none',
     },
   },
   components: {
-    // Globally disable ripple on all ButtonBase components (used by buttons, menu items, etc.)
-    MuiButtonBase: {
-      defaultProps: {
-        disableRipple: true,
-      },
-    },
-    MuiSelect: {
+    MuiCssBaseline: {
       styleOverrides: {
-        select: {
-          backgroundColor: 'transparent', // Remove the default white background
+        body: {
+          backgroundColor: 'transparent', // match HTML/CSS styling
         },
       },
     },
@@ -30,53 +37,89 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          textTransform: 'none',
+          color: '#fff',
           fontWeight: 500,
           borderRadius: '8px',
           padding: '8px 16px',
           fontSize: '16px',
-          boxShadow: 'none',
-          border: '1px solid #ccc',
-          transition: 'background-color 0.2s ease, border-color 0.2s ease',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          backgroundColor: '#334155', // slate-700
           '&:hover': {
-            backgroundColor: '#739BF280',
-            borderColor: '#3b82f6',
+            backgroundColor: '#475569', // slate-600
           },
-          '&:active': {
-            backgroundColor: '#6E96ED80',
+          '&:disabled': {
+            backgroundColor: 'rgba(255, 255, 255, 0.12)',
+            color: 'rgba(255, 255, 255, 0.3)',
           },
         },
       },
     },
-    MuiIconButton: {
-      defaultProps: {
-        disableRipple: true,
-      },
+    MuiCard: {
       styleOverrides: {
         root: {
-          textTransform: 'none',
-          fontWeight: 500,
-          borderRadius: '8px',
-          padding: '8px 16px',
-          fontSize: '16px',
-          boxShadow: 'none',
-          border: '1px solid #ccc',
-          transition: 'background-color 0.2s ease, border-color 0.2s ease',
-          '&:hover': {
-            backgroundColor: '#739BF280',
+          backgroundColor: '#1e293b', // match darker surface
+          color: '#fff',
+          borderRadius: '12px',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-root': {
+            color: '#fff',
+            backgroundColor: '#1e293b',
+            borderRadius: '6px',
+          },
+          '& .MuiInputBase-input::placeholder': {
+            color: 'rgba(255,255,255,0.5)',
+          },
+          '& .MuiFormHelperText-root': {
+            color: '#f87171', // red-400
+          },
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'rgba(255,255,255,0.23)',
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': {
             borderColor: '#3b82f6',
           },
-          '&:active': {
-            backgroundColor: '#6E96ED80',
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#3b82f6',
           },
         },
       },
     },
-    // Override default icon styles
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          color: '#cbd5e1', // slate-300
+          '&.Mui-focused': {
+            color: '#3b82f6',
+          },
+        },
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        label: {
+          color: '#cbd5e1',
+        },
+      },
+    },
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          color: '#3b82f6',
+          '&:hover': {
+            textDecoration: 'underline',
+          },
+        },
+      },
+    },
     MuiSvgIcon: {
       styleOverrides: {
         root: {
-          color: '#fff', // Set icons to white. Change to '#f3f3f3' for a light gray shade if preferred.
+          color: '#cbd5e1',
         },
       },
     },

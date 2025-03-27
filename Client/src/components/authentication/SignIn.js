@@ -19,6 +19,7 @@ import ForgotPassword from './ForgotPassword.js';
 import { MicrosoftIcon, LogoIcon } from './CustomIcons.js';
 import { useAuth } from './AuthContext.js';
 import LoadingBorder from '../loading-components/LoadingBorder.js';
+import { useTheme } from "@mui/material/styles";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -31,25 +32,17 @@ const Card = styled(MuiCard)(({ theme }) => ({
   [theme.breakpoints.up('sm')]: {
     maxWidth: '450px',
   },
+  borderRadius: theme.spacing(2),
   boxShadow:
-    'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
-  ...theme.applyStyles('dark', {
-    boxShadow:
-      'hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px',
-  }),
+    'rgba(0, 0, 0, 0.05) 0px 5px 15px, rgba(0, 0, 0, 0.05) 0px 15px 35px -5px',
 }));
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
   padding: 20,
   marginTop: '10vh',
+  minHeight: '100vh',
   position: 'relative',
-  '&::before': {
-    content: '""',
-    display: 'block',
-    position: 'absolute',
-    zIndex: -1,
-    inset: 0,
-  },
+  zIndex: 0,
 }));
 
 export default function SignIn() {
@@ -59,6 +52,7 @@ export default function SignIn() {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
   const [isForgotPwdOpen, setIsForgotPwdOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const theme = useTheme();
 
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
@@ -152,7 +146,7 @@ export default function SignIn() {
     <div>
       {isLoading && <LoadingBorder />}
       <CssBaseline enableColorScheme />
-      <SignInContainer direction="column" justifyContent="space-between">
+      <SignInContainer direction="column" justifyContent="space-between" >
         <Card variant="outlined">
           <Box display="flex" alignItems="center">
             <LogoIcon />
@@ -161,7 +155,6 @@ export default function SignIn() {
               sx={{
                 marginLeft: 1,
                 fontWeight: 'bold',
-                color: '#FFDD57',
                 fontFamily: 'Roboto, sans-serif',
                 fontSize: '1.5rem',
               }}
@@ -224,16 +217,20 @@ export default function SignIn() {
                 alignItems: 'center',
                 flexWrap: 'wrap', // Allows wrapping on smaller screens
                 gap: 1, // Adds spacing between items
+                color: 'rgba(0, 0, 0, 0.6)'
               }}
             >
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
                 label="Remember me"
+                sx={{
+                  color: 'rgba(0, 0, 0, 0.6)'
+                }}
               />
               <Button
                 onClick={handleForgotPwdOpen}
                 variant="text"
-                sx={{ textTransform: 'none', padding: 0, border: "none" }}
+                sx={{ textTransform: 'none', padding: 0, border: "none", background: "transparent" }}
               >
                 Forgot your password?
               </Button>

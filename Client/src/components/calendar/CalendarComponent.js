@@ -303,7 +303,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
           background-color: transparent !important;
         }
         .rbc-selected-cell {
-          background: rgba(0, 128, 255, 0.88) !important;
+          background: rgba(15, 116, 218, 0.88) !important;
           border-radius: 4px;
           transition: background-color 0.2s ease-in-out;
         }

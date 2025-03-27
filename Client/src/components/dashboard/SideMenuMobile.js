@@ -44,7 +44,8 @@ function SideMenuMobile({ open, toggleDrawer }) {
       sx={{
         [`& .${drawerClasses.paper}`]: {
           backgroundImage: 'none',
-          backgroundColor: '#0f172a',
+          backdropFilter: 'blur(22px)',
+          background: 'transparent',
         },
       }}
     >
