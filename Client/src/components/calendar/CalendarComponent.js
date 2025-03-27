@@ -222,16 +222,16 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
       alignItems: "center",
       background: "transparent",
     };
-  
-    const borderColor = event.category_id || "dodgerblue";
-  
+
+    const borderColor = event.category_id || "#2a4365";
+
     if (startsToday && !endsToday) {
       return {
         ...baseStyle,
         borderTop: `1px solid ${borderColor}`,
         borderBottom: `1px solid ${borderColor}`,
         borderLeft: `1px solid ${borderColor}`,
-        borderRadius: "8px 0 0 8px",
+        borderRadius: "5px 0 0 5px",
       };
     } else if (!startsToday && endsToday) {
       return {
@@ -239,7 +239,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
         borderTop: `1px solid ${borderColor}`,
         borderBottom: `1px solid ${borderColor}`,
         borderRight: `1px solid ${borderColor}`,
-        borderRadius: "0 8px 8px 0",
+        borderRadius: "0 5px 5px 0",
       };
     } else if (!startsToday && !endsToday) {
       return {
@@ -249,14 +249,14 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
         borderRadius: "0",
       };
     }
-  
+
     // Default: starts and ends today (single-day event)
     return {
       ...baseStyle,
       border: `1px solid ${borderColor}`,
-      borderRadius: "8px",
+      borderRadius: "5px",
     };
-  };  
+  };
 
   // Optional custom style getters for days and events
   const dayPropGetter = useCallback(
@@ -416,9 +416,18 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                                 borderRadius: "50%",
                                 backgroundColor: event.category_id || "dodgerblue",
                                 marginRight: "4px",
+                                flexShrink: 0,
                               }}
                             />
-                            <strong>{event.title}</strong>
+                            <span
+                              style={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              <strong>{event.title}</strong>
+                            </span>
                           </div>
                         );
                       })}
@@ -427,6 +436,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                 event: () => null, // Suppress default event rendering in month view
               },
               
+
             }}
             dayPropGetter={dayPropGetter}
             eventPropGetter={eventPropGetter}

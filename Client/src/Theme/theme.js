@@ -24,20 +24,6 @@ const theme = createTheme({
         },
       },
     },
-    // Override the underlying OutlinedInput used by Select and TextField.
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          backgroundColor: 'transparent',
-        },
-        input: {
-          backgroundColor: 'transparent',
-        },
-        notchedOutline: {
-          borderColor: 'rgba(255, 255, 255, 0.8)', // Use your theme.divider if needed
-        },
-      },
-    },
     MuiButton: {
       defaultProps: {
         disableRipple: true,
@@ -82,45 +68,6 @@ const theme = createTheme({
           },
           '&:active': {
             backgroundColor: '#6E96ED80',
-          },
-        },
-      },
-    },
-    MuiInputBase: {
-      styleOverrides: {
-        input: {
-          color: '#ffff',
-          '&::placeholder': {
-            color: '#ffff',
-            opacity: 1,
-          },
-        },
-      },
-    },
-    
-    MuiMenu: {
-      styleOverrides: {
-        paper: {
-          borderRadius: '12px',
-          boxShadow: 'none',
-          marginTop: '8px',
-          border: '1px solid #e0e0e0',
-        },
-      },
-    },
-    MuiMenuItem: {
-      defaultProps: {
-        disableRipple: true,
-      },
-      styleOverrides: {
-        root: {
-          fontSize: '16px',
-          padding: '8px 16px',
-          '&.Mui-selected': {
-            backgroundColor: '#E5F1FF',
-          },
-          '&:hover': {
-            backgroundColor: '#F0F0F0',
           },
         },
       },
