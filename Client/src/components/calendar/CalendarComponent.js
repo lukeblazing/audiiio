@@ -209,8 +209,34 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
     [filteredEvents]
   );
 
+  // Utility to check if the color is valid
+  function isValidCssColor(color) {
+    const s = new Option().style;
+    s.color = color;
+    return s.color !== "";
+  }
+
+  // Function to convert color names to RGB
+  function getRgbValues(color) {
+    const tempEl = document.createElement("div");
+    tempEl.style.color = color;
+    document.body.appendChild(tempEl);
+
+    const computedColor = getComputedStyle(tempEl).color;
+    document.body.removeChild(tempEl);
+
+    // Extract RGB values from computed color string
+    const rgbMatch = computedColor.match(/\d+/g);
+    return rgbMatch ? rgbMatch.slice(0, 3).join(",") : "0,0,0";
+  }
+
   const getEventStyle = (startsToday, endsToday, event) => {
     const borderColor = event.category_id || "dodgerblue";
+
+    // Gradient background using RGBA
+    const semiTransparentBackground = isValidCssColor(borderColor)
+      ? `linear-gradient(to right, rgba(${getRgbValues(borderColor)}, 0.1), rgba(${getRgbValues(borderColor)}, 0.05))`
+      : "transparent";
 
     const baseStyle = {
       fontSize: "0.5rem",
@@ -221,11 +247,10 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
       paddingBottom: "2px",
       paddingLeft: "4px",
       paddingRight: "0px",
-      backgroundColor: "#f0f8ff",
       marginBottom: "2px",
       display: "flex",
       alignItems: "center",
-      background: "transparent",
+      background: semiTransparentBackground,
     };
 
     if (startsToday && !endsToday) {
@@ -266,7 +291,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
     const today = new Date();
     const isToday = isSameDay(date, today);
     const isPast = isBefore(date, startOfDay(today));
-  
+
     return {
       className: isPast && !isToday ? "past-date" : "",
       style: {
@@ -278,13 +303,12 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
           ? `1px solid ${theme.palette.primary.main}`
           : `1px solid ${theme.palette.divider}`,
         boxShadow: isToday
-          ? `inset 0 0 4px ${theme.palette.primary.light}`
+          ? `inset 0 0 2px lightgray`
           : "none",
-        borderRadius: isToday ? "8px" : "0",
         backgroundColor: "transparent"
       },
     };
-  }, []);  
+  }, []);
 
   const eventPropGetter = useCallback(
     () => ({
@@ -462,10 +486,10 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                         const eventStartDate = format(event.start, "yyyy-MM-dd");
                         const eventEndDate = format(event.end, "yyyy-MM-dd");
                         const currentDate = format(date, "yyyy-MM-dd");
-              
+
                         const startsToday = eventStartDate === currentDate;
                         const endsToday = eventEndDate === currentDate;
-              
+
                         return (
                           <div
                             key={index}
@@ -486,7 +510,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                 ),
                 event: () => null, // Suppress default event rendering in month view
               },
-              
+
 
             }}
             dayPropGetter={dayPropGetter}
