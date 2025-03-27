@@ -14,7 +14,7 @@ import { useAuth } from '../authentication/AuthContext.js';
 import usePushSubscription from '../calendar/usePushSubscription';
 
 function SideMenuMobile({ open, toggleDrawer }) {
-  const { handleLogout } = useAuth();
+  const { handleLogout, userData } = useAuth();
   const { enablePushSubscription } = usePushSubscription();
 
   const attemptLogout = async () => {
@@ -62,15 +62,15 @@ function SideMenuMobile({ open, toggleDrawer }) {
           >
             <Avatar
               sizes="small"
-              alt="Luke B"
+              alt={userData ? userData.name : "User"}
               src="icons/app-icon-512x512.png"
               sx={{ width: 24, height: 24 }}
             />
             <Typography component="p" variant="h6">
-              Luke B
+              {userData ? userData.name : 'User'}
             </Typography>
           </Stack>
-          <MenuButton onClick={enablePushSubscription}>
+          <MenuButton onClick={enablePushSubscription} sx={{ border: 'none' }}>
             <NotificationsRoundedIcon />
           </MenuButton>
         </Stack>

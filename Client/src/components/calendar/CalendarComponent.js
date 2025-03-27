@@ -53,7 +53,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
       justifyContent="space-between"
       alignItems="center"
       padding={1}
-      bgcolor="white"
+      bgcolor="transparent"
       border="4px solid"
       borderColor={theme.palette.divider}
       borderRadius="8px 8px 0 0"
@@ -95,10 +95,12 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           onClick={goToToday}
           variant="text"
           size="small"
+          disableRipple
           sx={{
             padding: "6px 12px",
             textTransform: "none",
             backgroundColor: "transparent",
+            border: "transparent",
             color: theme.palette.primary.main,
             transition: "background-color 0.2s ease",
             "&:hover": { backgroundColor: "rgba(0,0,0,0.05)" },
@@ -165,16 +167,6 @@ const formatFullEventTime = (event, date) => {
     : endTime;
 
   return `${formattedStart} - ${formattedEnd}`;
-};
-
-const formatCompressedEventTime = (event, date) => {
-  if (isAllDayEvent(event, date)) {
-    return "All-day";
-  } else {
-    const startHour = format(event.start, "h");
-    const startPeriod = format(event.start, "a").toLowerCase();
-    return `${startHour}${startPeriod}`;
-  }
 };
 
 // The CalendarComponent now receives events via props
@@ -268,6 +260,8 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
         .rbc-header {
           font-size: 1rem;
           font-weight: bold;
+          border-right: 1px solid ${theme.palette.divider} !important;
+          border-bottom: 1px solid ${theme.palette.divider} !important;
         }
         .rbc-date-cell {
           font-size: 1rem;
@@ -385,7 +379,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
       >
         <Box
           sx={{
-            background: "white",
+            backdropFilter: 'blur(20px)',
             borderRadius: "16px",
             boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
             padding: "16px",
@@ -429,6 +423,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                     marginBottom: "8px",
                     fontSize: "1rem",
                     textAlign: "left",
+                    border: (theme) => `1px solid ${theme.palette.divider}`,
                   }}
                 >
                   <strong>{formatFullEventTime(event, selectedDate)}</strong>{" "}

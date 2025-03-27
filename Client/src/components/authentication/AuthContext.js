@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(null);
 
   const checkAuthStatus = async () => {
     try {
@@ -29,6 +30,7 @@ export const AuthProvider = ({ children }) => {
         const authResult = await response.json();
         setIsAuthenticated(true);
         setUserRole(authResult.role);
+        setUserData(authResult.user);
       } else {
         setIsAuthenticated(false);
         setUserRole(null);
@@ -45,6 +47,7 @@ export const AuthProvider = ({ children }) => {
   const handleLogin = (responseJSON) => {
     setIsAuthenticated(true); // Login user
     setUserRole(responseJSON.role); // Set user role
+    setUserData(responseJSON.user);
   };
 
   const handleLogout = () => {
@@ -63,7 +66,7 @@ export const AuthProvider = ({ children }) => {
     return <LoadingBorder />
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userRole, handleLogin, handleLogout }}>
+    <AuthContext.Provider value={{ isAuthenticated, userRole, handleLogin, handleLogout, userData }}>
       {children}
     </AuthContext.Provider>
   );

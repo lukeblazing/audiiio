@@ -1,6 +1,7 @@
 {
   "short_name": "OSC",
   "name": "Our Shared Calendar",
+  "description": "A beautifully designed shared calendar app with a calming, modern interface.",
   "icons": [
     {
       "src": "icons/app-icon-512x512.png",
@@ -12,6 +13,9 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#e0c3fc",
+  "background_color": "#f5f7fa",
+  "lang": "en",
+  "dir": "ltr"
 }

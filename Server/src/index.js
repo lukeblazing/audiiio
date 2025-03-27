@@ -105,8 +105,9 @@ app.post('/api/logout', (req, res) => {
 app.get('/api/authCheck', AuthController.verifyToken, (req, res) => {
     const userEmail = req.user.email;
     const userRole = req.user.role;
+    const userName = req.user.name;
 
-    res.status(200).json({ message: `Welcome ${userEmail}, you are authorized for /protected route as ${userRole}.` });
+    res.status(200).json({ message: `Welcome ${userEmail}, you are authorized for /protected route as ${userRole}.`,  user: req.user});
 });
 
 

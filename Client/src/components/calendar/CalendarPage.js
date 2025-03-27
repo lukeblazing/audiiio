@@ -70,13 +70,13 @@ function CalendarPage() {
   // State for deletion: selected event to delete
   const [selectedEventForDelete, setSelectedEventForDelete] = useState(null);
 
-  const commonButtonStyle = {
-    width: '100%',
-    maxWidth: '200px',
-    fontSize: '1rem',
-    textTransform: 'none',
-    borderRadius: '8px',
-  };
+  // const commonButtonStyle = {
+  //   width: '100%',
+  //   maxWidth: '200px',
+  //   fontSize: '1rem',
+  //   textTransform: 'none',
+  //   borderRadius: '8px',
+  // };
 
   // Animate buttons on press
   const handlePress = (button) => {
@@ -111,17 +111,14 @@ function CalendarPage() {
     }
   };
 
-  // Fetch events when remove modal opens
+  // Fetch calendar events on open
   useEffect(() => {
-    if (removeModalOpen) {
+    if (isAuthenticated) {
       fetchCalendarEvents();
     }
-  }, [removeModalOpen]);
-
-  // Initial fetch on mount
-  useEffect(() => {
-    fetchCalendarEvents();
-  }, []);
+  }, [isAuthenticated, removeModalOpen]);
+  
+  
 
   // Fetch calendars when create, calendar switcher, or create calendar modal opens
   const fetchCalendars = async () => {
@@ -366,9 +363,8 @@ function CalendarPage() {
                 height: 50,
                 borderRadius: '12px',
                 minWidth: 'auto',
-                border: '2px solid transparent',
-                background:
-                  'linear-gradient(white, white) padding-box, linear-gradient(45deg, #2196F3, #21CBF3) border-box',
+                border: '2px solid ${theme.palette.divider}',
+                background: 'transparent',
                 color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
                 transform: pressedButton === 'calendar' ? 'scale(0.7)' : 'scale(1)',
@@ -387,9 +383,8 @@ function CalendarPage() {
                 height: 50,
                 borderRadius: '12px',
                 minWidth: 'auto',
-                border: '2px solid transparent',
-                background:
-                  'linear-gradient(white, white) padding-box, linear-gradient(45deg, #2196F3, #21CBF3) border-box',
+                border: '2px solid ${theme.palette.divider}',
+                background: 'transparent',
                 color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
                 fontSize: '2rem',
@@ -409,9 +404,8 @@ function CalendarPage() {
                 height: 50,
                 borderRadius: '12px',
                 minWidth: 'auto',
-                border: '2px solid transparent',
-                background:
-                  'linear-gradient(white, white) padding-box, linear-gradient(45deg, #2196F3, #21CBF3) border-box',
+                border: '2px solid ${theme.palette.divider}',
+                background: 'transparent',
                 color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
                 fontSize: '2rem',
@@ -430,9 +424,8 @@ function CalendarPage() {
                 height: 50,
                 borderRadius: '12px',
                 minWidth: 'auto',
-                border: '2px solid transparent',
-                background:
-                  'linear-gradient(white, white) padding-box, linear-gradient(45deg, #2196F3, #21CBF3) border-box',
+                border: '2px solid ${theme.palette.divider}',
+                background: 'transparent',
                 color: '#2196F3',
                 transition: 'transform 0.2s ease-in-out',
                 transform: pressedButton === 'message' ? 'scale(0.7)' : 'scale(1)',
@@ -474,8 +467,8 @@ function CalendarPage() {
             aria-describedby="calendar-switcher-modal-description"
             BackdropProps={{
               sx: {
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                backdropFilter: 'blur(8px)',
+                backgroundColor: '${theme.palette.divider}',
+                backdropFilter: 'blur(20px)',
               },
             }}
           >
@@ -495,7 +488,7 @@ function CalendarPage() {
                   sx={{
                     width: '100%',
                     maxWidth: 480,
-                    background: '#fff',
+                    backdropFilter: 'blur(20px)',
                     borderTopLeftRadius: '16px',
                     borderTopRightRadius: '16px',
                     p: 4,
@@ -531,7 +524,6 @@ function CalendarPage() {
                           sx={{
                             padding: '8px 12px',
                             cursor: 'pointer',
-                            '&:hover': { backgroundColor: '#f9f9f9' },
                           }}
                         >
                           <ListItemIcon sx={{ minWidth: '40px' }}>
@@ -576,7 +568,6 @@ function CalendarPage() {
                         sx={{
                           padding: '8px 12px',
                           cursor: 'pointer',
-                          '&:hover': { backgroundColor: '#f9f9f9' },
                         }}
                       >
                         <ListItemIcon sx={{ minWidth: '40px' }}>
@@ -620,7 +611,6 @@ function CalendarPage() {
                         padding: '8px 16px',
                         textTransform: 'none',
                         boxShadow: 'none',
-                        '&:hover': { backgroundColor: '#0069d9' },
                       }}
                     >
                       New Calendar
@@ -634,7 +624,6 @@ function CalendarPage() {
                         padding: '8px 16px',
                         textTransform: 'none',
                         boxShadow: 'none',
-                        '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
                       Close
@@ -657,7 +646,7 @@ function CalendarPage() {
           >
             <Box
               sx={{
-                background: 'white',
+                backdropFilter: 'blur(20px)',
                 borderRadius: '16px',
                 boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
                 padding: '16px',
@@ -713,7 +702,8 @@ function CalendarPage() {
                     <Box
                       key={index}
                       sx={{
-                        background: 'rgba(0, 0, 0, 0.05)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid #ccc',
                         borderRadius: '8px',
                         padding: '12px',
                         marginBottom: '8px',
@@ -762,11 +752,11 @@ function CalendarPage() {
             onClose={() => setConfirmDeleteModalOpen(false)}
             aria-labelledby="confirm-delete-modal-title"
             aria-describedby="confirm-delete-modal-description"
-            BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.5)' } }}
+            BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0)' } }}
           >
             <Box
               sx={{
-                background: 'white',
+                backdropFilter: 'blur(20px)',
                 borderRadius: '16px',
                 boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
                 padding: '16px',
@@ -802,8 +792,8 @@ function CalendarPage() {
                   sx={{
                     mt: 2,
                     width: '100%',
-                    background: 'rgba(0, 0, 0, 0.05)',
                     borderRadius: '8px',
+                    border: '1px solid #ccc',
                     padding: '12px',
                     textAlign: 'left',
                   }}
@@ -823,7 +813,7 @@ function CalendarPage() {
                   onClick={() => setConfirmDeleteModalOpen(false)}
                   variant="outlined"
                   disableRipple
-                  sx={commonButtonStyle}
+                  //sx={commonButtonStyle}
                 >
                   Cancel
                 </Button>
@@ -831,7 +821,7 @@ function CalendarPage() {
                   onClick={() => deleteEvent(selectedEventForDelete.id)}
                   variant="contained"
                   disableRipple
-                  sx={commonButtonStyle}
+                  //sx={commonButtonStyle}
                 >
                   Confirm
                 </Button>
@@ -851,7 +841,7 @@ function CalendarPage() {
               component="form"
               onSubmit={handleCreateEvent}
               sx={{
-                background: 'white',
+                backdropFilter: 'blur(20px)',
                 borderRadius: '16px',
                 boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
                 padding: '16px',
@@ -950,11 +940,11 @@ function CalendarPage() {
                   onClick={() => setCreateModalOpen(false)}
                   variant="outlined"
                   disableRipple
-                  sx={commonButtonStyle}
+                  //sx={commonButtonStyle}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="contained" disableRipple sx={commonButtonStyle}>
+                <Button type="submit" variant="contained" disableRipple>
                   Create Event
                 </Button>
               </Box>
@@ -973,7 +963,7 @@ function CalendarPage() {
               component="form"
               onSubmit={handleCreateCalendar}
               sx={{
-                background: 'white',
+                backdropFilter: 'blur(20px)',
                 borderRadius: '16px',
                 boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
                 padding: '16px',
@@ -1022,11 +1012,11 @@ function CalendarPage() {
                   onClick={() => setCreateCalendarModalOpen(false)}
                   variant="outlined"
                   disableRipple
-                  sx={commonButtonStyle}
+                  //sx={commonButtonStyle}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="contained" disableRipple sx={commonButtonStyle}>
+                <Button type="submit" variant="contained" disableRipple>
                   Create Calendar
                 </Button>
               </Box>
@@ -1045,7 +1035,7 @@ function CalendarPage() {
               component="form"
               onSubmit={handleMessageSubmit}
               sx={{
-                background: 'white',
+                backdropFilter: 'blur(20px)',
                 borderRadius: '16px',
                 boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
                 padding: '16px',

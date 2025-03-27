@@ -28,9 +28,7 @@ class AuthController {
     // Respond with success
     res.status(200).json({ 
       message: 'Login successful',         
-      user: {
-        name: credentialsResult.storedName,
-      },
+      user: { email, name: credentialsResult.storedName, role: credentialsResult.storedUserRole },
     });
   }
 
