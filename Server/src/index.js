@@ -155,7 +155,7 @@ app.post('/api/calendar/event', AuthController.verifyToken, async (req, res) => 
   console.log("hello4")
   try {
     const query = `
-      INSERT INTO events (calendar_id, category_id, title, description, start, end_time, all_day, recurrence_rule)
+      INSERT INTO events (calendar_id, category_id, title, description, start, end_time, all_day, recurrence_rule, created_by)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
     `;
@@ -167,7 +167,8 @@ app.post('/api/calendar/event', AuthController.verifyToken, async (req, res) => 
       event.start,
       event.end_time,
       event.all_day || false,
-      event.recurrence_rule || null
+      event.recurrence_rule || null,
+      event.created_by || null,
     ];
     const result = await db.query(query, values);
     return res.status(201).json({ event: result.rows[0] });

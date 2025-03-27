@@ -14,32 +14,13 @@
         overscroll-behavior: none;
         touch-action: manipulation;
         background: linear-gradient(-45deg, 
-  #1e293b 0%, 
-  #0f172a 30%, 
-  #0f172a 40%, 
-  #0f172a 40%
-);
-background-size: 600% 600%;
-animation: gradientAnimation 20s ease infinite;
+        #1e293b 0%, 
+        #0f172a 30%, 
+        #0f172a 40%, 
+        #0f172a 40%
+      );
+      background-size: 600% 600%;
 
-      }
-    
-      @keyframes gradientAnimation {
-        0% {
-          background-position: 0% 50%;
-        }
-        25% {
-          background-position: 50% 100%;
-        }
-        50% {
-          background-position: 100% 50%;
-        }
-        75% {
-          background-position: 50% 0%;
-        }
-        100% {
-          background-position: 0% 50%;
-        }
       }
     
       body::before {
@@ -53,15 +34,6 @@ animation: gradientAnimation 20s ease infinite;
         animation: shimmer 10s linear infinite;
         pointer-events: none;
         z-index: 0;
-      }
-    
-      @keyframes shimmer {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
       }
     
       @supports (padding: env(safe-area-inset-top)) {

@@ -25,7 +25,7 @@ import SignIn from '../authentication/SignIn';
 import { useAuth } from '../authentication/AuthContext';
 
 function CalendarPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userData } = useAuth();
   const [pressedButton, setPressedButton] = useState(null);
 
   // Modal open/close states
@@ -221,6 +221,7 @@ function CalendarPage() {
             ...newEvent,
             start: new Date(newEvent.start).toISOString(),
             end_time: endTime.toISOString(),
+            created_by: userData ? userData.email : ''
           },
         }),
         credentials: 'include',
@@ -936,6 +937,41 @@ function CalendarPage() {
                 fullWidth
                 value={newEvent.description}
                 onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                sx={{
+                  input: {
+                    color: 'white',
+                    '&::placeholder': {
+                      color: 'white',
+                      opacity: 1,
+                    },
+                  },
+                  label: {
+                    color: 'white',
+                  },
+                  '& label.Mui-focused': {
+                    color: 'white',
+                  },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'white',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'white',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'white',
+                    },
+                  },
+                }}
+              />
+
+              <TextField
+                label="Color"
+                variant="outlined"
+                margin="normal"
+                fullWidth
+                value={newEvent.category_id}
+                onChange={(e) => setNewEvent({ ...newEvent, category_id: e.target.value })}
                 sx={{
                   input: {
                     color: 'white',

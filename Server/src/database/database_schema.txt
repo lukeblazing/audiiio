@@ -62,12 +62,12 @@ Referenced by:
 
 
 
-                                Table "public.events"
+                                 Table "public.events"
      Column      |           Type           | Collation | Nullable |      Default      
 -----------------+--------------------------+-----------+----------+-------------------
  id              | uuid                     |           | not null | gen_random_uuid()
  calendar_id     | uuid                     |           | not null | 
- category_id     | uuid                     |           |          | 
+ category_id     | text                     |           |          | 
  title           | text                     |           | not null | 
  description     | text                     |           |          | 
  start           | timestamp with time zone |           | not null | 
@@ -79,7 +79,6 @@ Indexes:
     "events_pkey" PRIMARY KEY, btree (id)
 Foreign-key constraints:
     "events_calendar_id_fkey" FOREIGN KEY (calendar_id) REFERENCES calendars(id) ON DELETE CASCADE
-    "events_category_id_fkey" FOREIGN KEY (category_id) REFERENCES categories(id)
 
 
                     Table "public.push_subscriptions"

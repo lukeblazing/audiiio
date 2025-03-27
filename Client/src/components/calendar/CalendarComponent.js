@@ -213,9 +213,11 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
       fontSize: "0.5rem",
       whiteSpace: "nowrap",
       overflow: "hidden",
-      textOverflow: "ellipsis",
       textAlign: "left",
-      padding: "2px 4px",
+      paddingTop: "2px",
+      paddingBottom: "2px",
+      paddingLeft: "4px",
+      paddingRight: "0px",
       backgroundColor: "#f0f8ff",
       marginBottom: "2px",
       display: "flex",
@@ -223,7 +225,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
       background: "transparent",
     };
 
-    const borderColor = event.category_id || "dodgerblue";
+    const borderColor = event.category_id || "lightgray";
 
     if (startsToday && !endsToday) {
       return {
@@ -411,20 +413,8 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                           >
                             <span
                               style={{
-                                display: "inline-block",
-                                width: "6px",
-                                height: "6px",
-                                borderRadius: "50%",
-                                backgroundColor: event.category_id || "dodgerblue",
-                                marginRight: "4px",
-                                flexShrink: 0,
-                              }}
-                            />
-                            <span
-                              style={{
                                 whiteSpace: "nowrap",
                                 overflow: "hidden",
-                                textOverflow: "ellipsis",
                               }}
                             >
                               <strong>{event.title}</strong>
