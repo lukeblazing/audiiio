@@ -262,18 +262,29 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
   };
 
   // Optional custom style getters for days and events
-  const dayPropGetter = useCallback(
-    (date) => ({
+  const dayPropGetter = useCallback((date) => {
+    const today = new Date();
+    const isToday = isSameDay(date, today);
+    const isPast = isBefore(date, startOfDay(today));
+  
+    return {
+      className: isPast && !isToday ? "past-date" : "",
       style: {
         cursor: "pointer",
         transition: "background-color 0.2s ease",
         position: "relative",
         overflow: "hidden",
+        border: isToday
+          ? `1px solid ${theme.palette.primary.main}`
+          : `1px solid ${theme.palette.divider}`,
+        boxShadow: isToday
+          ? `inset 0 0 4px ${theme.palette.primary.light}`
+          : "none",
+        borderRadius: isToday ? "8px" : "0",
+        backgroundColor: "transparent"
       },
-      className: "calendar-day",
-    }),
-    []
-  );
+    };
+  }, []);  
 
   const eventPropGetter = useCallback(
     () => ({
@@ -303,11 +314,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
   /* Remove any existing backgrounds */
 
   .rbc-off-range-bg {
-    background-color: transparent !important;
-  }
-
-  .rbc-today {
-    background-color: transparent !important;
+    background-color: transparent;
   }
 
   .rbc-row {
@@ -331,9 +338,34 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
     border-radius: 0 0 8px 8px;
     border: 4px solid ${theme.palette.divider};
   }
+  .past-date {
+      position: relative;
+      background: rgba(250, 245, 240, 0.8); /* Soft white with a warm undertone */
+      border-radius: 4px;
+      overflow: hidden;
+  }
 
-  .rbc-day-bg {
-    border: 1px solid ${theme.palette.divider} !important;
+  .past-date::before,
+  .past-date::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 40%;
+      height: 0.75px;
+      background: rgba(255, 250, 245, 0.4); /* Very soft white with slight opacity */
+      pointer-events: none;
+      z-index: 0;
+  }
+
+  .past-date::before {
+      transform: translate(-50%, -50%) rotate(45deg);
+      box-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1);
+  }
+
+  .past-date::after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+      box-shadow: -0.5px -0.5px 1px rgba(0, 0, 0, 0.1);
   }
 
   .rbc-month-view .rbc-day-bg:last-child {
