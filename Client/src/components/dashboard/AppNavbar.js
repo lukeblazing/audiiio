@@ -70,12 +70,12 @@ export default function AppNavbar() {
       <NavbarContainer>
         {/* Hamburger Menu Button on the Left with left spacing */}
         <Box sx={{ marginLeft: '16px' }}>
-          <MenuButton aria-label="menu" onClick={toggleDrawer(true)} size="large">
+          <MenuButton aria-label="menu" onClick={toggleDrawer(true)} size="large" sx={{ border: 'none' }}>
             <MenuRoundedIcon sx={{ fontSize: '2.5rem' }} />
           </MenuButton>
         </Box>
 
-        <RefreshButton aria-label="refresh" onClick={handleRefresh}>
+        <RefreshButton aria-label="refresh" onClick={handleRefresh} sx={{ border: 'none' }}>
           <RefreshIcon sx={{ fontSize: '2.5rem' }} />
         </RefreshButton>
       </NavbarContainer>

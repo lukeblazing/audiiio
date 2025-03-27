@@ -233,7 +233,7 @@ export default function SignIn() {
               <Button
                 onClick={handleForgotPwdOpen}
                 variant="text"
-                sx={{ textTransform: 'none', padding: 0 }}
+                sx={{ textTransform: 'none', padding: 0, border: "none" }}
               >
                 Forgot your password?
               </Button>

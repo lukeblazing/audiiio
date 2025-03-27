@@ -619,7 +619,7 @@ function CalendarPage() {
                       onClick={() => setCalendarSwitcherModalOpen(false)}
                       sx={{
                         border: '1px solid #ccc',
-                        color: '#333',
+                        color: '#ffff',
                         borderRadius: '8px',
                         padding: '8px 16px',
                         textTransform: 'none',
@@ -813,7 +813,7 @@ function CalendarPage() {
                   onClick={() => setConfirmDeleteModalOpen(false)}
                   variant="outlined"
                   disableRipple
-                  //sx={commonButtonStyle}
+                  sx={{ color: 'white' }}
                 >
                   Cancel
                 </Button>
@@ -876,7 +876,7 @@ function CalendarPage() {
               </Typography>
 
               <FormControl fullWidth margin="normal">
-                <InputLabel id="calendar-select-label">Calendar</InputLabel>
+                <InputLabel sx={{ color: 'white' }} id="calendar-select-label">Calendar</InputLabel>
                 <Select
                   labelId="calendar-select-label"
                   id="calendar-select"
@@ -901,6 +901,32 @@ function CalendarPage() {
                 value={newEvent.title}
                 onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
                 required
+                sx={{
+                  input: {
+                    color: 'white',
+                    '&::placeholder': {
+                      color: 'white',
+                      opacity: 1,
+                    },
+                  },
+                  label: {
+                    color: 'white',
+                  },
+                  '& label.Mui-focused': {
+                    color: 'white',
+                  },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'white',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'white',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'white',
+                    },
+                  },
+                }}
               />
 
               <TextField
@@ -910,6 +936,32 @@ function CalendarPage() {
                 fullWidth
                 value={newEvent.description}
                 onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                sx={{
+                  input: {
+                    color: 'white',
+                    '&::placeholder': {
+                      color: 'white',
+                      opacity: 1,
+                    },
+                  },
+                  label: {
+                    color: 'white',
+                  },
+                  '& label.Mui-focused': {
+                    color: 'white',
+                  },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'white',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'white',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'white',
+                    },
+                  },
+                }}
               />
 
               <TextField
@@ -940,7 +992,7 @@ function CalendarPage() {
                   onClick={() => setCreateModalOpen(false)}
                   variant="outlined"
                   disableRipple
-                  //sx={commonButtonStyle}
+                  sx={{ color: 'white' }}
                 >
                   Cancel
                 </Button>
@@ -1012,7 +1064,7 @@ function CalendarPage() {
                   onClick={() => setCreateCalendarModalOpen(false)}
                   variant="outlined"
                   disableRipple
-                  //sx={commonButtonStyle}
+                  sx={{ color: 'white' }}
                 >
                   Cancel
                 </Button>
@@ -1063,7 +1115,7 @@ function CalendarPage() {
                 Send Message
               </Typography>
               <FormControl fullWidth margin="normal">
-                <InputLabel id="recipient-select-label">Recipient</InputLabel>
+                <InputLabel sx={{ color: 'white' }} id="recipient-select-label">Recipient</InputLabel>
                 <Select
                   labelId="recipient-select-label"
                   id="recipient-select"
@@ -1071,6 +1123,8 @@ function CalendarPage() {
                   label="Recipient"
                   onChange={(e) => setSelectedRecipient(e.target.value)}
                   required
+                  sx={{
+                    color: 'white',}}
                 >
                   {availableUsers.map((user) => (
                     <MenuItem key={user.id} value={user.email}>
@@ -1093,7 +1147,7 @@ function CalendarPage() {
                   onClick={() => setMessageModalOpen(false)}
                   variant="outlined"
                   disableRipple
-                  sx={{ width: '100%', maxWidth: '200px', fontSize: '1rem', textTransform: 'none', borderRadius: '8px' }}
+                  sx={{ width: '100%', maxWidth: '200px', fontSize: '1rem', textTransform: 'none', borderRadius: '8px', color: 'white' }}
                 >
                   Cancel
                 </Button>

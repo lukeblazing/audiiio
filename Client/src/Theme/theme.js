@@ -6,6 +6,9 @@ const theme = createTheme({
       main: '#3b82f6', // A refined shadcn-style blue (Tailwind blue-500)
     },
     divider: 'rgba(184, 186, 187, 0.69)',
+    text: {
+      primary: '#fff', // Set default text color to white
+    },
   },
   components: {
     // Globally disable ripple on all ButtonBase components (used by buttons, menu items, etc.)
@@ -25,10 +28,10 @@ const theme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          backgroundColor: 'transparent', // Ensure the root is transparent
+          backgroundColor: 'transparent',
         },
         input: {
-          backgroundColor: 'transparent', // Ensure the input area is transparent
+          backgroundColor: 'transparent',
         },
         notchedOutline: {
           borderColor: 'rgba(255, 255, 255, 0.8)', // Use your theme.divider if needed
@@ -41,21 +44,20 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          textTransform: 'none', // Remove uppercase transformation
+          textTransform: 'none',
           fontWeight: 500,
-          borderRadius: '8px', // Slightly rounded corners
+          borderRadius: '8px',
           padding: '8px 16px',
           fontSize: '16px',
           boxShadow: 'none',
           border: '1px solid #ccc',
           transition: 'background-color 0.2s ease, border-color 0.2s ease',
-          // Use the primary color for hover/active states to mimic shadcn/ui styling
           '&:hover': {
             backgroundColor: '#739BF280',
             borderColor: '#3b82f6',
           },
           '&:active': {
-            backgroundColor: '#6E96ED80', // A slightly darker blue for active state
+            backgroundColor: '#6E96ED80',
           },
         },
       },
@@ -66,25 +68,36 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          textTransform: 'none', // Remove uppercase transformation
+          textTransform: 'none',
           fontWeight: 500,
-          borderRadius: '8px', // Slightly rounded corners
+          borderRadius: '8px',
           padding: '8px 16px',
           fontSize: '16px',
           boxShadow: 'none',
           border: '1px solid #ccc',
           transition: 'background-color 0.2s ease, border-color 0.2s ease',
-          // Hover and active states to mimic shadcn/ui styling
           '&:hover': {
             backgroundColor: '#739BF280',
             borderColor: '#3b82f6',
           },
           '&:active': {
-            backgroundColor: '#6E96ED80', // A slightly darker blue for active state
+            backgroundColor: '#6E96ED80',
           },
         },
       },
     },
+    MuiInputBase: {
+      styleOverrides: {
+        input: {
+          color: '#ffff',
+          '&::placeholder': {
+            color: '#ffff',
+            opacity: 1,
+          },
+        },
+      },
+    },
+    
     MuiMenu: {
       styleOverrides: {
         paper: {
@@ -109,6 +122,14 @@ const theme = createTheme({
           '&:hover': {
             backgroundColor: '#F0F0F0',
           },
+        },
+      },
+    },
+    // Override default icon styles
+    MuiSvgIcon: {
+      styleOverrides: {
+        root: {
+          color: '#fff', // Set icons to white. Change to '#f3f3f3' for a light gray shade if preferred.
         },
       },
     },

@@ -161,6 +161,12 @@ const formatFullEventTime = (event, date) => {
     return formattedStart;
   }
 
+  const isSameDay = format(event.end, "yyyy-MM-dd") === format(date, "yyyy-MM-dd");
+
+  if (!isSameDay) {
+    return formattedStart;
+  }
+
   const endTime = format(event.end, "h:mm a").toLowerCase();
   const formattedEnd = endTime.includes(":00")
     ? format(event.end, "h a").toLowerCase()
@@ -201,6 +207,56 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
     },
     [filteredEvents]
   );
+
+  const getEventStyle = (startsToday, endsToday, event) => {
+    const baseStyle = {
+      fontSize: "0.5rem",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      textAlign: "left",
+      padding: "2px 4px",
+      backgroundColor: "#f0f8ff",
+      marginBottom: "2px",
+      display: "flex",
+      alignItems: "center",
+      background: "transparent",
+    };
+  
+    const borderColor = event.category_id || "dodgerblue";
+  
+    if (startsToday && !endsToday) {
+      return {
+        ...baseStyle,
+        borderTop: `1px solid ${borderColor}`,
+        borderBottom: `1px solid ${borderColor}`,
+        borderLeft: `1px solid ${borderColor}`,
+        borderRadius: "8px 0 0 8px",
+      };
+    } else if (!startsToday && endsToday) {
+      return {
+        ...baseStyle,
+        borderTop: `1px solid ${borderColor}`,
+        borderBottom: `1px solid ${borderColor}`,
+        borderRight: `1px solid ${borderColor}`,
+        borderRadius: "0 8px 8px 0",
+      };
+    } else if (!startsToday && !endsToday) {
+      return {
+        ...baseStyle,
+        borderTop: `1px solid ${borderColor}`,
+        borderBottom: `1px solid ${borderColor}`,
+        borderRadius: "0",
+      };
+    }
+  
+    // Default: starts and ends today (single-day event)
+    return {
+      ...baseStyle,
+      border: `1px solid ${borderColor}`,
+      borderRadius: "8px",
+    };
+  };  
 
   // Optional custom style getters for days and events
   const dayPropGetter = useCallback(
@@ -257,11 +313,17 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
           border-right: 1px solid ${theme.palette.divider} !important;
           border-bottom: 1px solid ${theme.palette.divider} !important;
         }
+        .rbc-month-view .rbc-day-bg:last-child {
+          border-right: none !important;
+        }
         .rbc-header {
           font-size: 1rem;
           font-weight: bold;
           border-right: 1px solid ${theme.palette.divider} !important;
           border-bottom: 1px solid ${theme.palette.divider} !important;
+        }
+        .rbc-show-more {
+          display: none;
         }
         .rbc-date-cell {
           font-size: 1rem;
@@ -321,46 +383,50 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                   >
                     <span>{label}</span>
                     {filteredEvents
-                      .filter((event) =>
-                        isWithinInterval(event.start, {
-                          start: startOfDay(date),
-                          end: endOfDay(date),
-                        }) ||
-                        isWithinInterval(event.end, {
-                          start: startOfDay(date),
-                          end: endOfDay(date),
-                        }) ||
-                        (event.start < startOfDay(date) && event.end > endOfDay(date))
+                      .filter(
+                        (event) =>
+                          isWithinInterval(event.start, {
+                            start: startOfDay(date),
+                            end: endOfDay(date),
+                          }) ||
+                          isWithinInterval(event.end, {
+                            start: startOfDay(date),
+                            end: endOfDay(date),
+                          }) ||
+                          (event.start < startOfDay(date) && event.end > endOfDay(date))
                       )
-                      .map((event, index) => (
-                        <div
-                          key={index}
-                          style={{
-                            fontSize: "0.5rem",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            textAlign: "left",
-                            paddingLeft: "4px",
-                          }}
-                        >
-                          <span
-                            style={{
-                              display: "inline-block",
-                              width: "6px",
-                              height: "6px",
-                              borderRadius: "50%",
-                              backgroundColor: event.category_id || "dodgerblue",
-                              marginRight: "4px",
-                            }}
-                          />
-                          <strong>{event.title}</strong>
-                        </div>
-                      ))}
+                      .map((event, index) => {
+                        const eventStartDate = format(event.start, "yyyy-MM-dd");
+                        const eventEndDate = format(event.end, "yyyy-MM-dd");
+                        const currentDate = format(date, "yyyy-MM-dd");
+              
+                        const startsToday = eventStartDate === currentDate;
+                        const endsToday = eventEndDate === currentDate;
+              
+                        return (
+                          <div
+                            key={index}
+                            style={getEventStyle(startsToday, endsToday, event)}
+                          >
+                            <span
+                              style={{
+                                display: "inline-block",
+                                width: "6px",
+                                height: "6px",
+                                borderRadius: "50%",
+                                backgroundColor: event.category_id || "dodgerblue",
+                                marginRight: "4px",
+                              }}
+                            />
+                            <strong>{event.title}</strong>
+                          </div>
+                        );
+                      })}
                   </div>
                 ),
                 event: () => null, // Suppress default event rendering in month view
               },
+              
             }}
             dayPropGetter={dayPropGetter}
             eventPropGetter={eventPropGetter}
