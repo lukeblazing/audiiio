@@ -223,7 +223,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
       background: "transparent",
     };
 
-    const borderColor = event.category_id || "#2a4365";
+    const borderColor = event.category_id || "dodgerblue";
 
     if (startsToday && !endsToday) {
       return {
@@ -379,6 +379,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                       minHeight: "100%",
                       display: "flex",
                       flexDirection: "column",
+                      paddingLeft: "4px"
                     }}
                   >
                     <span>{label}</span>
