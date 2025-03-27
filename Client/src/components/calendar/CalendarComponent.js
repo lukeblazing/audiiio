@@ -144,17 +144,27 @@ const isAllDayEvent = (event, currentDay) => {
 const formatFullEventTime = (event, date) => {
   if (isAllDayEvent(event, date)) {
     return "All-day";
-  } else {
-    const startTime = format(event.start, "h:mm a").toLowerCase();
-    const endTime = format(event.end, "h:mm a").toLowerCase();
-    const formattedStart = startTime.includes(":00")
-      ? format(event.start, "h a").toLowerCase()
-      : startTime;
-    const formattedEnd = endTime.includes(":00")
-      ? format(event.end, "h a").toLowerCase()
-      : endTime;
-    return `${formattedStart} - ${formattedEnd}`;
   }
+
+  const startTime = format(event.start, "h:mm a").toLowerCase();
+  const formattedStart = startTime.includes(":00")
+    ? format(event.start, "h a").toLowerCase()
+    : startTime;
+
+  // If no end or it's 11:59 PM, only show start
+  if (
+    !event.end ||
+    (event.end.getHours?.() === 23 && event.end.getMinutes?.() === 59)
+  ) {
+    return formattedStart;
+  }
+
+  const endTime = format(event.end, "h:mm a").toLowerCase();
+  const formattedEnd = endTime.includes(":00")
+    ? format(event.end, "h a").toLowerCase()
+    : endTime;
+
+  return `${formattedStart} - ${formattedEnd}`;
 };
 
 const formatCompressedEventTime = (event, date) => {
@@ -325,32 +335,33 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                         isWithinInterval(event.end, {
                           start: startOfDay(date),
                           end: endOfDay(date),
-                        })
+                        }) ||
+                        (event.start < startOfDay(date) && event.end > endOfDay(date))
                       )
                       .map((event, index) => (
                         <div
-                        key={index}
-                        style={{
-                          fontSize: "0.5rem",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textAlign: "left",
-                          paddingLeft: "4px",
-                        }}
-                      >
-                        <span
+                          key={index}
                           style={{
-                            display: "inline-block",
-                            width: "6px",
-                            height: "6px",
-                            borderRadius: "50%",
-                            backgroundColor: event.category_id || "dodgerblue",
-                            marginRight: "4px",
+                            fontSize: "0.5rem",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            textAlign: "left",
+                            paddingLeft: "4px",
                           }}
-                        />
-                        <strong>{event.title}</strong>
-                      </div>
+                        >
+                          <span
+                            style={{
+                              display: "inline-block",
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              backgroundColor: event.category_id || "dodgerblue",
+                              marginRight: "4px",
+                            }}
+                          />
+                          <strong>{event.title}</strong>
+                        </div>
                       ))}
                   </div>
                 ),
@@ -362,7 +373,8 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
             style={{ height: "100%" }}
           />
         </Box>
-      )}
+      )
+      }
 
       <Modal
         open={modalOpen}
@@ -421,7 +433,11 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                 >
                   <strong>{formatFullEventTime(event, selectedDate)}</strong>{" "}
                   {event.title}
-                  <br />• {event.description}
+                  {event.description && (
+                    <>
+                      <br />• {event.description}
+                    </>
+                  )}
                 </Typography>
               ))
             ) : (
@@ -448,7 +464,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
           </Button>
         </Box>
       </Modal>
-    </Box>
+    </Box >
   );
 };
 

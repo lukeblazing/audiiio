@@ -182,17 +182,6 @@ function CalendarPage() {
       ? calendarEvents.filter((event) => selectedCalendarFilters.includes(event.calendar_id))
       : calendarEvents;
 
-  // Helper function to format Date objects for datetime-local inputs
-  const formatDateLocal = (date) => {
-    const pad = (num) => num.toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const month = pad(date.getMonth() + 1);
-    const day = pad(date.getDate());
-    const hours = pad(date.getHours());
-    const minutes = pad(date.getMinutes());
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
-
   // Function to delete an event
   const deleteEvent = async (eventId) => {
     try {
@@ -222,7 +211,9 @@ function CalendarPage() {
     if (!endTime) {
       const startDate = new Date(newEvent.start);
       startDate.setHours(23, 59, 0, 0);
-      endTime = formatDateLocal(startDate);
+      endTime = startDate; // use Date object directly
+    } else {
+      endTime = new Date(newEvent.end_time);
     }
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
@@ -232,7 +223,7 @@ function CalendarPage() {
           event: {
             ...newEvent,
             start: new Date(newEvent.start).toISOString(),
-            end_time: endTime,
+            end_time: endTime.toISOString(),
           },
         }),
         credentials: 'include',
