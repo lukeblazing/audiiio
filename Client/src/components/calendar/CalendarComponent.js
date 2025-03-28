@@ -251,7 +251,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
       display: "flex",
       alignItems: "center",
       background: semiTransparentBackground,
-      filter: isPastDay ? "blur(3px) brightness(0.85)" : "none",
+      filter: isPastDay ? "blur(1px) brightness(0.85)" : "none",
     };
 
     if (startsToday && !endsToday) {
