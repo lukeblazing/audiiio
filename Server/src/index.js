@@ -27,18 +27,18 @@ app.use(express.json());
 
 // Enable cors for prod url
 const corsOptions = {
-    origin: process.env.NODE_ENV === 'development'
-        ? 'http://localhost:8080'  // Allow dev frontend on localhost
-        : 'https://www.lukeblazing.com', // Allow production frontend on myapp.com
-    credentials: true,               // Enable sending cookies with requests
+  origin: process.env.NODE_ENV === 'development'
+    ? 'http://localhost:8080'  // Allow dev frontend on localhost
+    : 'https://www.lukeblazing.com', // Allow production frontend on myapp.com
+  credentials: true,               // Enable sending cookies with requests
 };
 
 app.use(cors(corsOptions));
 
 if (process.env.NODE_ENV === 'development') {
-    console.log('CORS enabled for development with localhost:8080');
+  console.log('CORS enabled for development with localhost:8080');
 } else {
-    console.log('CORS enabled for production with www.lukeblazing.com');
+  console.log('CORS enabled for production with www.lukeblazing.com');
 }
 
 // Start the cron jobs
@@ -53,61 +53,69 @@ webpush.setVapidDetails(
 
 // Middleware to force HTTPS
 app.use((req, res, next) => {
-    if (process.env.NODE_ENV !== 'development' && req.headers['x-forwarded-proto'] !== 'https') {
-        return res.redirect('https://' + req.headers.host + req.url);
-    }
-    next();
+  if (process.env.NODE_ENV !== 'development' && req.headers['x-forwarded-proto'] !== 'https') {
+    return res.redirect('https://' + req.headers.host + req.url);
+  }
+  next();
 });
 
 // Sign up: Create a new user
 app.post('/api/signUp', async (req, res) => {
-    try {
-        return await AuthController.createUser(req, res);
-    } catch (error) {
-        // If there's a server error, return a 500 status code
-        return res.status(500).json({
-            success: false,
-            message: 'An internal server error occurred',
-            error: error.message
-        });
-    }
+  try {
+
+    // temporarily disable sign up
+    return res.status(500).json({
+      success: false,
+      message: 'An internal server error occurred',
+      error: error.message
+    });
+
+    //return await AuthController.createUser(req, res);
+  } catch (error) {
+    // If there's a server error, return a 500 status code
+    return res.status(500).json({
+      success: false,
+      message: 'An internal server error occurred',
+      error: error.message
+    });
+  }
 });
 
 // Route for handling login
 app.post('/api/login', async (req, res) => {
-    try {
-        return await AuthController.login(req, res);
-    } catch (error) {
-        // If there's a server error, return a 500 status code
-        return res.status(500).json({
-            success: false,
-            message: 'An internal server error occurred',
-            error: error.message
-        });
-    }
+  try {
+    return await AuthController.login(req, res);
+  } catch (error) {
+    // If there's a server error, return a 500 status code
+    return res.status(500).json({
+      success: false,
+      message: 'An internal server error occurred',
+      error: error.message
+    });
+  }
 });
 
 // Route for handling logout
 app.post('/api/logout', (req, res) => {
-    try {
-        return AuthController.logout(req, res);
-    } catch (error) {
-        // If there's a server error, return a 500 status code
-        return res.status(500).json({
-            success: false,
-            message: 'An internal server error occurred',
-            error: error.message
-        });
-    }
+  try {
+    return AuthController.logout(req, res);
+  } catch (error) {
+    // If there's a server error, return a 500 status code
+    return res.status(500).json({
+      success: false,
+      message: 'An internal server error occurred',
+      error: error.message
+    });
+  }
 });
 
 // Protected route to test authentication from AuthController
 app.get('/api/authCheck', AuthController.verifyToken, (req, res) => {
-    const userEmail = req.user.email;
-    const userRole = req.user.role;
-    const userName = req.user.name;
+  const userEmail = req.user.email;
+  const userRole = req.user.role;
+  const userName = req.user.name;
 
-    res.status(200).json({ message: `Welcome ${userEmail}, you are authorized for /protected route as ${userRole}.`,  user: req.user});
+  res.status(200).json({ message: `Welcome ${userEmail}, you are authorized for /protected route as ${userRole}.`, user: req.user });
 });
 
 
@@ -122,6 +130,12 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyToken, async (
   if (!req?.user?.email) {
     return res.status(401).json({ message: 'Access denied. No email provided.' });
   }
+
+  const allowedEmails = ['lukeblazing@yahoo.com', 'chelsyjohnson1234@gmail.com'];
+  if (!allowedEmails.includes(req.user.email)) {
+    return res.status(200).json({ events: [] }); // return empty list if not approved
+  }
+
   try {
     const query = `
       SELECT *
@@ -451,10 +465,10 @@ app.use(express.static(path.join(__dirname, '../public/build')));
 
 // Start the server
 app.listen(PORT, () => {
-    console.log('We are about to start this server now.');
-    if (process.env.NODE_ENV === 'development') {
-        console.log(`Server is running on http://localhost:${PORT}`);
-    } else {
-        console.log(`Server is running on PORT ${PORT}`);
-    }
+  console.log('We are about to start this server now.');
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  } else {
+    console.log(`Server is running on PORT ${PORT}`);
+  }
 });

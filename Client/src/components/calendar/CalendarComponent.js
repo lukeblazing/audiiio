@@ -230,7 +230,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
     return rgbMatch ? rgbMatch.slice(0, 3).join(",") : "0,0,0";
   }
 
-  const getEventStyle = (startsToday, endsToday, event) => {
+  const getEventStyle = (startsToday, endsToday, isPastDay, event) => {
     const borderColor = event.category_id || "dodgerblue";
 
     // Gradient background using RGBA
@@ -251,6 +251,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
       display: "flex",
       alignItems: "center",
       background: semiTransparentBackground,
+      filter: isPastDay ? "blur(3px) brightness(0.85)" : "none",
     };
 
     if (startsToday && !endsToday) {
@@ -491,10 +492,12 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                         const startsToday = eventStartDate === currentDate;
                         const endsToday = eventEndDate === currentDate;
 
+                        const isPastDay = isBefore(startOfDay(date), startOfDay(new Date()));
+
                         return (
                           <div
                             key={index}
-                            style={getEventStyle(startsToday, endsToday, event)}
+                            style={getEventStyle(startsToday, endsToday, isPastDay, event)}
                           >
                             <span
                               style={{
