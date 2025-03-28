@@ -200,6 +200,7 @@ function CalendarPage() {
       const startDate = new Date(newEvent.start);
       startDate.setHours(23, 59, 0, 0);
       endTime = startDate; // use Date object directly
+
     } else {
       endTime = new Date(newEvent.end_time);
     }

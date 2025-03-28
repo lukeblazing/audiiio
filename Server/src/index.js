@@ -170,7 +170,7 @@ app.post('/api/calendar/event', AuthController.verifyToken, async (req, res) => 
   try {
     const query = `
       INSERT INTO events (calendar_id, category_id, title, description, start, end_time, all_day, recurrence_rule, created_by)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
     const values = [

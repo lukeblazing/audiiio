@@ -231,7 +231,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
   }
 
   const getEventStyle = (startsToday, endsToday, isPastDay, event) => {
-    const borderColor = event.category_id || "dodgerblue";
+    const borderColor = isValidCssColor(event.category_id) ? event.category_id : "dodgerblue";
 
     // Gradient background using RGBA
     const semiTransparentBackground = isValidCssColor(borderColor)
