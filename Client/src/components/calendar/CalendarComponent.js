@@ -69,6 +69,8 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           justifyContent: "center",
           height: "100%",
           borderRadius: "8px",
+          position: "relative",
+          zIndex: 2,
           transition: "background-color 0.2s ease",
           "&:hover": {
             backgroundColor: "rgba(0,0,0,0.1)",
@@ -91,10 +93,13 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           component="div"
           sx={{
             textAlign: "center",
-            fontSize: "clamp(1.2rem, 2.5vw, 1.5rem)",
+            fontSize: "1.225rem",
+            whiteSpace: "nowrap",
             fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
             userSelect: "none",
             fontWeight: 800,
+            position: "relative",
+            zIndex: 1,
           }}
         >
           {label()}
@@ -127,6 +132,8 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           justifyContent: "center",
           height: "100%",
           borderRadius: "8px",
+          position: "relative",
+          zIndex: 2,
           transition: "background-color 0.2s ease",
           "&:hover": {
             backgroundColor: "rgba(0,0,0,0.1)",
