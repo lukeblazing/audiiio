@@ -538,7 +538,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
           sx={{
             backdropFilter: 'blur(20px)',
             borderRadius: "16px",
-            border: "2px solid white",
+            border: '1px solid #ccc',
             boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
             padding: "16px",
             maxWidth: "90vw",

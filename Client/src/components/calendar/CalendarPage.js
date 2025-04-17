@@ -703,7 +703,7 @@ function CalendarPage() {
                       key={index}
                       sx={{
                         backdropFilter: 'blur(20px)',
-                        border: `1px solid ${event.category_id ? event.category_id : '#ccc'}`,
+                        border: `1px solid ${event.category_id ? event.category_id : 'dodgerblue'}`,
                         borderRadius: '8px',
                         padding: '12px',
                         marginBottom: '8px',
