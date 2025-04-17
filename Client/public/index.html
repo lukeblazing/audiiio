@@ -5,44 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <style>
-      html, body {
-        position: fixed;
-        overflow: hidden;
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        overscroll-behavior: none;
-        touch-action: manipulation;
-        background: linear-gradient(-45deg, 
-        #1e293b 0%, 
-        #0f172a 30%, 
-        #0f172a 40%, 
-        #0f172a 40%
-      );
-      background-size: 600% 600%;
-
+      /* 1 — Gradient layer lives on html (:root) */
+      html{
+        /* full‑viewport gradient */
+        background: linear-gradient(-45deg,
+                   #1e293b 0%,
+                   #0f172a 30%,
+                   #0f172a 40%);
+        background-size: 600% 600%;
+        height:100%;          /* makes sure html fills the viewport */
       }
-    
-      body::before {
-        content: "";
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-        animation: shimmer 10s linear infinite;
-        pointer-events: none;
-        z-index: 0;
+      
+      /* 2 — Body supplies a SOLID colour for the status bar */
+      body{
+        /* the colour Safari picks up for black‑translucent */
+        background-color:#1e293b;     /* ──► same as first gradient stop        */
+      
+        /* *no* background-image here, so the html gradient shows through */
+        margin:0;
+        height:100%;
+        padding:env(safe-area-inset-top) env(safe-area-inset-right)
+                env(safe-area-inset-bottom) env(safe-area-inset-left);
       }
-    
-      @supports (padding: env(safe-area-inset-top)) {
-        body {
-          padding: env(safe-area-inset-top) env(safe-area-inset-right)
-                   env(safe-area-inset-bottom) env(safe-area-inset-left);
-        }
-      }
-    </style>    
+      </style>
+      
+      
 
     <title>Our Shared Calendar</title>
 
@@ -53,15 +40,13 @@
     <link rel="manifest" href="manifest.json" />
 
     <!-- iOS Web App Settings -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-title" content="Our Shared Cal" />
 
     <!-- iOS Icon Support -->
     <link rel="apple-touch-icon" sizes="512x512" href="icons/app-icon-512x512.png" />
-
-    <!-- Theme Color (Used for PWA and Mobile UI Styling) -->
-    <meta name="theme-color" content="#0f172a" />
 
     <style>
       body {
