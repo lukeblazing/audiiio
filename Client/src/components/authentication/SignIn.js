@@ -18,7 +18,7 @@ import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgotPassword.js';
 import { MicrosoftIcon, LogoIcon } from './CustomIcons.js';
 import { useAuth } from './AuthContext.js';
-import LoadingBorder from '../loading-components/LoadingBorder.js';
+import LoadingSpinner from '../loading-components/LoadingSpinner.js';
 import { useTheme } from "@mui/material/styles";
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -143,7 +143,7 @@ export default function SignIn() {
 
   return (
     <div>
-      {isLoading && <LoadingBorder />}
+      {isLoading && <LoadingSpinner />}
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="center" >
         <Card variant="outlined">

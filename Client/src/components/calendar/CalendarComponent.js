@@ -21,7 +21,7 @@ import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
-import LoadingBorder from "../loading-components/LoadingBorder.js";
+import LoadingSpinner from "../loading-components/LoadingSpinner.js";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import Button from "@mui/material/Button";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
@@ -444,7 +444,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
 `}</style>
 
       {isLoading ? (
-        <LoadingBorder />
+        <LoadingSpinner />
       ) : (
         <Box sx={{ flexGrow: 1, height: "100%", overflow: "hidden" }}>
           <BigCalendar

@@ -17,7 +17,7 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import { LogoIcon, MicrosoftIcon } from './CustomIcons.js';
 import { useAuth } from './AuthContext.js';
-import LoadingBorder from '../loading-components/LoadingBorder.js';
+import LoadingSpinner from '../loading-components/LoadingSpinner.js';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -159,7 +159,7 @@ export default function SignUp() {
 
   return (
     <div>
-      {isLoading && <LoadingBorder />}
+      {isLoading && <LoadingSpinner />}
       <CssBaseline enableColorScheme />
       <SignUpContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">

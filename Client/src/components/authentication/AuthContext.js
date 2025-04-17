@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import LoadingBorder from '../loading-components/LoadingBorder';
+import LoadingSpinner from '../loading-components/LoadingSpinner';
 
 // Create the AuthContext
 const AuthContext = createContext();
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
 
 
   if (loading)
-    return <LoadingBorder />
+    return <LoadingSpinner />
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, userRole, handleLogin, handleLogout, userData }}>
