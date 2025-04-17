@@ -547,6 +547,8 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
         onClose={() => setModalOpen(false)}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
+        disableAutoFocus
+        disableEnforceFocus
       >
         <Box
           sx={{

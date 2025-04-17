@@ -23,6 +23,12 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiModal: {
+      defaultProps: {
+        disableAutoFocus: true,
+        disableEnforceFocus: true,
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: {
         body: {
