@@ -325,7 +325,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
   );
 
   const getBorderColor = (categoryId) => 
-    isValidCssColor(categoryId) ? categoryId : "#ccc";
+    isValidCssColor(categoryId) ? categoryId : "dodgerblue";
 
   return (
     <Box
@@ -533,12 +533,12 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
         onClose={() => setModalOpen(false)}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
-        BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.5)" } }}
       >
         <Box
           sx={{
             backdropFilter: 'blur(20px)',
             borderRadius: "16px",
+            border: "2px solid white",
             boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
             padding: "16px",
             maxWidth: "90vw",
