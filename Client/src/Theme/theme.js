@@ -67,7 +67,7 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1e293b', // match darker surface
+          backgroundColor: '#0f172a', // match darker surface
           color: '#fff',
           borderRadius: '12px',
         },
