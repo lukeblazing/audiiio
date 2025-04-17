@@ -91,7 +91,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           component="div"
           sx={{
             textAlign: "center",
-            fontSize: "1.5rem",
+            fontSize: "clamp(0.8rem, 2.5vw, 1.5rem)",
             fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
             userSelect: "none",
             fontWeight: 800,
