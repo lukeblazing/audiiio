@@ -247,6 +247,7 @@ export default function SignUp() {
               type="submit"
               fullWidth
               variant="contained"
+              disableRipple
               disabled={isLoading} // Disable the button when loading
               sx={{
                 position: 'relative',

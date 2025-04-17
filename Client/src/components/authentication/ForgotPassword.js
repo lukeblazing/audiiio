@@ -55,8 +55,8 @@ function ForgotPassword({ isForgotPwdOpen, handleForgotPwdClose }) {
             />
           </FormControl>
           <DialogActions sx={{ pb: 3, px: 3 }}>
-            <Button onClick={handleForgotPwdClose}>Cancel</Button>
-            <Button variant="contained" type="submit">
+            <Button disableRipple onClick={handleForgotPwdClose}>Cancel</Button>
+            <Button disableRipple variant="contained" type="submit">
               Continue
             </Button>
           </DialogActions>

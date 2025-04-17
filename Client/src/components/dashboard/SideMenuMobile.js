@@ -86,6 +86,7 @@ function SideMenuMobile({ open, toggleDrawer }) {
           <Button
             variant="outlined"
             fullWidth
+            disableRipple
             startIcon={<LogoutRoundedIcon />}
             onClick={attemptLogout}
             sx={{

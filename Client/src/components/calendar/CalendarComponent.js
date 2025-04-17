@@ -117,7 +117,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
             color: theme.palette.primary.main,
             transition: "background-color 0.2s ease",
             "&:hover": { backgroundColor: "rgba(0,0,0,0.05)" },
-            marginTop: "8px",
+            marginTop: "8px",disableRipple
           }}
         >
           Today
@@ -618,6 +618,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
           <Button
             onClick={() => setModalOpen(false)}
             variant="contained"
+            disableRipple
             sx={{
               mt: 2,
               width: "100%",

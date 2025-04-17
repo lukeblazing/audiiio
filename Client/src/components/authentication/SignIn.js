@@ -229,6 +229,7 @@ export default function SignIn() {
               <Button
                 onClick={handleForgotPwdOpen}
                 variant="text"
+                disableRipple
                 sx={{ textTransform: 'none', padding: 0, border: "none", background: "transparent" }}
               >
                 Forgot your password?
@@ -236,6 +237,7 @@ export default function SignIn() {
             </Box>
             <Button
               type="submit"
+              disableRipple
               fullWidth
               variant="contained"
               disabled={isLoading} // Disable the button when loading
