@@ -66,7 +66,7 @@ function SideMenuMobile({ open, toggleDrawer }) {
             <Avatar
               sizes="small"
               alt={userData ? userData.name : "User"}
-              src="icons/app-icon-v3.png"
+              src="icons/app-icon-v4.png"
               sx={{ width: 24, height: 24 }}
             />
             <Typography component="p" variant="h6">
