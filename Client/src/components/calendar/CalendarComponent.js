@@ -63,7 +63,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
       <Box
         onClick={goToBack}
         sx={{
-          flex: 1,
+          flex: "0 0 25%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -78,7 +78,14 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
       >
         <ArrowBack sx={{ color: theme.palette.primary.main, fontSize: "1.8rem" }} />
       </Box>
-      <Box display="flex" flexDirection="column" alignItems="center" flexGrow={2}>
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        flex="0 0 50%"
+        sx={{ minWidth: 0 }}
+      >
         <Typography
           variant="h6"
           component="div"
@@ -114,7 +121,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
       <Box
         onClick={goToNext}
         sx={{
-          flex: 1,
+          flex: "0 0 25%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
