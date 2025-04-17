@@ -31,6 +31,16 @@ const theme = createTheme({
         },
       },
     },
+	  MuiButtonBase: {
+            defaultProps: {
+                disableRipple: true,
+            },
+        },
+        MuiButtonGroup: {
+            defaultProps: {
+                disableRipple: true,
+            },
+        },
     MuiButton: {
       defaultProps: {
         disableRipple: true,
