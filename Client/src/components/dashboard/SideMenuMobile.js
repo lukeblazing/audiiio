@@ -46,6 +46,8 @@ function SideMenuMobile({ open, toggleDrawer }) {
           backgroundImage: 'none',
           backdropFilter: 'blur(22px)',
           background: 'transparent',
+          paddingTop: 'env(safe-area-inset-top, 16px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 16px)',
         },
       }}
     >

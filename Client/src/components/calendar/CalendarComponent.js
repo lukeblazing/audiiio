@@ -324,6 +324,9 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
     []
   );
 
+  const getBorderColor = (categoryId) => 
+    isValidCssColor(categoryId) ? categoryId : "#ccc";
+
   return (
     <Box
       sx={{
@@ -578,7 +581,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
                     marginBottom: "8px",
                     fontSize: "1rem",
                     textAlign: "left",
-                    border: (theme) => `1px solid ${theme.palette.divider}`,
+                    border: `1px solid ${getBorderColor(event.category_id)}`,
                   }}
                 >
                   <strong>{formatFullEventTime(event, selectedDate)}</strong>{" "}
