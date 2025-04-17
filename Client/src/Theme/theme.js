@@ -8,7 +8,6 @@ const theme = createTheme({
     },
     background: {
       default: 'transparent', // handled by your HTML/CSS gradient
-      paper: '#1e293b', // slightly lighter than the base background
     },
     text: {
       primary: '#ffffff',     // Main body text
