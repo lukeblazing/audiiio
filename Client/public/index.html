@@ -2,12 +2,50 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- include shrink‑to‑fit=no for broader iOS support -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no, viewport-fit=cover"
+    />
+
+    <title>Calendar</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="icons/app-icon-512x512.png" type="image/png" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- iOS Web App Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="apple-mobile-web-app-title" content="Our Shared Cal" />
+
+    <!-- iOS Icon Support -->
+    <link
+      rel="apple-touch-icon"
+      sizes="512x512"
+      href="icons/app-icon-512x512.png"
+    />
 
     <style>
-      /* 1 — Gradient layer lives on html (:root) */
-      html{
-        /* full‑viewport gradient */
+      /* 1) Reset & fallback */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background-color: #0f172a; /* fallback if gradient fails */
+      }
+
+      /* 2) Fullscreen gradient layer */
+      #gradient-bg {
+        position: fixed;
+        inset: 0; /* top:0; right:0; bottom:0; left:0 */
         background: linear-gradient(
           -45deg,
           #0f172a 0%,
@@ -15,49 +53,40 @@
           #0f172a 40%
         );
         background-size: 600% 600%;
-        height:100%;          /* makes sure html fills the viewport */
+        background-attachment: fixed;
+        z-index: -1; /* behind all content */
       }
-      
-      body {
-        background: transparent;
-        margin: 0;
 
-        /* iOS ≤11.1 fallback */
-        padding-top:    constant(safe-area-inset-top);
-        padding-right:  constant(safe-area-inset-right);
-        padding-bottom: constant(safe-area-inset-bottom);
-        padding-left:   constant(safe-area-inset-left);
+      /* 3) Safe‑area wrapper for your actual UI */
+      #safe-area-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
 
-        /* iOS ≥11.2 modern syntax */
-        padding-top:    env(safe-area-inset-top);
-        padding-right:  env(safe-area-inset-right);
+        /* push content out of notch & home‑indicator */
+        padding-top: env(safe-area-inset-top);
+        padding-right: env(safe-area-inset-right);
         padding-bottom: env(safe-area-inset-bottom);
-        padding-left:   env(safe-area-inset-left);
+        padding-left: env(safe-area-inset-left);
       }
-      </style>
-      
-      
 
-    <title>Our Shared Calendar</title>
-
-    <!-- Favicon -->
-    <link rel="icon" href="icons/app-icon-512x512.png" type="image/png">
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json" />
-
-    <!-- iOS Web App Settings -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0f172a" />
-    <meta name="apple-mobile-web-app-title" content="Our Shared Cal" />
-
-    <!-- iOS Icon Support -->
-    <link rel="apple-touch-icon" sizes="512x512" href="icons/app-icon-512x512.png" />
-
-
+      /* example: footer always sits above the home‑indicator */
+      .footer {
+        margin-top: auto;
+      }
+    </style>
   </head>
+
   <body>
-    <div id="root"></div>
+    <!-- the gradient div -->
+    <div id="gradient-bg"></div>
+
+    <!-- your “chrome” that respects the safe areas -->
+    <div id="safe-area-wrapper">
+      <div id="root">
+        <!-- your React app mounts here -->
+      </div>
+    </div>
   </body>
 </html>
