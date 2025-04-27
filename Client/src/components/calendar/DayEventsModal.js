@@ -96,8 +96,7 @@ function DayEventsModal({
 }) {
 
   const { isAuthenticated, userData } = useAuth();
-  const [mode, setMode] = useState('view'); // 'view' | 'create' | 'remove'
-  const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
+  const [mode, setMode] = useState('view'); // 'view' | 'create' | 'remove' | 'confirm_remove'
   const [eventToDelete, setEventToDelete] = useState(null);
 
   /* new-event form state */
@@ -181,7 +180,6 @@ function DayEventsModal({
         credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to delete event');
-      setConfirmDeleteModalOpen(false);
       setMode('view');
       fetchCalendarEvents();
     } catch (err) {
@@ -193,7 +191,7 @@ function DayEventsModal({
 
   const askDelete = (ev) => {
     setEventToDelete(ev);
-    setConfirmDeleteModalOpen(true);
+    setMode('confirm_remove');
   };
 
   /* ───────── JSX fragments ───────── */
@@ -222,8 +220,10 @@ function DayEventsModal({
         {mode === 'create'
           ? 'Create Event'
           : mode === 'remove'
-            ? 'Remove Event'
-            : (selectedDate ? format(selectedDate, 'EEEE, MMMM d, yyyy') : '')
+            ? 'Delete Event'
+            : mode === 'confirm_remove'
+              ? 'Delete?'
+              : (selectedDate ? format(selectedDate, 'EEEE, MMMM d, yyyy') : '')
         }
       </Typography>
 
@@ -355,6 +355,35 @@ function DayEventsModal({
     </>
   );
 
+  const ConfirmRemoveBody = (
+    <>
+      {eventToDelete && (
+        <>
+          <Box sx={{ width: '100%', maxHeight: '60vh', overflowY: 'auto', px: 1 }}>
+            <Typography
+              sx={{
+                background: 'rgba(0,0,0,0.05)',
+                borderRadius: 1,
+                p: 1.5,
+                mb: 1,
+                border: `1px solid ${getBorderColor(eventToDelete.category_id)}`
+              }}
+            >
+              <strong>{formatFullEventTime(eventToDelete, selectedDate)}</strong> {eventToDelete.title}
+              {eventToDelete.description && <> <br />• {eventToDelete.description}</>}
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 2, mt: 2, justifyContent: 'center' }}>
+            <Button disableRipple variant="outlined" onClick={() => setMode('remove')}>Cancel</Button>
+            <Button disableRipple variant="contained" onClick={() => onDeleteEvent(eventToDelete.id)}>Confirm</Button>
+          </Box>
+        </>
+      )}
+    </>
+  );
+
+
   /* ───────── render ───────── */
 
   return (
@@ -366,6 +395,7 @@ function DayEventsModal({
           {mode === 'view' && ViewBody}
           {mode === 'create' && CreateBody}
           {mode === 'remove' && RemoveBody}
+          {mode === 'confirm_remove' && ConfirmRemoveBody}
           {mode === 'view' && (
             <Button
               disableRipple
@@ -376,88 +406,6 @@ function DayEventsModal({
               Close
             </Button>
           )}
-        </Box>
-      </Modal>
-
-      {/* Confirmation Modal for Deleting an Event */}
-      <Modal
-        open={confirmDeleteModalOpen}
-        onClose={() => setConfirmDeleteModalOpen(false)}
-        aria-labelledby="confirm-delete-modal-title"
-        aria-describedby="confirm-delete-modal-description"
-        BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0)' } }}
-      >
-        <Box
-          sx={{
-            backdropFilter: 'blur(20px)',
-            borderRadius: '16px',
-            boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
-            padding: '16px',
-            maxWidth: '90vw',
-            maxHeight: '80vh',
-            width: '100%',
-            margin: 'auto',
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            overflowY: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Typography
-            id="confirm-delete-modal-title"
-            variant="h6"
-            component="h2"
-            sx={{
-              fontWeight: '600',
-              letterSpacing: '0.5px',
-              textAlign: 'center',
-              width: '100%',
-            }}
-          >
-            Confirm Cancellation
-          </Typography>
-          {eventToDelete && (
-            <Box
-              sx={{
-                mt: 2,
-                width: '100%',
-                borderRadius: '8px',
-                border: `1px solid ${eventToDelete.category_id ? eventToDelete.category_id : '#ccc'}`,
-                padding: '12px',
-                textAlign: 'left',
-              }}
-            >
-              <Typography variant="subtitle1">
-                <strong>{eventToDelete.title}</strong>
-              </Typography>
-              {eventToDelete.description && (
-                <Typography variant="body2">
-                  {eventToDelete.description}
-                </Typography>
-              )}
-            </Box>
-          )}
-          <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', maxWidth: '200px' }}>
-            <Button
-              onClick={() => setConfirmDeleteModalOpen(false)}
-              variant="outlined"
-              disableRipple
-              sx={{ color: 'white' }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => onDeleteEvent(eventToDelete.id)}
-              variant="contained"
-              disableRipple
-            >
-              Confirm
-            </Button>
-          </Box>
         </Box>
       </Modal>
     </>
