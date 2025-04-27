@@ -1,0 +1,467 @@
+// EventModal.js
+import React, { useState } from 'react';
+import {
+  Box,
+  Modal,
+  Typography,
+  IconButton,
+  Button,
+  TextField
+} from '@mui/material';
+import { Add, Remove, ArrowBackIosNew } from '@mui/icons-material';
+import {
+  format,
+  startOfDay,
+  endOfDay,
+  isBefore,
+  isAfter,
+  isSameDay,
+  isWithinInterval
+} from 'date-fns';
+import { useAuth } from '../authentication/AuthContext';
+
+/* ───────────────────────── helpers ───────────────────────── */
+
+const isAllDayEvent = (event, currentDay) => {
+  const eventStart = startOfDay(event.start);
+  const eventEnd = startOfDay(event.end);
+  const day = startOfDay(currentDay);
+
+  const startsBeforeDay = isBefore(eventStart, day);
+  const endsOnOrAfterDay = isAfter(eventEnd, day) || isSameDay(eventEnd, day);
+  return startsBeforeDay && endsOnOrAfterDay;
+};
+
+const formatFullEventTime = (event, date) => {
+  if (isAllDayEvent(event, date)) return 'All-day';
+
+  const fmt = (d) =>
+    format(d, 'h:mm a').toLowerCase().replace(':00', '');
+
+  // show only start if there’s no end or the end is 11:59 PM
+  if (!event.end || (event.end.getHours() === 23 && event.end.getMinutes() === 59))
+    return fmt(event.start);
+
+  // if it ends on a different day just show the start
+  if (!isSameDay(event.end, date)) return fmt(event.start);
+
+  return `${fmt(event.start)} – ${fmt(event.end)}`;
+};
+
+const isValidCssColor = (c) => {
+  const s = new Option().style;
+  s.color = c;
+  return s.color !== '';
+};
+
+const getRgbValues = (color) => {
+  const el = document.createElement('div');
+  el.style.color = color;
+  document.body.appendChild(el);
+  const rgb = getComputedStyle(el).color.match(/\d+/g) || [0, 0, 0];
+  document.body.removeChild(el);
+  return rgb.slice(0, 3).join(',');
+};
+
+const getBorderColor = (category) =>
+  isValidCssColor(category) ? category : 'dodgerblue';
+
+const sharedModalBoxSx = {
+  backdropFilter: 'blur(20px)',
+  borderRadius: 2,
+  border: '1px solid #ccc',
+  boxShadow: '0 8px 16px rgba(0,0,0,0.12)',
+  p: 2,
+  maxWidth: '90vw',
+  maxHeight: '80vh',
+  width: '100%',
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%,-50%)',
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center'
+};
+
+/* ══════════════════════  main component ═════════════════════ */
+
+function DayEventsModal({
+  open,
+  onClose,
+  selectedDate,
+  calendarEvents = [],
+  fetchCalendarEvents
+}) {
+
+  const { isAuthenticated, userData } = useAuth();
+  const [mode, setMode] = useState('view'); // 'view' | 'create' | 'remove'
+  const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
+
+  /* new-event form state */
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    description: '',
+    category_id: '',
+    start: '',
+    end_time: ''
+  });
+
+  const eventsOnDate = React.useMemo(() => {
+    if (!selectedDate) return [];
+    const dayStart = startOfDay(selectedDate);
+    const dayEnd = endOfDay(selectedDate);
+    return calendarEvents.filter(
+      (event) =>
+        isWithinInterval(event.start, { start: dayStart, end: dayEnd }) ||
+        isWithinInterval(event.end, { start: dayStart, end: dayEnd }) ||
+        (event.start < dayStart && event.end > dayEnd)
+    );
+  }, [calendarEvents, selectedDate]);
+
+  // Handle Create Event form submission
+  const onCreateEvent = async (e) => {
+    e.preventDefault();
+    if (!newEvent.title || !newEvent.start) {
+      alert('Please fill in required fields: Title, and Start Time.');
+      return;
+    }
+    let endTime = newEvent.end_time;
+    if (!endTime) {
+      const startDate = new Date(newEvent.start);
+      startDate.setHours(23, 59, 0, 0);
+      endTime = startDate; // use Date object directly
+
+    } else {
+      endTime = new Date(newEvent.end_time);
+    }
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: {
+            ...newEvent,
+            start: new Date(newEvent.start).toISOString(),
+            end_time: endTime.toISOString(),
+            created_by: userData ? userData.email : ''
+          },
+        }),
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to create event');
+      // Reset form and close modal on success
+      setNewEvent({
+        calendar_id: '',
+        category_id: '',
+        title: '',
+        description: '',
+        start: '',
+        end_time: '',
+        recurrence_rule: '',
+      });
+      setMode('view')
+      // Refresh events after creation
+      fetchCalendarEvents();
+    } catch (err) {
+      console.error(err);
+      alert('Error creating event');
+    }
+  };
+
+  // Function to delete an event
+  const onDeleteEvent = async (eventId) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: { id: eventId } }),
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to delete event');
+      setConfirmDeleteModalOpen(false);
+      setMode('view');
+      fetchCalendarEvents();
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting event');
+    }
+  };
+
+
+  const askDelete = (ev) => {
+    setEventToDelete(ev);
+    setConfirmDeleteModalOpen(true);
+  };
+
+  /* ───────── JSX fragments ───────── */
+
+  const Header = (
+    <Box
+      sx={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        mb: 1
+      }}
+    >
+      {mode === 'view' ? (
+        <IconButton aria-label="remove" onClick={() => setMode('remove')}>
+          <Remove />
+        </IconButton>
+      ) : (
+        <IconButton aria-label="back" onClick={() => setMode('view')}>
+          <ArrowBackIosNew />
+        </IconButton>
+      )}
+
+      <Typography variant="h6" sx={{ flex: 1, textAlign: 'center' }}>
+        {mode === 'create'
+          ? 'Create Event'
+          : mode === 'remove'
+            ? 'Remove Event'
+            : (selectedDate ? format(selectedDate, 'EEEE, MMMM d, yyyy') : '')
+        }
+      </Typography>
+
+      {mode === 'view' ? (
+        <IconButton
+          aria-label="add"
+          onClick={() => {
+            const defaultStart = new Date(selectedDate);
+            defaultStart.setHours(8, 0, 0, 0);
+            setNewEvent({
+              title: '',
+              description: '',
+              category_id: '',
+              start: defaultStart,  // <-- set it!
+              end_time: '',         // or null, depending
+            });
+            setMode('create');
+          }}
+        >
+          <Add />
+        </IconButton>
+      ) : (
+        <Box sx={{ width: 40 }} /> /* spacer */
+      )}
+    </Box>
+  );
+
+  const ViewBody = (
+    <Box sx={{ width: '100%', maxHeight: '60vh', overflowY: 'auto', px: 1 }}>
+      {eventsOnDate.length ? (
+        eventsOnDate.map((ev, idx) => (
+          <Typography
+            key={idx}
+            sx={{
+              background: 'rgba(0,0,0,0.05)',
+              borderRadius: 1,
+              p: 1.5, mb: 1,
+              border: `1px solid ${getBorderColor(ev.category_id)}`
+            }}
+          >
+            <strong>{formatFullEventTime(ev, selectedDate)}</strong> {ev.title}
+            {ev.description && <> <br />• {ev.description}</>}
+          </Typography>
+        ))
+      ) : (
+        <Typography sx={{ opacity: .8, textAlign: 'center' }}>
+          We're free!
+        </Typography>
+      )}
+    </Box>
+  );
+
+  const CreateBody = (
+    <Box component="form" onSubmit={onCreateEvent} sx={{ width: '100%', px: 1 }}>
+      <TextField
+        label="Title" fullWidth required margin="normal"
+        value={newEvent.title}
+        onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+      />
+      <TextField
+        label="Description" fullWidth margin="normal"
+        value={newEvent.description}
+        onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+      />
+      <TextField
+        label="Color" fullWidth margin="normal"
+        value={newEvent.category_id}
+        onChange={(e) => setNewEvent({ ...newEvent, category_id: e.target.value })}
+      />
+      <TextField
+        label="Start Time"
+        type="time"
+        fullWidth
+        margin="normal"
+        value={
+          newEvent.start
+            ? `${String(new Date(newEvent.start).getHours()).padStart(2, '0')}:${String(new Date(newEvent.start).getMinutes()).padStart(2, '0')}`
+            : '08:00'
+        }
+        onChange={(e) => {
+          const [hours, minutes] = e.target.value.split(':').map(Number);
+          const baseDate = newEvent.start ? new Date(newEvent.start) : new Date(selectedDate);
+          baseDate.setHours(hours, minutes, 0, 0);
+          setNewEvent({ ...newEvent, start: baseDate });
+        }}
+      />
+      <Box sx={{ display: 'flex', gap: 2, mt: 2, justifyContent: 'center' }}>
+        <Button disableRipple variant="outlined" onClick={() => setMode('view')}>Cancel</Button>
+        <Button disableRipple variant="contained" type="submit">Create</Button>
+      </Box>
+    </Box>
+  );
+
+  const RemoveBody = (
+    <>
+      <Box sx={{ width: '100%', maxHeight: '60vh', overflowY: 'auto', px: 1 }}>
+        {eventsOnDate.length ? (
+          eventsOnDate.map((ev, idx) => (
+            <Typography
+              key={idx}
+              sx={{
+                background: 'rgba(0,0,0,0.05)',
+                borderRadius: 1,
+                p: 1.5, mb: 1,
+                border: `1px solid ${getBorderColor(ev.category_id)}`
+              }}
+              onClick={() => askDelete(ev)}
+            >
+              <strong>{formatFullEventTime(ev, selectedDate)}</strong> {ev.title}
+              {ev.description && <> <br />• {ev.description}</>}
+            </Typography>
+          ))
+        ) : (
+          <Typography sx={{ opacity: .8, textAlign: 'center' }}>
+            No events to delete.
+          </Typography>
+        )}
+      </Box>
+
+
+      <Button
+        disableRipple
+        sx={{ mt: 2, maxWidth: 200, alignSelf: 'center' }}
+        variant="outlined"
+        onClick={() => setMode('view')}
+      >
+        Back
+      </Button>
+    </>
+  );
+
+  /* ───────── render ───────── */
+
+  return (
+    <>
+      {/* main modal */}
+      <Modal open={open} onClose={onClose} disableAutoFocus disableEnforceFocus>
+        <Box sx={sharedModalBoxSx}>
+          {Header}
+          {mode === 'view' && ViewBody}
+          {mode === 'create' && CreateBody}
+          {mode === 'remove' && RemoveBody}
+          {mode === 'view' && (
+            <Button
+              disableRipple
+              sx={{ mt: 2, maxWidth: 200 }}
+              variant="contained"
+              onClick={onClose}
+            >
+              Close
+            </Button>
+          )}
+        </Box>
+      </Modal>
+
+      {/* Confirmation Modal for Deleting an Event */}
+      <Modal
+        open={confirmDeleteModalOpen}
+        onClose={() => setConfirmDeleteModalOpen(false)}
+        aria-labelledby="confirm-delete-modal-title"
+        aria-describedby="confirm-delete-modal-description"
+        BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0)' } }}
+      >
+        <Box
+          sx={{
+            backdropFilter: 'blur(20px)',
+            borderRadius: '16px',
+            boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
+            padding: '16px',
+            maxWidth: '90vw',
+            maxHeight: '80vh',
+            width: '100%',
+            margin: 'auto',
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            id="confirm-delete-modal-title"
+            variant="h6"
+            component="h2"
+            sx={{
+              fontWeight: '600',
+              letterSpacing: '0.5px',
+              textAlign: 'center',
+              width: '100%',
+            }}
+          >
+            Confirm Cancellation
+          </Typography>
+          {eventToDelete && (
+            <Box
+              sx={{
+                mt: 2,
+                width: '100%',
+                borderRadius: '8px',
+                border: `1px solid ${eventToDelete.category_id ? eventToDelete.category_id : '#ccc'}`,
+                padding: '12px',
+                textAlign: 'left',
+              }}
+            >
+              <Typography variant="subtitle1">
+                <strong>{eventToDelete.title}</strong>
+              </Typography>
+              {eventToDelete.description && (
+                <Typography variant="body2">
+                  {eventToDelete.description}
+                </Typography>
+              )}
+            </Box>
+          )}
+          <Box sx={{ display: 'flex', gap: 2, mt: 2, width: '100%', maxWidth: '200px' }}>
+            <Button
+              onClick={() => setConfirmDeleteModalOpen(false)}
+              variant="outlined"
+              disableRipple
+              sx={{ color: 'white' }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => onDeleteEvent(eventToDelete.id)}
+              variant="contained"
+              disableRipple
+            >
+              Confirm
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+    </>
+  );
+}
+
+export default DayEventsModal;

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Calendar as BigCalendar,
   dateFnsLocalizer,
@@ -19,12 +19,13 @@ import {
 import enUS from "date-fns/locale/en-US";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
 import LoadingSpinner from "../loading-components/LoadingSpinner.js";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import Button from "@mui/material/Button";
-import { ArrowBack, ArrowForward } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, } from "@mui/icons-material";
+import { useAuth } from '../authentication/AuthContext';
+import DayEventsModal from "./DayEventsModal.js";
 
 // Set up the localizer
 const locales = { "en-US": enUS };
@@ -191,8 +192,10 @@ const formatFullEventTime = (event, date) => {
 };
 
 // The CalendarComponent now receives events via props
-const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
+const CalendarComponent = ({ events, selectedCalendars, setCalendarEvents }) => {
   const theme = useTheme();
+
+  const { isAuthenticated, userData } = useAuth();
 
   // Optionally filter events based on selected calendar filters
   const filteredEvents =
@@ -202,26 +205,63 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
 
   const [currentView, setCurrentView] = useState(Views.MONTH);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [modalOpen, setModalOpen] = useState(false);
+  const [dayEventsModalOpen, setDayEventsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedEvents, setSelectedEvents] = useState([]);
+  const [selectedEventsForDay, setSelectedEventsForDay] = useState([]);
+  const [isEventsLoading, setIsEventsLoading] = useState(true);
+
+  // State for Create Event modal: new event form
+  const [newEvent, setNewEvent] = useState({
+    calendar_id: '',
+    category_id: '',
+    title: '',
+    description: '',
+    start: '',
+    end_time: '',
+    recurrence_rule: '',
+  });
 
   const handleSelectSlot = useCallback(
     (slotInfo) => {
-      const dayStart = startOfDay(slotInfo.start);
-      const dayEnd = endOfDay(slotInfo.start);
-      const eventsOnDay = filteredEvents.filter(
-        (event) =>
-          isWithinInterval(event.start, { start: dayStart, end: dayEnd }) ||
-          isWithinInterval(event.end, { start: dayStart, end: dayEnd }) ||
-          (event.start < dayStart && event.end > dayEnd)
-      );
-      setSelectedEvents(eventsOnDay);
       setSelectedDate(slotInfo.start);
-      setModalOpen(true);
+      setDayEventsModalOpen(true);
     },
     [filteredEvents]
   );
+
+  // Function to fetch all events for the user
+  const fetchCalendarEvents = async () => {
+    setIsEventsLoading(true);
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getAllEventsForUser`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to fetch events');
+      const data = await response.json();
+      // Convert event dates to Date objects
+      const fetchedEvents = (data.events || []).map((event) => ({
+        ...event,
+        start: new Date(event.start),
+        end: event.end_time
+          ? new Date(event.end_time)
+          : new Date(new Date(event.start).setHours(23, 59, 0, 0)),
+      }));
+      setCalendarEvents(fetchedEvents);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsEventsLoading(false);
+    }
+  };
+
+  // Fetch calendar events on open
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCalendarEvents();
+    }
+  }, [isAuthenticated]);
 
   // Utility to check if the color is valid
   function isValidCssColor(color) {
@@ -338,7 +378,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
     []
   );
 
-  const getBorderColor = (categoryId) => 
+  const getBorderColor = (categoryId) =>
     isValidCssColor(categoryId) ? categoryId : "dodgerblue";
 
   return (
@@ -457,7 +497,7 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
   }
 `}</style>
 
-      {isLoading ? (
+      {isEventsLoading ? (
         <LoadingSpinner />
       ) : (
         <Box sx={{ flexGrow: 1, height: "100%", overflow: "hidden" }}>
@@ -542,98 +582,14 @@ const CalendarComponent = ({ events, isLoading, selectedCalendars }) => {
       )
       }
 
-      <Modal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-        disableAutoFocus
-        disableEnforceFocus
-      >
-        <Box
-          sx={{
-            backdropFilter: 'blur(20px)',
-            borderRadius: "16px",
-            border: '1px solid #ccc',
-            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.12)",
-            padding: "16px",
-            maxWidth: "90vw",
-            maxHeight: "80vh",
-            width: "100%",
-            margin: "auto",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: "600", textAlign: "center", width: "100%" }}
-          >
-            Events on {selectedDate ? format(selectedDate, "MMMM d, yyyy") : ""}
-          </Typography>
-          <Box
-            sx={{
-              mt: 2,
-              width: "100%",
-              maxHeight: "60vh",
-              overflowY: "auto",
-              padding: "0 8px",
-            }}
-          >
-            {selectedEvents.length > 0 ? (
-              selectedEvents.map((event, index) => (
-                <Typography
-                  key={index}
-                  sx={{
-                    background: "rgba(0, 0, 0, 0.05)",
-                    borderRadius: "8px",
-                    padding: "12px",
-                    marginBottom: "8px",
-                    fontSize: "1rem",
-                    textAlign: "left",
-                    border: `1px solid ${getBorderColor(event.category_id)}`,
-                  }}
-                >
-                  <strong>{formatFullEventTime(event, selectedDate)}</strong>{" "}
-                  {event.title}
-                  {event.description && (
-                    <>
-                      <br />• {event.description}
-                    </>
-                  )}
-                </Typography>
-              ))
-            ) : (
-              <Typography
-                sx={{ opacity: 0.8, fontSize: "1rem", textAlign: "center" }}
-              >
-                We're free!
-              </Typography>
-            )}
-          </Box>
-          <Button
-            onClick={() => setModalOpen(false)}
-            variant="contained"
-            disableRipple
-            sx={{
-              mt: 2,
-              width: "100%",
-              maxWidth: "200px",
-              fontSize: "1rem",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-          >
-            Close
-          </Button>
-        </Box>
-      </Modal>
+      <DayEventsModal
+        open={dayEventsModalOpen}
+        onClose={() => setDayEventsModalOpen(false)}
+        selectedDate={selectedDate}
+        calendarEvents={events}
+        fetchCalendarEvents={fetchCalendarEvents}
+      />
+
     </Box >
   );
 };

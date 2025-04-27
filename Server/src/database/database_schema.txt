@@ -62,11 +62,11 @@ Referenced by:
 
 
 
-                                Table "public.events"
+                                 Table "public.events"
      Column      |           Type           | Collation | Nullable |      Default      
 -----------------+--------------------------+-----------+----------+-------------------
  id              | uuid                     |           | not null | gen_random_uuid()
- calendar_id     | uuid                     |           | not null | 
+ calendar_id     | uuid                     |           |          | 
  category_id     | text                     |           |          | 
  title           | text                     |           | not null | 
  description     | text                     |           |          | 

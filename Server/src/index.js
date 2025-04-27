@@ -153,20 +153,16 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyToken, async (
 // POST /api/calendar/event
 // Create an event in a particular calendar.
 app.post('/api/calendar/event', AuthController.verifyToken, async (req, res) => {
-  console.log("hello there!")
   if (!req?.user?.role) {
     return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   }
-  console.log("hello2")
   if (!req?.user?.email) {
     return res.status(401).json({ message: 'Access denied. No email provided.' });
   }
-  console.log("hello3")
   const event = req.body.event;
-  if (!event || !event.calendar_id || !event.title || !event.start || !event.end_time) {
+  if (!event || !event.title || !event.start || !event.end_time) {
     return res.status(400).json({ message: 'Missing required event fields.' });
   }
-  console.log("hello4")
   try {
     const query = `
       INSERT INTO events (calendar_id, category_id, title, description, start, end_time, all_day, recurrence_rule, created_by)
@@ -174,7 +170,7 @@ app.post('/api/calendar/event', AuthController.verifyToken, async (req, res) => 
       RETURNING *
     `;
     const values = [
-      event.calendar_id,
+      event.calendar_id || null,
       event.category_id || null,
       event.title,
       event.description || null,
