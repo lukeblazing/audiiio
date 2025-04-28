@@ -40,7 +40,7 @@ function SideMenuMobile({ open, toggleDrawer }) {
     <Drawer
       anchor="left"
       open={open}
-      onClose={toggleDrawer(false)}
+      onClose={() => toggleDrawer(false)}
       sx={{
         [`& .${drawerClasses.paper}`]: {
           backgroundImage: 'none',
@@ -79,7 +79,7 @@ function SideMenuMobile({ open, toggleDrawer }) {
         </Stack>
         <Divider />
         <Stack sx={{ flexGrow: 1 }}>
-          <MenuContent />
+          <MenuContent toggleDrawer={toggleDrawer} />
           <Divider />
         </Stack>
         <Stack sx={{ p: 2 }}>

@@ -148,85 +148,79 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
   );
 };
 
-// Helper functions for event time formatting
-const isAllDayEvent = (event, currentDay) => {
-  const eventStart = startOfDay(event.start);
-  const eventEnd = startOfDay(event.end);
-  const viewingDay = startOfDay(currentDay);
-  const startsBeforeViewingDay = isBefore(eventStart, viewingDay);
-  const endsOnOrAfterViewingDay =
-    isAfter(eventEnd, viewingDay) || isSameDay(eventEnd, viewingDay);
-  return startsBeforeViewingDay && endsOnOrAfterViewingDay;
+const DateHeader = ({ label, date, calendarEvents, getEventStyle }) => {
+  return (
+    <div
+      style={{
+        minHeight: "100%",
+        display: "flex",
+        flexDirection: "column",
+        paddingLeft: "4px"
+      }}
+    >
+      <span>{label}</span>
+      {(calendarEvents || [])
+        .filter(
+          (event) =>
+            isWithinInterval(event.start, {
+              start: startOfDay(date),
+              end: endOfDay(date),
+            }) ||
+            isWithinInterval(event.end, {
+              start: startOfDay(date),
+              end: endOfDay(date),
+            }) ||
+            (event.start < startOfDay(date) && event.end > endOfDay(date))
+        )
+        .map((event, index) => {
+          const eventStartDate = format(event.start, "yyyy-MM-dd");
+          const eventEndDate = format(event.end, "yyyy-MM-dd");
+          const currentDate = format(date, "yyyy-MM-dd");
+
+          const startsToday = eventStartDate === currentDate;
+          const endsToday = eventEndDate === currentDate;
+
+          const isPastDay = isBefore(startOfDay(date), startOfDay(new Date()));
+
+          return (
+            <div
+              key={index}
+              style={getEventStyle(startsToday, endsToday, isPastDay, event)}
+            >
+              <span
+                style={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                }}
+              >
+                <strong>{event.title}</strong>
+              </span>
+            </div>
+          );
+        })}
+    </div>
+  );
 };
 
-const formatFullEventTime = (event, date) => {
-  if (isAllDayEvent(event, date)) {
-    return "All-day";
-  }
-
-  const startTime = format(event.start, "h:mm a").toLowerCase();
-  const formattedStart = startTime.includes(":00")
-    ? format(event.start, "h a").toLowerCase()
-    : startTime;
-
-  // If no end or it's 11:59 PM, only show start
-  if (
-    !event.end ||
-    (event.end.getHours?.() === 23 && event.end.getMinutes?.() === 59)
-  ) {
-    return formattedStart;
-  }
-
-  const isSameDay = format(event.end, "yyyy-MM-dd") === format(date, "yyyy-MM-dd");
-
-  if (!isSameDay) {
-    return formattedStart;
-  }
-
-  const endTime = format(event.end, "h:mm a").toLowerCase();
-  const formattedEnd = endTime.includes(":00")
-    ? format(event.end, "h a").toLowerCase()
-    : endTime;
-
-  return `${formattedStart} - ${formattedEnd}`;
-};
 
 // The CalendarComponent now receives events via props
-const CalendarComponent = ({ events, selectedCalendars, setCalendarEvents }) => {
+const CalendarComponent = ({ calendarEvents, setCalendarEvents }) => {
   const theme = useTheme();
 
-  const { isAuthenticated, userData } = useAuth();
-
-  // Optionally filter events based on selected calendar filters
-  const filteredEvents =
-    selectedCalendars && selectedCalendars.length > 0
-      ? events.filter((event) => selectedCalendars.includes(event.calendar_id))
-      : events;
+  const { isAuthenticated } = useAuth();
 
   const [currentView, setCurrentView] = useState(Views.MONTH);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [dayEventsModalOpen, setDayEventsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedEventsForDay, setSelectedEventsForDay] = useState([]);
   const [isEventsLoading, setIsEventsLoading] = useState(true);
-
-  // State for Create Event modal: new event form
-  const [newEvent, setNewEvent] = useState({
-    calendar_id: '',
-    category_id: '',
-    title: '',
-    description: '',
-    start: '',
-    end_time: '',
-    recurrence_rule: '',
-  });
 
   const handleSelectSlot = useCallback(
     (slotInfo) => {
       setSelectedDate(slotInfo.start);
       setDayEventsModalOpen(true);
     },
-    [filteredEvents]
+    [calendarEvents]
   );
 
   // Function to fetch all events for the user
@@ -378,219 +372,177 @@ const CalendarComponent = ({ events, selectedCalendars, setCalendarEvents }) => 
     []
   );
 
-  const getBorderColor = (categoryId) =>
-    isValidCssColor(categoryId) ? categoryId : "dodgerblue";
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        flexGrow: 1,
-        minHeight: "55vh",
-        marginRight: "2vh",
-        marginLeft: "2vh",
-        overflow: "hidden",
-      }}
-    >
+    <>
       <style>{`
-  /* Remove any existing backgrounds */
+        /* Remove any existing backgrounds */
 
-  .rbc-off-range-bg {
-    background-color: transparent;
-  }
+        .rbc-off-range-bg {
+          background-color: transparent;
+        }
 
-  .rbc-row {
-  border: none !important;
-}
+        .rbc-row {
+          border: none !important;
+        }
 
-.rbc-month-row + .rbc-month-row {
-  border-top: 1px solid ${theme.palette.divider} !important;
-}
+        .rbc-month-row + .rbc-month-row {
+          border-top: 1px solid ${theme.palette.divider} !important;
+        }
 
 
-  /* Selected cell styling */
-  .rbc-selected-cell {
-    background: rgba(16, 85, 153, 0.88) !important;
-    border-radius: 4px;
-    transition: background-color 0.2s ease-in-out;
-  }
+        /* Selected cell styling */
+        .rbc-selected-cell {
+          background: rgba(16, 85, 153, 0.88) !important;
+          border-radius: 4px;
+          transition: background-color 0.2s ease-in-out;
+        }
 
-  /* Month view wrapper */
-  .rbc-month-view {
-    border-radius: 0 0 8px 8px;
-    border: 4px solid ${theme.palette.divider};
-  }
-  .past-date {
-      position: relative;
-      background: rgba(250, 245, 240, 0.8); /* Soft white with a warm undertone */
-      border-radius: 4px;
-      overflow: hidden;
-  }
+        /* Month view wrapper */
+        .rbc-month-view {
+          border-radius: 0 0 8px 8px;
+          border: 4px solid ${theme.palette.divider};
+        }
+        .past-date {
+            position: relative;
+            background: rgba(250, 245, 240, 0.8); /* Soft white with a warm undertone */
+            border-radius: 4px;
+            overflow: hidden;
+        }
 
-  .past-date::before,
-  .past-date::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 40%;
-      height: 0.75px;
-      background: rgba(255, 250, 245, 0.4); /* Very soft white with slight opacity */
-      pointer-events: none;
-      z-index: 0;
-  }
+        .past-date::before,
+        .past-date::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40%;
+            height: 0.75px;
+            background: rgba(255, 250, 245, 0.4); /* Very soft white with slight opacity */
+            pointer-events: none;
+            z-index: 0;
+        }
 
-  .past-date::before {
-      transform: translate(-50%, -50%) rotate(45deg);
-      box-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1);
-  }
+        .past-date::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+            box-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1);
+        }
 
-  .past-date::after {
-      transform: translate(-50%, -50%) rotate(-45deg);
-      box-shadow: -0.5px -0.5px 1px rgba(0, 0, 0, 0.1);
-  }
+        .past-date::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+            box-shadow: -0.5px -0.5px 1px rgba(0, 0, 0, 0.1);
+        }
 
-  .rbc-month-view .rbc-day-bg:last-child {
-    border-right: none !important;
-  }
+        .rbc-month-view .rbc-day-bg:last-child {
+          border-right: none !important;
+        }
 
-  /* Header cell (day names) */
-  .rbc-header {
-    font-size: 1rem;
-    font-weight: bold;
-    border: 1px solid ${theme.palette.divider} !important;
-  }
+        /* Header cell (day names) */
+        .rbc-header {
+          font-size: 1rem;
+          font-weight: bold;
+          border: 1px solid ${theme.palette.divider} !important;
+        }
 
-  /* Hide 'show more' link */
-  .rbc-show-more {
-    display: none;
-  }
+        /* Hide 'show more' link */
+        .rbc-show-more {
+          display: none;
+        }
 
-  /* Date cell text styling */
-  .rbc-date-cell {
-    font-size: 1rem;
-    font-weight: normal;
-    transition: font-size 0.2s ease;
-  }
+        /* Date cell text styling */
+        .rbc-date-cell {
+          font-size: 1rem;
+          font-weight: normal;
+          transition: font-size 0.2s ease;
+        }
 
-  /* Responsive font sizes */
-  @media (max-width: 1024px) {
-    .rbc-header, .rbc-date-cell {
-      font-size: 0.8rem;
-    }
-  }
-  @media (max-width: 768px) {
-    .rbc-header, .rbc-date-cell {
-      font-size: 0.7rem;
-    }
-  }
-  @media (max-width: 480px) {
-    .rbc-header, .rbc-date-cell {
-      font-size: 0.6rem;
-    }
-  }
-  @media (max-width: 360px) {
-    .rbc-header, .rbc-date-cell {
-      font-size: 0.5rem;
-    }
-  }
-`}</style>
+        /* Responsive font sizes */
+        @media (max-width: 1024px) {
+          .rbc-header, .rbc-date-cell {
+            font-size: 0.8rem;
+          }
+        }
+        @media (max-width: 768px) {
+          .rbc-header, .rbc-date-cell {
+            font-size: 0.7rem;
+          }
+        }
+        @media (max-width: 480px) {
+          .rbc-header, .rbc-date-cell {
+            font-size: 0.6rem;
+          }
+        }
+        @media (max-width: 360px) {
+          .rbc-header, .rbc-date-cell {
+            font-size: 0.5rem;
+          }
+        }
+  `}</style>
 
       {isEventsLoading ? (
         <LoadingSpinner />
       ) : (
-        <Box sx={{ flexGrow: 1, height: "100%", overflow: "hidden" }}>
-          <BigCalendar
-            localizer={localizer}
-            events={filteredEvents}
-            startAccessor="start"
-            endAccessor="end"
-            selectable
-            longPressThreshold={0}
-            onSelectSlot={handleSelectSlot}
-            view={currentView}
-            views={[Views.MONTH, Views.DAY]}
-            date={currentDate}
-            onView={(view) => setCurrentView(view)}
-            onNavigate={(date) => setCurrentDate(date)}
-            drilldownView={null}
-            components={{
-              toolbar: CalendarToolbar,
-              month: {
-                dateHeader: ({ label, date }) => (
-                  <div
-                    style={{
-                      minHeight: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      paddingLeft: "4px"
-                    }}
-                  >
-                    <span>{label}</span>
-                    {filteredEvents
-                      .filter(
-                        (event) =>
-                          isWithinInterval(event.start, {
-                            start: startOfDay(date),
-                            end: endOfDay(date),
-                          }) ||
-                          isWithinInterval(event.end, {
-                            start: startOfDay(date),
-                            end: endOfDay(date),
-                          }) ||
-                          (event.start < startOfDay(date) && event.end > endOfDay(date))
-                      )
-                      .map((event, index) => {
-                        const eventStartDate = format(event.start, "yyyy-MM-dd");
-                        const eventEndDate = format(event.end, "yyyy-MM-dd");
-                        const currentDate = format(date, "yyyy-MM-dd");
-
-                        const startsToday = eventStartDate === currentDate;
-                        const endsToday = eventEndDate === currentDate;
-
-                        const isPastDay = isBefore(startOfDay(date), startOfDay(new Date()));
-
-                        return (
-                          <div
-                            key={index}
-                            style={getEventStyle(startsToday, endsToday, isPastDay, event)}
-                          >
-                            <span
-                              style={{
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                              }}
-                            >
-                              <strong>{event.title}</strong>
-                            </span>
-                          </div>
-                        );
-                      })}
-                  </div>
-                ),
-                event: () => null, // Suppress default event rendering in month view
-              },
-
-
+        <Box // outer "entire screen" box
+          sx={{
+            height: '100vh',          // take the whole viewport
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center', // horizontal centering
+            alignItems: 'center',    // vertical centering
+          }}
+        >
+          {/* Inner “Calendar” box */}
+          <Box
+            sx={{
+              aspectRatio: '8 / 9',
+              width: { xs: '90vw', sm: 420, md: 560, lg: 800, xl: 1100 },
+              bgcolor: 'background.paper',
             }}
-            dayPropGetter={dayPropGetter}
-            eventPropGetter={eventPropGetter}
-            style={{ height: "100%" }}
-          />
+          >
+            <BigCalendar
+              localizer={localizer}
+              events={calendarEvents}
+              startAccessor="start"
+              endAccessor="end"
+              selectable
+              longPressThreshold={0}
+              onSelectSlot={handleSelectSlot}
+              view={currentView}
+              views={[Views.MONTH, Views.DAY]}
+              date={currentDate}
+              onView={(view) => setCurrentView(view)}
+              onNavigate={(date) => setCurrentDate(date)}
+              drilldownView={null}
+              components={{
+                toolbar: CalendarToolbar,
+                month: {
+                  dateHeader: (props) => (
+                    <DateHeader
+                      {...props}
+                      calendarEvents={calendarEvents}
+                      getEventStyle={getEventStyle}
+                    />
+                  ),
+                  event: () => null, // Suppress default event rendering in month view
+                },
+
+
+              }}
+              dayPropGetter={dayPropGetter}
+              eventPropGetter={eventPropGetter}
+              style={{ height: "100%" }}
+            />
+
+            <DayEventsModal
+              open={dayEventsModalOpen}
+              onClose={() => setDayEventsModalOpen(false)}
+              selectedDate={selectedDate}
+              calendarEvents={calendarEvents}
+              fetchCalendarEvents={fetchCalendarEvents}
+            />
+          </Box>
         </Box>
-      )
-      }
-
-      <DayEventsModal
-        open={dayEventsModalOpen}
-        onClose={() => setDayEventsModalOpen(false)}
-        selectedDate={selectedDate}
-        calendarEvents={events}
-        fetchCalendarEvents={fetchCalendarEvents}
-      />
-
-    </Box >
+      )}
+    </>
   );
 };
 

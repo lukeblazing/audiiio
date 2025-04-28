@@ -6,6 +6,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import { useNavigate } from 'react-router-dom';
 // import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 // import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 // import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
@@ -21,13 +22,20 @@ const secondaryListItems = [
   // { text: 'Feedback', icon: <HelpRoundedIcon /> },
 ];
 
-export default function MenuContent() {
+export default function MenuContent({ toggleDrawer }) {
+  const navigate = useNavigate();
+
+  const handleCalendarClick = () => {
+    navigate('/');
+    toggleDrawer(false);
+  };
+
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: 'space-between' }}>
       <List>
         {mainListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-            <ListItemButton selected={index === 0} sx={{ py: 1.5 }}>
+            <ListItemButton disableRipple selected={index === 0} sx={{ py: 1.5 }} onClick={handleCalendarClick}>
               <ListItemIcon sx={{ minWidth: 48 }}>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: '1.1rem' }} />
             </ListItemButton>

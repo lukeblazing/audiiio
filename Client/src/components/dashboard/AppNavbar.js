@@ -56,7 +56,7 @@ export default function AppNavbar() {
   const [open, setOpen] = React.useState(false);
 
   // Function to toggle the drawer open state
-  const toggleDrawer = (newOpen) => () => {
+  const toggleDrawer = (newOpen) => {
     setOpen(newOpen);
   };
 
@@ -70,7 +70,7 @@ export default function AppNavbar() {
       <NavbarContainer>
         {/* Hamburger Menu Button on the Left with left spacing */}
         <Box sx={{ marginLeft: '16px' }}>
-          <MenuButton aria-label="menu" onClick={toggleDrawer(true)} size="large" sx={{ border: 'none' }}>
+          <MenuButton aria-label="menu" onClick={() => toggleDrawer(true)} size="large" sx={{ border: 'none' }}>
             <MenuRoundedIcon sx={{ fontSize: '2.5rem' }} />
           </MenuButton>
         </Box>

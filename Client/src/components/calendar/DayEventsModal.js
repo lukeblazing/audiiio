@@ -54,15 +54,6 @@ const isValidCssColor = (c) => {
   return s.color !== '';
 };
 
-const getRgbValues = (color) => {
-  const el = document.createElement('div');
-  el.style.color = color;
-  document.body.appendChild(el);
-  const rgb = getComputedStyle(el).color.match(/\d+/g) || [0, 0, 0];
-  document.body.removeChild(el);
-  return rgb.slice(0, 3).join(',');
-};
-
 const getBorderColor = (category) =>
   isValidCssColor(category) ? category : 'dodgerblue';
 
