@@ -240,7 +240,7 @@ const CalendarComponent = ({ calendarEvents, setCalendarEvents }) => {
         start: new Date(event.start),
         end: event.end_time
           ? new Date(event.end_time)
-          : new Date(new Date(event.start).setHours(23, 59, 0, 0)),
+          : new Date(new Date(event.start).setHours(23, 59, 0, 0)), // eventually this should be fixed to properly handle null end_times
       }));
       setCalendarEvents(fetchedEvents);
     } catch (err) {

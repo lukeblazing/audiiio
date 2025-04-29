@@ -118,15 +118,7 @@ function DayEventsModal({
       alert('Please fill in required fields: Title, and Start Time.');
       return;
     }
-    let endTime = newEvent.end_time;
-    if (!endTime) {
-      const startDate = new Date(newEvent.start);
-      startDate.setHours(23, 59, 0, 0);
-      endTime = startDate; // use Date object directly
-
-    } else {
-      endTime = new Date(newEvent.end_time);
-    }
+    let endTime = newEvent.end_time ? new Date(newEvent.end_time) : null;
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
         method: 'POST',
@@ -135,7 +127,7 @@ function DayEventsModal({
           event: {
             ...newEvent,
             start: new Date(newEvent.start).toISOString(),
-            end_time: endTime.toISOString(),
+            end_time: endTime ? endTime.toISOString() : null,
             created_by: userData ? userData.email : ''
           },
         }),

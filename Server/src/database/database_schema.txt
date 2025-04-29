@@ -71,7 +71,7 @@ Referenced by:
  title           | text                     |           | not null | 
  description     | text                     |           |          | 
  start           | timestamp with time zone |           | not null | 
- end_time        | timestamp with time zone |           | not null | 
+ end_time        | timestamp with time zone |           |          | 
  all_day         | boolean                  |           |          | false
  recurrence_rule | text                     |           |          | 
  created_at      | timestamp with time zone |           |          | now()

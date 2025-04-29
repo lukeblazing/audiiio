@@ -160,7 +160,7 @@ app.post('/api/calendar/event', AuthController.verifyToken, async (req, res) => 
     return res.status(401).json({ message: 'Access denied. No email provided.' });
   }
   const event = req.body.event;
-  if (!event || !event.title || !event.start || !event.end_time) {
+  if (!event || !event.title || !event.start) {
     return res.status(400).json({ message: 'Missing required event fields.' });
   }
   try {
@@ -174,11 +174,11 @@ app.post('/api/calendar/event', AuthController.verifyToken, async (req, res) => 
       event.category_id || null,
       event.title,
       event.description || null,
-      event.start,
-      event.end_time,
+      new Date(event.start).toISOString(),   // sanitize
+      event.end_time ? new Date(event.end_time).toISOString() : null,  // sanitize
       event.all_day || false,
       event.recurrence_rule || null,
-      event.created_by || null,
+      req.user.email,                        // always use auth token email as created_by
     ];
     const result = await db.query(query, values);
     return res.status(201).json({ event: result.rows[0] });
