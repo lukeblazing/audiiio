@@ -4,7 +4,7 @@
   "description": "A beautifully designed shared calendar app with a calming, modern interface.",
   "icons": [
     {
-      "src": "icons/app-icon-v4.png",
+      "src": "icons/app-icon-v5.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
