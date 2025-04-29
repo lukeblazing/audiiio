@@ -489,7 +489,7 @@ const CalendarComponent = ({ calendarEvents, setCalendarEvents }) => {
             justifyContent: 'center',
             alignItems: 'flex-start',
             pt: { xs: '102px', sm: '102px', md: '102px' }, // Push content below the navbar
-            overflowY: 'auto',
+            overflowY: 'Visible',
           }}
         >
           <Box

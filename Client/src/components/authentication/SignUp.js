@@ -40,17 +40,9 @@ const Card = styled(MuiCard)(({ theme }) => ({
 
 const SignUpContainer = styled(Stack)(({ theme }) => ({
   padding: 20,
-  marginTop: '10vh',
+  minHeight: '100vh',
   position: 'relative',
-  '&::before': {
-    content: '""',
-    display: 'block',
-    position: 'absolute',
-    zIndex: -1,
-    inset: 0,
-    ...theme.applyStyles('dark', {
-    }),
-  },
+  zIndex: 0,
 }));
 
 export default function SignUp() {
@@ -170,7 +162,6 @@ export default function SignUp() {
               sx={{
                 marginLeft: 1,
                 fontWeight: 'bold',
-                color: '#FFDD57',
                 fontFamily: 'Roboto, sans-serif',
                 fontSize: '1.5rem',
               }}
