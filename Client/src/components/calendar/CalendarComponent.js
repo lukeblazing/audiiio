@@ -481,20 +481,21 @@ const CalendarComponent = ({ calendarEvents, setCalendarEvents }) => {
       {isEventsLoading ? (
         <LoadingSpinner />
       ) : (
-        <Box // outer "entire screen" box
+        <Box
           sx={{
-            height: '100vh',          // take the whole viewport
+            minHeight: '100vh',
             width: '100%',
             display: 'flex',
-            justifyContent: 'center', // horizontal centering
-            alignItems: 'center',    // vertical centering
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            pt: { xs: '102px', sm: '102px', md: '102px' }, // Push content below the navbar
+            overflowY: 'auto',
           }}
         >
-          {/* Inner “Calendar” box */}
           <Box
             sx={{
               aspectRatio: '7 / 9',
-              width: { xs: '90vw', sm: 420, md: 560, lg: 800, xl: 1100 },
+              width: 'min(90vw, 800px)',
               bgcolor: 'background.paper',
             }}
           >
