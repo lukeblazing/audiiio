@@ -495,7 +495,6 @@ const CalendarComponent = ({ calendarEvents, setCalendarEvents }) => {
             sx={{
               aspectRatio: '7 / 9',
               width: { xs: '90vw', sm: 420, md: 560, lg: 800, xl: 1100 },
-              maxHeight: '90vh',
               bgcolor: 'background.paper',
             }}
           >
