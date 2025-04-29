@@ -293,6 +293,21 @@ function DayEventsModal({
           setNewEvent({ ...newEvent, start: baseDate });
         }}
       />
+      <TextField
+        label="End Time"
+        type="datetime-local"
+        fullWidth
+        margin="normal"
+        value={
+          newEvent.end_time
+            ? format(new Date(newEvent.end_time), "yyyy-MM-dd'T'HH:mm")
+            : ''
+        }
+        onChange={(e) => {
+          const date = new Date(e.target.value);
+          setNewEvent({ ...newEvent, end_time: date });
+        }}
+      />
       <Box sx={{ display: 'flex', gap: 2, mt: 2, justifyContent: 'center' }}>
         <Button disableRipple variant="outlined" onClick={() => setMode('view')}>Cancel</Button>
         <Button disableRipple variant="contained" type="submit">Create</Button>
