@@ -32,7 +32,7 @@ const isAllDayEvent = (event, currentDay) => {
   return startsBeforeDay && endsOnOrAfterDay;
 };
 
-const formatFullEventTime = (event, date) => {
+export const formatFullEventTime = (event, date) => {
   if (isAllDayEvent(event, date)) return 'All-day';
 
   const fmt = (d) =>
@@ -45,7 +45,7 @@ const formatFullEventTime = (event, date) => {
   // if it ends on a different day just show the start
   if (!isSameDay(event.end, date)) return fmt(event.start);
 
-  return `${fmt(event.start)} – ${fmt(event.end)}`;
+  return `${fmt(event.start)} - ${fmt(event.end)}`;
 };
 
 const isValidCssColor = (c) => {

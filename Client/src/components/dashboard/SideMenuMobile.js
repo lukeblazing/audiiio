@@ -14,7 +14,7 @@ import { useAuth } from '../authentication/AuthContext.js';
 import usePushSubscription from '../calendar/usePushSubscription';
 
 function SideMenuMobile({ open, toggleDrawer }) {
-  const { handleLogout, userData } = useAuth();
+  const { isAuthenticated, handleLogout, userData } = useAuth();
   const { enablePushSubscription } = usePushSubscription();
 
   const attemptLogout = async () => {
@@ -65,12 +65,12 @@ function SideMenuMobile({ open, toggleDrawer }) {
           >
             <Avatar
               sizes="small"
-              alt={userData ? userData.name : "User"}
+              alt={userData ? userData.name : "Guest"}
               src="icons/app-icon-v5.png"
               sx={{ width: 24, height: 24 }}
             />
             <Typography component="p" variant="h6">
-              {userData ? userData.name : 'User'}
+              {userData ? userData.name : 'Guest'}
             </Typography>
           </Stack>
           <MenuButton onClick={enablePushSubscription} sx={{ border: 'none' }}>
@@ -83,20 +83,37 @@ function SideMenuMobile({ open, toggleDrawer }) {
           <Divider />
         </Stack>
         <Stack sx={{ p: 2 }}>
-          <Button
-            variant="outlined"
-            fullWidth
-            disableRipple
-            startIcon={<LogoutRoundedIcon />}
-            onClick={attemptLogout}
-            sx={{
-              paddingLeft: { xs: '20vw', sm: '15vw', md: '100px' }, // Use viewport width (vw) on smaller screens, pixel-based for larger screens
-              paddingRight: { xs: '20vw', sm: '15vw', md: '100px' },
-              textTransform: 'none',
-            }}
-          >
-            Logout
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              variant="outlined"
+              fullWidth
+              disableRipple
+              startIcon={<LogoutRoundedIcon />}
+              onClick={attemptLogout}
+              sx={{
+                paddingLeft: { xs: '20vw', sm: '15vw', md: '100px' },
+                paddingRight: { xs: '20vw', sm: '15vw', md: '100px' },
+                textTransform: 'none',
+              }}
+            >
+              Logout
+            </Button>
+          ) : (
+            <Button
+              variant="outlined"
+              fullWidth
+              disableRipple
+              href="/sign-in"
+              sx={{
+                paddingLeft: { xs: '20vw', sm: '15vw', md: '100px' },
+                paddingRight: { xs: '20vw', sm: '15vw', md: '100px' },
+                textTransform: 'none',
+              }}
+            >
+              Sign In
+            </Button>
+          )}
+
         </Stack>
       </Stack>
     </Drawer>

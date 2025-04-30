@@ -11,9 +11,7 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 async function subscribeUser(registration) {
-  console.log("MADE IT zero");
   let subscription = await registration.pushManager.getSubscription();
-  console.log("MADE IT one", subscription);
   
   if (!subscription) {
     const vapidPublicKey = process.env.REACT_APP_VAPID_PUBLIC_KEY;
@@ -27,8 +25,6 @@ async function subscribeUser(registration) {
     });
   }
   
-  console.log("MADE IT HERE", subscription);
-  
   const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/subscribe`, {
     method: 'POST',
     credentials: 'include',
@@ -39,7 +35,6 @@ async function subscribeUser(registration) {
   });
   
   const data = await response.json();
-  console.log('Push subscription saved:', data);
 }
 
 async function unsubscribeUser(registration) {

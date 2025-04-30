@@ -34,11 +34,13 @@ export const AuthProvider = ({ children }) => {
       } else {
         setIsAuthenticated(false);
         setUserRole(null);
+        setUserData(null);
       }
     } catch (error) {
       console.error('Failed to fetch auth status:', error);
       setIsAuthenticated(false);
       setUserRole(null);
+      setUserData(null);
     } finally {
       setLoading(false);
     }
@@ -53,14 +55,13 @@ export const AuthProvider = ({ children }) => {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUserRole(null);
+    setUserData(null);
   };
 
   // Check authentication status on component mount
   useEffect(() => {
-    setLoading(true)
     checkAuthStatus();
   }, []);
-
 
   if (loading)
     return <LoadingSpinner />

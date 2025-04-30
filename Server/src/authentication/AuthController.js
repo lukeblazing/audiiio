@@ -166,6 +166,33 @@ class AuthController {
       return res.status(403).json({ message: 'Invalid or expired token.' });
     }
   }
+
+    // Middleware to verify the token from the cookie
+    verifyOptionalToken(req, res, next) {
+      const cookies = parseCookies(req.headers.cookie);
+      const token = cookies['token'];
+  
+      if (!token) {
+        return next();
+      }
+  
+      try {
+        // Verify the token using the secret key
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  
+        // Attach user info (email and role) to the request object
+        req.user = {
+          name: decoded.name,
+          email: decoded.email,
+          role: decoded.role
+        };
+  
+        // Continue to the next middleware or route handler
+        next();
+      } catch (err) {
+        return next();
+      }
+    }
 }
 
 export default new AuthController();

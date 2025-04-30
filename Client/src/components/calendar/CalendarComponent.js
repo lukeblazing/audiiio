@@ -26,6 +26,7 @@ import Button from "@mui/material/Button";
 import { ArrowBack, ArrowForward, } from "@mui/icons-material";
 import { useAuth } from '../authentication/AuthContext';
 import DayEventsModal from "./DayEventsModal.js";
+import { formatFullEventTime } from "./DayEventsModal.js";
 
 // Set up the localizer
 const locales = { "en-US": enUS };
@@ -75,7 +76,6 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           transition: "background-color 0.2s ease",
           "&:hover": {
             backgroundColor: "rgba(0,0,0,0.1)",
-            cursor: "pointer",
           },
         }}
       >
@@ -138,7 +138,6 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           transition: "background-color 0.2s ease",
           "&:hover": {
             backgroundColor: "rgba(0,0,0,0.1)",
-            cursor: "pointer",
           },
         }}
       >
@@ -193,7 +192,7 @@ const DateHeader = ({ label, date, calendarEvents, getEventStyle }) => {
                   overflow: "hidden",
                 }}
               >
-                <strong>{event.title}</strong>
+                <strong>{event.title || formatFullEventTime(event, date)}</strong>
               </span>
             </div>
           );
@@ -204,11 +203,12 @@ const DateHeader = ({ label, date, calendarEvents, getEventStyle }) => {
 
 
 // The CalendarComponent now receives events via props
-const CalendarComponent = ({ calendarEvents, setCalendarEvents }) => {
+const CalendarComponent = ({ }) => {
   const theme = useTheme();
 
   const { isAuthenticated } = useAuth();
 
+  const [calendarEvents, setCalendarEvents] = useState([]);
   const [currentView, setCurrentView] = useState(Views.MONTH);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [dayEventsModalOpen, setDayEventsModalOpen] = useState(false);
@@ -225,7 +225,6 @@ const CalendarComponent = ({ calendarEvents, setCalendarEvents }) => {
 
   // Function to fetch all events for the user
   const fetchCalendarEvents = async () => {
-    setIsEventsLoading(true);
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getAllEventsForUser`, {
         method: 'GET',
@@ -252,9 +251,7 @@ const CalendarComponent = ({ calendarEvents, setCalendarEvents }) => {
 
   // Fetch calendar events on open
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchCalendarEvents();
-    }
+    fetchCalendarEvents();
   }, [isAuthenticated]);
 
   // Utility to check if the color is valid
@@ -494,8 +491,8 @@ const CalendarComponent = ({ calendarEvents, setCalendarEvents }) => {
         >
           <Box
             sx={{
-              aspectRatio: '7 / 9',
-              width: 'min(90vw, 800px)',
+              width: '90vw',
+              height: 'min(max(60vh, 50vw), 120vw)',
               bgcolor: 'background.paper',
             }}
           >

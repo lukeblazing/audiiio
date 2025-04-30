@@ -123,24 +123,24 @@ app.get('/api/authCheck', AuthController.verifyToken, (req, res) => {
 // GET /api/calendar/getAllEventsForUser
 // Retrieve all events from any calendar associated with the user.
 // This includes calendars owned by the user and those where they are added.
-app.get('/api/calendar/getAllEventsForUser', AuthController.verifyToken, async (req, res) => {
-  if (!req?.user?.role) {
-    return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  }
-  if (!req?.user?.email) {
-    return res.status(401).json({ message: 'Access denied. No email provided.' });
-  }
-
-  const allowedEmails = ['lukeblazing@yahoo.com', 'chelsyjohnson1234@gmail.com'];
-  if (!allowedEmails.includes(req.user.email)) {
-    return res.status(200).json({ events: [] }); // return empty list if not approved
-  }
-
-  try {
-    const query = `
+app.get('/api/calendar/getAllEventsForUser', AuthController.verifyOptionalToken, async (req, res) => {
+  let query = ``;
+  if (req?.user?.role && req.user.email && req.user.name) {
+    query = `
       SELECT *
       FROM events
     `;
+  } else {
+    query = `
+      SELECT
+        start,
+        end_time,
+        'red' AS category_id
+      FROM events
+    `;
+  }
+
+  try {
     const result = await db.query(query);
     return res.status(200).json({ events: result.rows });
   } catch (err) {
@@ -289,43 +289,6 @@ app.get('/api/calendar/getCalendarsForUser', AuthController.verifyToken, async (
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-
-app.get('/api/calendar/events', async (req, res) => {
-  console.log("Received a request for events");
-  try {
-    // Query the events table. Adjust the SELECT statement if you need to filter or join data.
-    const result = await db.query(`
-      SELECT 
-        id, 
-        title, 
-        description, 
-        start, 
-        end_time, 
-        all_day, 
-        recurrence_rule 
-      FROM events
-    `);
-
-    // Map the returned rows to match the expected JSON format,
-    // renaming end_time to end for client-side compatibility.
-    const events = result.rows.map(event => ({
-      id: event.id,
-      title: event.title,
-      description: event.description,
-      start: event.start,
-      end: event.end_time,
-      // Optional: Include additional fields if needed
-      allDay: event.all_day,
-      recurrenceRule: event.recurrence_rule
-    }));
-
-    res.status(200).json(events);
-  } catch (error) {
-    console.error('Error fetching events:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
