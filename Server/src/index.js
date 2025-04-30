@@ -135,7 +135,7 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyOptionalToken,
       SELECT
         start,
         end_time,
-        'red' AS category_id
+        'white' AS category_id
       FROM events
     `;
   }
