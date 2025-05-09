@@ -486,13 +486,13 @@ const CalendarComponent = ({ }) => {
       ) : (
         <Box
           sx={{
-            height: `calc(100vh - ${72}px)`,
-            pt: '72px',
+            minHeight: '100vh',
             width: '100%',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'flex-start',
-            overflowY: 'auto',
+            pt: { xs: '102px', sm: '102px', md: '102px' }, // Push content below the navbar
+            overflowY: 'Visible',
           }}
         >
           <Box
