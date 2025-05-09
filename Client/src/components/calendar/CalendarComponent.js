@@ -148,6 +148,21 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
 };
 
 const DateHeader = ({ label, date, calendarEvents, getEventStyle }) => {
+  const sortedEvents = (calendarEvents || [])
+    .filter(
+      (event) =>
+        isWithinInterval(event.start, {
+          start: startOfDay(date),
+          end: endOfDay(date),
+        }) ||
+        isWithinInterval(event.end, {
+          start: startOfDay(date),
+          end: endOfDay(date),
+        }) ||
+        (event.start < startOfDay(date) && event.end > endOfDay(date))
+    )
+    .sort((a, b) => a.start - b.start); // Sort by start time
+
   return (
     <div
       style={{
@@ -158,48 +173,65 @@ const DateHeader = ({ label, date, calendarEvents, getEventStyle }) => {
       }}
     >
       <span>{label}</span>
-      {(calendarEvents || [])
-        .filter(
-          (event) =>
-            isWithinInterval(event.start, {
-              start: startOfDay(date),
-              end: endOfDay(date),
-            }) ||
-            isWithinInterval(event.end, {
-              start: startOfDay(date),
-              end: endOfDay(date),
-            }) ||
-            (event.start < startOfDay(date) && event.end > endOfDay(date))
-        )
-        .map((event, index) => {
-          const eventStartDate = format(event.start, "yyyy-MM-dd");
-          const eventEndDate = format(event.end, "yyyy-MM-dd");
-          const currentDate = format(date, "yyyy-MM-dd");
+      {sortedEvents.map((event, index) => {
+        const eventStartDate = format(event.start, "yyyy-MM-dd");
+        const eventEndDate = format(event.end, "yyyy-MM-dd");
+        const currentDate = format(date, "yyyy-MM-dd");
 
-          const startsToday = eventStartDate === currentDate;
-          const endsToday = eventEndDate === currentDate;
+        const startsToday = eventStartDate === currentDate;
+        const endsToday = eventEndDate === currentDate;
 
-          const isPastDay = isBefore(startOfDay(date), startOfDay(new Date()));
+        const isPastDay = isBefore(startOfDay(date), startOfDay(new Date()));
 
-          return (
-            <div
-              key={index}
-              style={getEventStyle(startsToday, endsToday, isPastDay, event)}
+        return (
+          <div
+            key={index}
+            style={getEventStyle(startsToday, endsToday, isPastDay, event)}
+          >
+            <span
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+              }}
             >
-              <span
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                }}
-              >
-                <strong>{event.title || formatFullEventTime(event, date)}</strong>
-              </span>
-            </div>
-          );
-        })}
+              <strong>{event.title || formatFullEventTime(event, date)}</strong>
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 };
+
+// Utility to check if the color is valid
+function isValidCssColor(color) {
+  const s = new Option().style;
+  s.color = color;
+  return s.color !== "";
+}
+
+// Function to convert color names to RGB
+function getRgbValues(color) {
+  const tempEl = document.createElement("div");
+  tempEl.style.color = color;
+  document.body.appendChild(tempEl);
+
+  const computedColor = getComputedStyle(tempEl).color;
+  document.body.removeChild(tempEl);
+
+  // Extract RGB values from computed color string
+  const rgbMatch = computedColor.match(/\d+/g);
+  return rgbMatch ? rgbMatch.slice(0, 3).join(",") : "0,0,0";
+}
+
+export function eventBackground (eventCategoryId) {
+
+  const borderColor = isValidCssColor(eventCategoryId) ? eventCategoryId : "dodgerblue";
+
+  return isValidCssColor(borderColor)
+  ? `rgba(${getRgbValues(borderColor)}, 0.04)`
+  : "transparent";
+}
 
 
 // The CalendarComponent now receives events via props
@@ -254,34 +286,8 @@ const CalendarComponent = ({ }) => {
     fetchCalendarEvents();
   }, [isAuthenticated]);
 
-  // Utility to check if the color is valid
-  function isValidCssColor(color) {
-    const s = new Option().style;
-    s.color = color;
-    return s.color !== "";
-  }
-
-  // Function to convert color names to RGB
-  function getRgbValues(color) {
-    const tempEl = document.createElement("div");
-    tempEl.style.color = color;
-    document.body.appendChild(tempEl);
-
-    const computedColor = getComputedStyle(tempEl).color;
-    document.body.removeChild(tempEl);
-
-    // Extract RGB values from computed color string
-    const rgbMatch = computedColor.match(/\d+/g);
-    return rgbMatch ? rgbMatch.slice(0, 3).join(",") : "0,0,0";
-  }
-
   const getEventStyle = (startsToday, endsToday, isPastDay, event) => {
     const borderColor = isValidCssColor(event.category_id) ? event.category_id : "dodgerblue";
-
-    // Gradient background using RGBA
-    const semiTransparentBackground = isValidCssColor(borderColor)
-      ? `linear-gradient(to right, rgba(${getRgbValues(borderColor)}, 0.1), rgba(${getRgbValues(borderColor)}, 0.05))`
-      : "transparent";
 
     const baseStyle = {
       fontSize: "0.5rem",
@@ -295,7 +301,7 @@ const CalendarComponent = ({ }) => {
       marginBottom: "2px",
       display: "flex",
       alignItems: "center",
-      background: semiTransparentBackground,
+      background: eventBackground(event.category_id),
       filter: isPastDay ? "blur(1px) brightness(0.85)" : "none",
     };
 
@@ -447,7 +453,7 @@ const CalendarComponent = ({ }) => {
 
         /* Date cell text styling */
         .rbc-date-cell {
-          font-size: 1rem;
+          font-size: 1.4rem;
           font-weight: normal;
           transition: font-size 0.2s ease;
         }
@@ -455,22 +461,22 @@ const CalendarComponent = ({ }) => {
         /* Responsive font sizes */
         @media (max-width: 1024px) {
           .rbc-header, .rbc-date-cell {
-            font-size: 0.8rem;
+            font-size: 1.3rem;
           }
         }
         @media (max-width: 768px) {
           .rbc-header, .rbc-date-cell {
-            font-size: 0.7rem;
+            font-size: 1.1rem;
           }
         }
         @media (max-width: 480px) {
           .rbc-header, .rbc-date-cell {
-            font-size: 0.6rem;
+            font-size: 1.0rem;
           }
         }
         @media (max-width: 360px) {
           .rbc-header, .rbc-date-cell {
-            font-size: 0.5rem;
+            font-size: 0.9rem;
           }
         }
   `}</style>

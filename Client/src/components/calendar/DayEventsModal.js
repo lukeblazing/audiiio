@@ -19,6 +19,7 @@ import {
   isWithinInterval
 } from 'date-fns';
 import { useAuth } from '../authentication/AuthContext';
+import { eventBackground } from './CalendarComponent';
 
 /* ───────────────────────── helpers ───────────────────────── */
 
@@ -108,7 +109,7 @@ function DayEventsModal({
         isWithinInterval(event.start, { start: dayStart, end: dayEnd }) ||
         isWithinInterval(event.end, { start: dayStart, end: dayEnd }) ||
         (event.start < dayStart && event.end > dayEnd)
-    );
+    ).sort((a, b) => a.start - b.start);
   }, [calendarEvents, selectedDate]);
 
   // Handle Create Event form submission
@@ -189,14 +190,14 @@ function DayEventsModal({
         mb: 1
       }}
     >
-      {mode === 'view' ? (
+      {(mode === 'view' && isAuthenticated) ? (
         <IconButton aria-label="remove" onClick={() => setMode('remove')}>
           <Remove />
         </IconButton>
-      ) : (
+      ) : ( isAuthenticated && (
         <IconButton aria-label="back" onClick={() => setMode('view')}>
           <ArrowBackIosNew />
-        </IconButton>
+        </IconButton>)
       )}
 
       <Typography variant="h6" sx={{ flex: 1, textAlign: 'center' }}>
@@ -210,9 +211,10 @@ function DayEventsModal({
         }
       </Typography>
 
-      {mode === 'view' ? (
+      {(mode === 'view' && isAuthenticated) ? (
         <IconButton
           aria-label="add"
+          sx={{ fontSize: 50 }}
           onClick={() => {
             const defaultStart = new Date(selectedDate);
             defaultStart.setHours(8, 0, 0, 0);
@@ -220,17 +222,17 @@ function DayEventsModal({
               title: '',
               description: '',
               category_id: '',
-              start: defaultStart,  // <-- set it!
-              end_time: '',         // or null, depending
+              start: defaultStart,
+              end_time: '',
             });
             setMode('create');
           }}
         >
           <Add />
         </IconButton>
-      ) : (
+      ) : ( isAuthenticated && (
         <Box sx={{ width: 40 }} /> /* spacer */
-      )}
+      ))}
     </Box>
   );
 
@@ -241,7 +243,7 @@ function DayEventsModal({
           <Typography
             key={idx}
             sx={{
-              background: 'rgba(0,0,0,0.05)',
+              background: eventBackground(ev.category_id),
               borderRadius: 1,
               p: 1.5, mb: 1,
               border: `1px solid ${getBorderColor(ev.category_id)}`
@@ -281,6 +283,11 @@ function DayEventsModal({
         type="time"
         fullWidth
         margin="normal"
+        sx={{
+          '& input::-webkit-datetime-edit, & input::-webkit-datetime-edit-fields-wrapper': {
+            padding: 0,
+          },
+        }}
         value={
           newEvent.start
             ? `${String(new Date(newEvent.start).getHours()).padStart(2, '0')}:${String(new Date(newEvent.start).getMinutes()).padStart(2, '0')}`
@@ -298,6 +305,11 @@ function DayEventsModal({
         type="datetime-local"
         fullWidth
         margin="normal"
+        sx={{
+          '& input::-webkit-datetime-edit, & input::-webkit-datetime-edit-fields-wrapper': {
+            padding: 0,
+          },
+        }}
         value={
           newEvent.end_time
             ? format(new Date(newEvent.end_time), "yyyy-MM-dd'T'HH:mm")

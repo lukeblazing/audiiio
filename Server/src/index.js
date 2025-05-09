@@ -135,7 +135,8 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyOptionalToken,
       SELECT
         start,
         end_time,
-        'gray' AS category_id
+        'gray' AS category_id,
+        'Busy' AS title
       FROM events
     `;
   }

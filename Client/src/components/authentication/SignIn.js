@@ -219,21 +219,6 @@ export default function SignIn() {
                 color: 'rgba(0, 0, 0, 0.6)'
               }}
             >
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-                sx={{
-                  color: 'rgba(0, 0, 0, 0.6)'
-                }}
-              />
-              <Button
-                onClick={handleForgotPwdOpen}
-                variant="text"
-                disableRipple
-                sx={{ textTransform: 'none', padding: 0, border: "none", background: "transparent" }}
-              >
-                Forgot your password?
-              </Button>
             </Box>
             <Button
               type="submit"
@@ -261,10 +246,9 @@ export default function SignIn() {
               )}
             </Button>
             <Typography sx={{ textAlign: 'center' }}>
-              Don&apos;t have an account?{' '}
               <span>
-                <Link component={RouterLink} to="/sign-up" variant="body2">
-                  Sign up
+                <Link component={RouterLink} to="/" variant="body2">
+                  Cancel
                 </Link>
               </span>
             </Typography>
