@@ -194,7 +194,7 @@ const DateHeader = ({ label, date, calendarEvents, getEventStyle }) => {
                 overflow: "hidden",
               }}
             >
-              <strong>{(event.title && event.title != "Busy") ? event.title : formatFullEventTime(event, date)}</strong>
+              <strong>{(event.title) ? event.title : formatFullEventTime(event, date)}</strong>
             </span>
           </div>
         );
