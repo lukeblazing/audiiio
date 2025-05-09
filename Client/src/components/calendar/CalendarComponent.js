@@ -224,13 +224,13 @@ function getRgbValues(color) {
   return rgbMatch ? rgbMatch.slice(0, 3).join(",") : "0,0,0";
 }
 
-export function eventBackground (eventCategoryId) {
+export function eventBackground(eventCategoryId) {
 
   const borderColor = isValidCssColor(eventCategoryId) ? eventCategoryId : "dodgerblue";
 
   return isValidCssColor(borderColor)
-  ? `rgba(${getRgbValues(borderColor)}, 0.04)`
-  : "transparent";
+    ? `rgba(${getRgbValues(borderColor)}, 0.06)`
+    : "transparent";
 }
 
 
@@ -508,6 +508,7 @@ const CalendarComponent = ({ }) => {
               startAccessor="start"
               endAccessor="end"
               selectable
+              onSelecting={() => false}
               longPressThreshold={0}
               onSelectSlot={handleSelectSlot}
               view={currentView}
