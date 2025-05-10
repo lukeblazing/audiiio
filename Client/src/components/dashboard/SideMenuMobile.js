@@ -56,6 +56,7 @@ function SideMenuMobile({ open, toggleDrawer }) {
         sx={{
           maxWidth: '70dvw',
           minWidth: '20dvw',
+          height: '100%'
         }}
       >
         <Stack direction="row" sx={{ p: 2, pb: 0, gap: 1 }}>

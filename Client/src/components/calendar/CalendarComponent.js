@@ -486,8 +486,8 @@ const CalendarComponent = ({ }) => {
       ) : (
         <Box
           sx={{
-            height: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 72px',
             width: '100%',
+            marginTop: '10vh',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'flex-start',
