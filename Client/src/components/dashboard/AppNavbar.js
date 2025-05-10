@@ -18,7 +18,8 @@ const NavbarContainer = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   zIndex: theme.zIndex.appBar, // Ensures the navbar is above other elements
-  height: 'calc(10vh + env(safe-area-inset-top))',
+  height: '72px',
+  paddingTop: 'env(safe-area-inset-top)',
   top: 'env(safe-area-inset-top)'
 }));
 
