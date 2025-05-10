@@ -41,8 +41,11 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   paddingLeft: 20,
   paddingRight: 20,
   height: '100vh',
+  paddingTop: 'env(safe-area-inset-top)', // Top safe area inset
+  paddingBottom: 'env(safe-area-inset-bottom)',
   position: 'relative',
   zIndex: 0,
+  boxSizing: 'border-box',
 }));
 
 export default function SignIn() {
