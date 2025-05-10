@@ -19,6 +19,7 @@ const NavbarContainer = styled(Box)(({ theme }) => ({
   justifyContent: 'space-between',
   zIndex: theme.zIndex.appBar, // Ensures the navbar is above other elements
   height: '72px',
+  top: 'env(safe-area-inset-top)'
 }));
 
 // Styled Typography for the "Events" text with custom font and bold weight
