@@ -12,7 +12,6 @@ import MenuButton from './MenuButton.js';
 // Styled Container using Box for layout with proper responsive height
 const NavbarContainer = styled(Box)(({ theme }) => ({
   position: 'fixed', // Fixes the navbar at the top
-  top: 'env(safe-area-inset-top)',
   left: 0,
   width: '100%',
   display: 'flex',
