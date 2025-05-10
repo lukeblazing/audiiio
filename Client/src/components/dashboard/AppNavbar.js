@@ -14,6 +14,7 @@ const NavbarContainer = styled(Box)(({ theme }) => ({
   position: 'fixed', // Fixes the navbar at the top
   left: 0,
   width: '100%',
+  top: 'env(safe-area-inset-top)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
