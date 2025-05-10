@@ -6,7 +6,9 @@ import {
   Typography,
   IconButton,
   Button,
-  TextField
+  TextField,
+  Stack,
+  Collapse
 } from '@mui/material';
 import { Add, Remove, ArrowBackIosNew } from '@mui/icons-material';
 import {
@@ -20,6 +22,7 @@ import {
 } from 'date-fns';
 import { useAuth } from '../authentication/AuthContext';
 import { eventBackground } from './CalendarComponent';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 /* ───────────────────────── helpers ───────────────────────── */
 
@@ -90,6 +93,7 @@ function DayEventsModal({
   const { isAuthenticated, userData } = useAuth();
   const [mode, setMode] = useState('view'); // 'view' | 'create' | 'remove' | 'confirm_remove'
   const [eventToDelete, setEventToDelete] = useState(null);
+  const [openDescAndColor, setOpenDescAndColor] = useState(false);
 
   /* new-event form state */
   const [newEvent, setNewEvent] = useState({
@@ -194,7 +198,7 @@ function DayEventsModal({
         <IconButton aria-label="remove" onClick={() => setMode('remove')}>
           <Remove />
         </IconButton>
-      ) : ( isAuthenticated && (
+      ) : (isAuthenticated && (
         <IconButton aria-label="back" onClick={() => setMode('view')}>
           <ArrowBackIosNew />
         </IconButton>)
@@ -230,7 +234,7 @@ function DayEventsModal({
         >
           <Add />
         </IconButton>
-      ) : ( isAuthenticated && (
+      ) : (isAuthenticated && (
         <Box sx={{ width: 40 }} /> /* spacer */
       ))}
     </Box>
@@ -263,21 +267,51 @@ function DayEventsModal({
 
   const CreateBody = (
     <Box component="form" onSubmit={onCreateEvent} sx={{ width: '100%', px: 1 }}>
-      <TextField
-        label="Title" fullWidth required margin="normal"
-        value={newEvent.title}
-        onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-      />
-      <TextField
-        label="Description" fullWidth margin="normal"
-        value={newEvent.description}
-        onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-      />
-      <TextField
-        label="Color" fullWidth margin="normal"
-        value={newEvent.category_id}
-        onChange={(e) => setNewEvent({ ...newEvent, category_id: e.target.value })}
-      />
+      <Stack direction="row" spacing={2} alignItems="flex-start">
+        <TextField
+          label="Title" fullWidth required margin="normal"
+          value={newEvent.title}
+          onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+        />
+        <IconButton
+          disableRipple
+          onClick={() => setOpenDescAndColor((prev) => !prev)}
+          aria-label={
+            openDescAndColor ? 'Collapse optional fields' : 'Expand optional fields'
+          }
+          sx={{
+            mt: 2, // aligns the button with the TextField’s label
+            height: 56, // same as TextField height
+            width: 56, // square shape
+            borderRadius: '6px', // matches TextField rounded corners
+            color: '#fff', // text color
+            backgroundColor: 'transparent', // same as TextField background
+            '&:hover': {
+              backgroundColor: '#334155', // slightly lighter for hover
+            },
+            border: '1px solid rgba(255,255,255,0.23)', // matching border
+            transition: 'transform 0.25s, background-color 0.2s',
+            transform: openDescAndColor ? 'rotate(180deg)' : 'none',
+          }}
+          size="small"
+        >
+          <ExpandMoreIcon />
+        </IconButton>
+      </Stack>
+      <Collapse in={openDescAndColor} timeout="auto" unmountOnExit>
+        <Stack spacing={2} sx={{ mt: 2 }}>
+          <TextField
+            label="Description" fullWidth margin="normal"
+            value={newEvent.description}
+            onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+          />
+          <TextField
+            label="Color" fullWidth margin="normal"
+            value={newEvent.category_id}
+            onChange={(e) => setNewEvent({ ...newEvent, category_id: e.target.value })}
+          />
+        </Stack>
+      </Collapse>
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
         <TextField
           required
