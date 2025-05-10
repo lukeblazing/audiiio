@@ -48,6 +48,8 @@ function SideMenuMobile({ open, toggleDrawer }) {
           background: 'transparent',
           paddingTop: 'env(safe-area-inset-top, 16px)',
           paddingBottom: 'env(safe-area-inset-bottom, 16px)',
+          minHeight: 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom))', // Updated height
+          boxSizing: 'border-box', // Include padding in height calculation
         },
       }}
     >
