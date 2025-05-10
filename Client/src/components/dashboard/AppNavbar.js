@@ -22,11 +22,6 @@ const NavbarContainer = styled(Box)(({ theme }) => ({
 
   // Default height for medium and larger screens
   height: '72px',
-
-  // Responsive height adjustments using theme breakpoints
-  [theme.breakpoints.down('sm')]: {
-    height: '56px', // Height for small and extra-small screens
-  },
 }));
 
 // Styled Typography for the "Events" text with custom font and bold weight
