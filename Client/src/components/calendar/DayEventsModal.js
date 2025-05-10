@@ -278,7 +278,7 @@ function DayEventsModal({
         value={newEvent.category_id}
         onChange={(e) => setNewEvent({ ...newEvent, category_id: e.target.value })}
       />
-      <Box sx={{ display: 'flex', gap: 2, mt: 2, justifyContent: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
         <TextField
           required
           label="Start Time"
