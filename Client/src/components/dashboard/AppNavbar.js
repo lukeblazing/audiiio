@@ -11,16 +11,13 @@ import MenuButton from './MenuButton.js';
 
 // Styled Container using Box for layout with proper responsive height
 const NavbarContainer = styled(Box)(({ theme }) => ({
-  position: 'fixed', // Fixes the navbar at the top
+  position: 'fixed',
   left: 0,
   width: '100%',
-  top: 'env(safe-area-inset-top)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   zIndex: theme.zIndex.appBar, // Ensures the navbar is above other elements
-
-  // Default height for medium and larger screens
   height: '72px',
 }));
 
