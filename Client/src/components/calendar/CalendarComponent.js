@@ -487,11 +487,11 @@ const CalendarComponent = ({ }) => {
         <Box
           sx={{
             width: '100%',
-            paddingTop: '72px',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'flex-start',
-            overflowY: 'Visible',
+            overflowY: 'visible',
+            paddingTop: 'calc(102px + env(safe-area-inset-top))'
           }}
         >
           <Box

@@ -20,6 +20,7 @@ const NavbarContainer = styled(Box)(({ theme }) => ({
   zIndex: theme.zIndex.appBar, // Ensures the navbar is above other elements
   height: '72px',
   paddingTop: 'env(safe-area-inset-top)',
+  paddingBottom: 'env(safe-area-inset-bottom)'
 }));
 
 // Styled Typography for the "Events" text with custom font and bold weight
