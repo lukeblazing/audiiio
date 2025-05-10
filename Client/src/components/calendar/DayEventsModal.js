@@ -278,78 +278,81 @@ function DayEventsModal({
         value={newEvent.category_id}
         onChange={(e) => setNewEvent({ ...newEvent, category_id: e.target.value })}
       />
-      <TextField
-        label="Start Time"
-        type="time"
-        fullWidth
-        margin="normal"
-        sx={{
-          '& input[type="time"]': {
-            WebkitAppearance: 'none', // Disable native iOS appearance
-            MozAppearance: 'textfield', // For Firefox
-            appearance: 'textfield', // General CSS property
-            height: 56, // Match MUI's default TextField height
-            padding: '0 14px', // Adjusted padding to center the text vertically
-            lineHeight: 'normal', // Reset line height to normal
-            display: 'flex', // Use flex to align items
-            alignItems: 'center', // Vertically center
-            boxSizing: 'border-box',
-            borderRadius: 4,
-          },
-          '& input::-webkit-calendar-picker-indicator': {
-            opacity: 1,
-            width: 24,
-            height: 24,
-            cursor: 'pointer',
-          },
-        }}
-        value={
-          newEvent.start
-            ? `${String(new Date(newEvent.start).getHours()).padStart(2, '0')}:${String(new Date(newEvent.start).getMinutes()).padStart(2, '0')}`
-            : '08:00'
-        }
-        onChange={(e) => {
-          const [hours, minutes] = e.target.value.split(':').map(Number);
-          const baseDate = newEvent.start ? new Date(newEvent.start) : new Date(selectedDate);
-          baseDate.setHours(hours, minutes, 0, 0);
-          setNewEvent({ ...newEvent, start: baseDate });
-        }}
-      />
-      <TextField
-        label="End Time"
-        type="datetime-local"
-        fullWidth
-        margin="normal"
-        sx={{
-          '& input[type="datetime-local"]': {
-            WebkitAppearance: 'none',
-            MozAppearance: 'textfield',
-            appearance: 'textfield',
-            height: 56,
-            padding: '0 14px',
-            lineHeight: 'normal',
-            display: 'flex',
-            alignItems: 'center',
-            boxSizing: 'border-box',
-            borderRadius: 4,
-          },
-          '& input::-webkit-calendar-picker-indicator': {
-            opacity: 1,
-            width: 24,
-            height: 24,
-            cursor: 'pointer',
-          },
-        }}
-        value={
-          newEvent.end_time
-            ? format(new Date(newEvent.end_time), "yyyy-MM-dd'T'HH:mm")
-            : ''
-        }
-        onChange={(e) => {
-          const date = new Date(e.target.value);
-          setNewEvent({ ...newEvent, end_time: date });
-        }}
-      />
+      <Box sx={{ display: 'flex', gap: 2, mt: 2, justifyContent: 'center' }}>
+        <TextField
+          required
+          label="Start Time"
+          type="time"
+          fullWidth
+          margin="normal"
+          sx={{
+            '& input[type="time"]': {
+              WebkitAppearance: 'none', // Disable native iOS appearance
+              MozAppearance: 'textfield', // For Firefox
+              appearance: 'textfield', // General CSS property
+              height: 56, // Match MUI's default TextField height
+              padding: '0 14px', // Adjusted padding to center the text vertically
+              lineHeight: 'normal', // Reset line height to normal
+              display: 'flex', // Use flex to align items
+              alignItems: 'center', // Vertically center
+              boxSizing: 'border-box',
+              borderRadius: 4,
+            },
+            '& input::-webkit-calendar-picker-indicator': {
+              opacity: 1,
+              width: 24,
+              height: 24,
+              cursor: 'pointer',
+            },
+          }}
+          value={
+            newEvent.start
+              ? `${String(new Date(newEvent.start).getHours()).padStart(2, '0')}:${String(new Date(newEvent.start).getMinutes()).padStart(2, '0')}`
+              : '08:00'
+          }
+          onChange={(e) => {
+            const [hours, minutes] = e.target.value.split(':').map(Number);
+            const baseDate = newEvent.start ? new Date(newEvent.start) : new Date(selectedDate);
+            baseDate.setHours(hours, minutes, 0, 0);
+            setNewEvent({ ...newEvent, start: baseDate });
+          }}
+        />
+        <TextField
+          label="End Time (Optional)"
+          type="datetime-local"
+          fullWidth
+          margin="normal"
+          sx={{
+            '& input[type="datetime-local"]': {
+              WebkitAppearance: 'none',
+              MozAppearance: 'textfield',
+              appearance: 'textfield',
+              height: 56,
+              padding: '0 14px',
+              lineHeight: 'normal',
+              display: 'flex',
+              alignItems: 'center',
+              boxSizing: 'border-box',
+              borderRadius: 4,
+            },
+            '& input::-webkit-calendar-picker-indicator': {
+              opacity: 1,
+              width: 24,
+              height: 24,
+              cursor: 'pointer',
+            },
+          }}
+          value={
+            newEvent.end_time
+              ? format(new Date(newEvent.end_time), "yyyy-MM-dd'T'HH:mm")
+              : ''
+          }
+          onChange={(e) => {
+            const date = new Date(e.target.value);
+            setNewEvent({ ...newEvent, end_time: date });
+          }}
+        />
+      </Box>
       <Box sx={{ display: 'flex', gap: 2, mt: 2, justifyContent: 'center' }}>
         <Button disableRipple variant="outlined" onClick={() => setMode('view')}>Cancel</Button>
         <Button disableRipple variant="contained" type="submit">Create</Button>
