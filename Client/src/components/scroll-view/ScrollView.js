@@ -89,11 +89,6 @@ const ScrollView = () => {
                 borderRadius: 2,
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                 backgroundColor: theme.palette.background.paper,
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-                  borderColor: theme.palette.primary.main,
-                },
               }}
             >
               <CardActionArea sx={{ flexGrow: 1 }}>

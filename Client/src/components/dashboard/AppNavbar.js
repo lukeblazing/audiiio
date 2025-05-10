@@ -41,9 +41,6 @@ const Title = styled(Typography)(({ theme }) => ({
 const RefreshButton = styled(IconButton)(({ theme }) => ({
   marginRight: '16px',
   transition: 'transform 0.5s ease',
-  '&:hover': {
-    transform: 'rotate(360deg)',
-  },
 }));
 
 export default function AppNavbar() {

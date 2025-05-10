@@ -59,9 +59,6 @@ const theme = createTheme({
           fontSize: '16px',
           border: '1px solid rgba(255, 255, 255, 0.2)',
           backgroundColor: '#334155', // slate-700
-          '&:hover': {
-            backgroundColor: '#475569', // slate-600
-          },
           '&:disabled': {
             backgroundColor: 'rgba(255, 255, 255, 0.12)',
             color: 'rgba(255, 255, 255, 0.3)',
@@ -95,9 +92,6 @@ const theme = createTheme({
           '& .MuiOutlinedInput-notchedOutline': {
             borderColor: 'rgba(255,255,255,0.23)',
           },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#3b82f6',
-          },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
             borderColor: '#3b82f6',
           },
@@ -125,9 +119,6 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           color: '#3b82f6',
-          '&:hover': {
-            textDecoration: 'underline',
-          },
         },
       },
     },

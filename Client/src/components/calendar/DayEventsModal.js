@@ -286,9 +286,6 @@ function DayEventsModal({
             borderRadius: '6px', // matches TextField rounded corners
             color: '#fff', // text color
             backgroundColor: 'transparent', // same as TextField background
-            '&:hover': {
-              backgroundColor: '#334155', // slightly lighter for hover
-            },
             border: '1px solid rgba(255,255,255,0.23)', // matching border
             transition: 'transform 0.25s, background-color 0.2s',
             transform: openDescAndColor ? 'rotate(180deg)' : 'none',

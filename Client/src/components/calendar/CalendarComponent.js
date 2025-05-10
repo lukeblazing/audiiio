@@ -74,9 +74,6 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           position: "relative",
           zIndex: 2,
           transition: "background-color 0.2s ease",
-          "&:hover": {
-            backgroundColor: "rgba(0,0,0,0.1)",
-          },
         }}
       >
         <ArrowBack sx={{ color: theme.palette.primary.main, fontSize: "1.8rem" }} />
@@ -117,7 +114,6 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
             border: "transparent",
             color: theme.palette.primary.main,
             transition: "background-color 0.2s ease",
-            "&:hover": { backgroundColor: "rgba(0,0,0,0.05)" },
             marginTop: "8px"
           }}
         >
@@ -136,9 +132,6 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           position: "relative",
           zIndex: 2,
           transition: "background-color 0.2s ease",
-          "&:hover": {
-            backgroundColor: "rgba(0,0,0,0.1)",
-          },
         }}
       >
         <ArrowForward sx={{ color: theme.palette.primary.main, fontSize: "1.8rem" }} />
