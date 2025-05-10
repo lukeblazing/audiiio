@@ -284,8 +284,11 @@ function DayEventsModal({
         fullWidth
         margin="normal"
         sx={{
-          '& input::-webkit-datetime-edit, & input::-webkit-datetime-edit-fields-wrapper': {
-            padding: 0,
+          '& input[type="time"]': {
+            WebkitAppearance: 'textfield',
+            height: 22,
+            padding: '16.5px 14px',
+            lineHeight: '1.4375em',
           },
         }}
         value={
@@ -306,8 +309,11 @@ function DayEventsModal({
         fullWidth
         margin="normal"
         sx={{
-          '& input::-webkit-datetime-edit, & input::-webkit-datetime-edit-fields-wrapper': {
-            padding: 0,
+          '& input[type="datetime-local"]': {
+            WebkitAppearance: 'textfield',
+            height: 22,
+            padding: '16.5px 14px',
+            lineHeight: '1.4375em',
           },
         }}
         value={
