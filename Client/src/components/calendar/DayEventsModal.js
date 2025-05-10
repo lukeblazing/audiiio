@@ -285,19 +285,21 @@ function DayEventsModal({
         margin="normal"
         sx={{
           '& input[type="time"]': {
-            WebkitAppearance: 'none',       // Disable native iOS appearance
-            MozAppearance: 'textfield',     // For Firefox
-            appearance: 'textfield',        // General CSS property
-            height: 56,                     // Match MUI's default TextField height
-            padding: '16.5px 14px',         // Consistent padding
-            lineHeight: '1.4375em',
-            boxSizing: 'border-box',        // Ensure height calculation includes padding
-            borderRadius: 4,                // Match MUI border radius
+            WebkitAppearance: 'none', // Disable native iOS appearance
+            MozAppearance: 'textfield', // For Firefox
+            appearance: 'textfield', // General CSS property
+            height: 56, // Match MUI's default TextField height
+            padding: '0 14px', // Adjusted padding to center the text vertically
+            lineHeight: 'normal', // Reset line height to normal
+            display: 'flex', // Use flex to align items
+            alignItems: 'center', // Vertically center
+            boxSizing: 'border-box',
+            borderRadius: 4,
           },
           '& input::-webkit-calendar-picker-indicator': {
             opacity: 1,
-            width: 24, 
-            height: 24, 
+            width: 24,
+            height: 24,
             cursor: 'pointer',
           },
         }}
@@ -324,8 +326,10 @@ function DayEventsModal({
             MozAppearance: 'textfield',
             appearance: 'textfield',
             height: 56,
-            padding: '16.5px 14px',
-            lineHeight: '1.4375em',
+            padding: '0 14px',
+            lineHeight: 'normal',
+            display: 'flex',
+            alignItems: 'center',
             boxSizing: 'border-box',
             borderRadius: 4,
           },
