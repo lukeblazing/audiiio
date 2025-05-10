@@ -285,10 +285,20 @@ function DayEventsModal({
         margin="normal"
         sx={{
           '& input[type="time"]': {
-            WebkitAppearance: 'textfield',
-            height: 22,
-            padding: '16.5px 14px',
+            WebkitAppearance: 'none',       // Disable native iOS appearance
+            MozAppearance: 'textfield',     // For Firefox
+            appearance: 'textfield',        // General CSS property
+            height: 56,                     // Match MUI's default TextField height
+            padding: '16.5px 14px',         // Consistent padding
             lineHeight: '1.4375em',
+            boxSizing: 'border-box',        // Ensure height calculation includes padding
+            borderRadius: 4,                // Match MUI border radius
+          },
+          '& input::-webkit-calendar-picker-indicator': {
+            opacity: 1,
+            width: 24, 
+            height: 24, 
+            cursor: 'pointer',
           },
         }}
         value={
@@ -310,10 +320,20 @@ function DayEventsModal({
         margin="normal"
         sx={{
           '& input[type="datetime-local"]': {
-            WebkitAppearance: 'textfield',
-            height: 22,
+            WebkitAppearance: 'none',
+            MozAppearance: 'textfield',
+            appearance: 'textfield',
+            height: 56,
             padding: '16.5px 14px',
             lineHeight: '1.4375em',
+            boxSizing: 'border-box',
+            borderRadius: 4,
+          },
+          '& input::-webkit-calendar-picker-indicator': {
+            opacity: 1,
+            width: 24,
+            height: 24,
+            cursor: 'pointer',
           },
         }}
         value={
