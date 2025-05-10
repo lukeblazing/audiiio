@@ -151,7 +151,7 @@ export default function SignUp() {
   };
 
   return (
-    <div>
+    <div id="safe-area-wrapper">
       {isLoading && <LoadingSpinner />}
       <CssBaseline enableColorScheme />
       <SignUpContainer direction="column" justifyContent="space-between">

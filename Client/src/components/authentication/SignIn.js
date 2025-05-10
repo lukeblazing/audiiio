@@ -40,7 +40,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
 const SignInContainer = styled(Stack)(({ theme }) => ({
   paddingLeft: 20,
   paddingRight: 20,
-  height: '100dvh',
+  height: '100vh',
   position: 'relative',
   zIndex: 0,
 }));
@@ -143,7 +143,7 @@ export default function SignIn() {
   };
 
   return (
-    <div>
+    <div id="safe-area-wrapper">
       {isLoading && <LoadingSpinner />}
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="center" >

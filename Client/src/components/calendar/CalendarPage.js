@@ -5,11 +5,11 @@ import CalendarComponent from './CalendarComponent';
 function CalendarPage() {
   
   return (
-    <>
+    <div id="safe-area-wrapper">
       <AppNavbar />
 
       <CalendarComponent/>
-    </>
+    </div>
   );
 }
 
