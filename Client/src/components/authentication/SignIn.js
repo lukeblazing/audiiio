@@ -40,7 +40,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
 const SignInContainer = styled(Stack)(({ theme }) => ({
   paddingLeft: 20,
   paddingRight: 20,
-  height: '100vh',
+  height: '100%',
   position: 'relative',
   zIndex: 0,
 }));
