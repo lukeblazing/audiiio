@@ -158,16 +158,9 @@ export default function SignIn() {
                 fontSize: '1.5rem',
               }}
             >
-              Hello
+              Sign In
             </Typography>
           </Box>
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-          >
-            Sign in
-          </Typography>
           <Box
             component="form"
             onSubmit={handleSubmit}
