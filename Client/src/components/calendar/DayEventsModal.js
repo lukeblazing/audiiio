@@ -318,7 +318,7 @@ function DayEventsModal({
           }}
         />
         <TextField
-          label="End Time (Optional)"
+          label="End Time"
           type="datetime-local"
           fullWidth
           margin="normal"
