@@ -35,7 +35,7 @@ class AuthController {
   // Validate email and password
   async getCredentials(email, password) {
     try {
-      const queryText = 'SELECT password, name, role FROM app_users WHERE email = $1';
+      const queryText = 'SELECT password, name, role FROM app_users WHERE lower(email) = lower($1)';
       const result = await pool.query(queryText, [email]);
 
       if (result.rows.length === 0) {

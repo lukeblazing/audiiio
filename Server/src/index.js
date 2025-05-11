@@ -125,7 +125,7 @@ app.get('/api/authCheck', AuthController.verifyToken, (req, res) => {
 // This includes calendars owned by the user and those where they are added.
 app.get('/api/calendar/getAllEventsForUser', AuthController.verifyOptionalToken, async (req, res) => {
   let query = ``;
-  if (req?.user?.role && req.user.email && req.user.name && ['lukeblazing@yahoo.com', 'chelsyjohnson1234@gmail.com'].includes(req.user.email)) {
+  if (req?.user?.role && req.user.email && req.user.name && (['lukeblazing@yahoo.com', 'chelsyjohnson1234@gmail.com'].map(e => e.toLowerCase()).includes(req.user.email.toLowerCase())) ) {
     query = `
       SELECT *
       FROM events
