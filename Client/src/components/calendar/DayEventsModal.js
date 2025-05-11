@@ -23,6 +23,7 @@ import {
 import { useAuth } from '../authentication/AuthContext';
 import { eventBackground } from './CalendarComponent';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CircularProgress from '@mui/material/CircularProgress';
 
 /* ───────────────────────── helpers ───────────────────────── */
 
@@ -94,6 +95,7 @@ function DayEventsModal({
   const [mode, setMode] = useState('view'); // 'view' | 'create' | 'remove' | 'confirm_remove'
   const [eventToDelete, setEventToDelete] = useState(null);
   const [openDescAndColor, setOpenDescAndColor] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   /* new-event form state */
   const [newEvent, setNewEvent] = useState({
@@ -119,6 +121,8 @@ function DayEventsModal({
   // Handle Create Event form submission
   const onCreateEvent = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
     if (!newEvent.title || !newEvent.start) {
       alert('Please fill in required fields: Title, and Start Time.');
       return;
@@ -155,11 +159,15 @@ function DayEventsModal({
     } catch (err) {
       console.error(err);
       alert('Error creating event');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Function to delete an event
   const onDeleteEvent = async (eventId) => {
+    setIsLoading(true);
+
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
         method: 'DELETE',
@@ -173,6 +181,8 @@ function DayEventsModal({
     } catch (err) {
       console.error(err);
       alert('Error deleting event');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -386,7 +396,12 @@ function DayEventsModal({
       </Box>
       <Box sx={{ display: 'flex', gap: 2, mt: 2, justifyContent: 'center' }}>
         <Button disableRipple variant="outlined" onClick={() => setMode('view')}>Cancel</Button>
-        <Button disableRipple variant="contained" type="submit">Create</Button>
+        <Button disableRipple variant="contained" disabled={isLoading} type="submit" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {isLoading ? <>
+            <CircularProgress size={20} color="inherit" />
+            Creating…
+          </> : 'Create'}
+        </Button>
       </Box>
     </Box>
   );
@@ -450,7 +465,12 @@ function DayEventsModal({
 
           <Box sx={{ display: 'flex', gap: 2, mt: 2, justifyContent: 'center' }}>
             <Button disableRipple variant="outlined" onClick={() => setMode('remove')}>Cancel</Button>
-            <Button disableRipple variant="contained" onClick={() => onDeleteEvent(eventToDelete.id)}>Confirm</Button>
+            <Button disableRipple variant="contained" disabled={isLoading} sx={{ display: 'flex', alignItems: 'center', gap: 1 }} onClick={() => onDeleteEvent(eventToDelete.id)}>
+              {isLoading ? <>
+                <CircularProgress size={20} color="inherit" />
+                Deleting...
+              </> : 'Confirm'}
+            </Button>
           </Box>
         </>
       )}

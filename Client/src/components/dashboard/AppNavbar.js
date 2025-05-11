@@ -45,6 +45,7 @@ const RefreshButton = styled(IconButton)(({ theme }) => ({
 
 export default function AppNavbar() {
   const [open, setOpen] = React.useState(false);
+  const [isRotating, setIsRotating] = React.useState(false);
 
   // Function to toggle the drawer open state
   const toggleDrawer = (newOpen) => {
@@ -53,7 +54,10 @@ export default function AppNavbar() {
 
   // Function to refresh the page
   const handleRefresh = () => {
-    window.location.reload();
+    setIsRotating(true);
+    setTimeout(() => {
+      window.location.reload();
+    }, 125);
   };
 
   return (
@@ -66,7 +70,7 @@ export default function AppNavbar() {
           </MenuButton>
         </Box>
 
-        <RefreshButton aria-label="refresh" onClick={handleRefresh} sx={{ border: 'none' }}>
+        <RefreshButton aria-label="refresh" onClick={handleRefresh} sx={{ border: 'none', transition: 'transform 0.5s ease',transform: isRotating ? 'rotate(360deg)' : 'none', }}>
           <RefreshIcon sx={{ fontSize: '2.5rem' }} />
         </RefreshButton>
       </NavbarContainer>
