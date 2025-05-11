@@ -129,6 +129,7 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyOptionalToken,
     query = `
       SELECT *
       FROM events
+      WHERE start >= NOW() - INTERVAL '3 months'
     `;
   } else {
     query = `
@@ -138,6 +139,7 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyOptionalToken,
         'gray' AS category_id,
         'Busy' AS title
       FROM events
+      WHERE start >= NOW() - INTERVAL '2 months'
     `;
   }
 
