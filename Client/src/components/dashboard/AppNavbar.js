@@ -62,7 +62,7 @@ export default function AppNavbar() {
     color: theme.palette.text.primary,
     fontFamily: '"Roboto", "Segoe UI", Helvetica, Arial, sans-serif',
     fontWeight: 'bold',
-    fontSize: '2rem',
+    fontSize: '1.2rem',
     position: 'absolute',
     left: '50%',
     transform: 'translateX(-50%)',

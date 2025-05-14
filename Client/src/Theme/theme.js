@@ -66,6 +66,11 @@ const theme = createTheme({
         },
       },
     },
+    MuiToggleButton: {
+      defaultProps: {
+        disableRipple: true,
+      },
+    },    
     MuiCard: {
       styleOverrides: {
         root: {
