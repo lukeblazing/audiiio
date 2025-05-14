@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -6,14 +7,12 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
-import { useNavigate } from 'react-router-dom';
-// import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
-// import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
-// import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
+import NoteRoundedIcon from '@mui/icons-material/NoteRounded';
 import Box from '@mui/material/Box';
 
 const mainListItems = [
-  { text: 'Calendar', icon: <HomeRoundedIcon /> },
+  { text: 'Calendar', icon: <HomeRoundedIcon />, path: '/' },
+  { text: 'Notes', icon: <NoteRoundedIcon />, path: '/notes' },
 ];
 
 const secondaryListItems = [
@@ -24,9 +23,10 @@ const secondaryListItems = [
 
 export default function MenuContent({ toggleDrawer }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleCalendarClick = () => {
-    navigate('/');
+  const handleItemClick = (path) => {
+    navigate(path);
     toggleDrawer(false);
   };
 
@@ -35,7 +35,12 @@ export default function MenuContent({ toggleDrawer }) {
       <List>
         {mainListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-            <ListItemButton disableRipple selected={index === 0} sx={{ py: 1.5 }} onClick={handleCalendarClick}>
+            <ListItemButton
+              disableRipple
+              selected={location.pathname === item.path}
+              sx={{ py: 1.5 }}
+              onClick={() => handleItemClick(item.path)}
+            >
               <ListItemIcon sx={{ minWidth: 48 }}>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: '1.1rem' }} />
             </ListItemButton>
@@ -43,7 +48,7 @@ export default function MenuContent({ toggleDrawer }) {
         ))}
       </List>
 
-      <Box sx={{  }}>
+      <Box>
         <List>
           {secondaryListItems.map((item, index) => (
             <ListItem key={index} disablePadding sx={{ display: 'block' }}>

@@ -8,6 +8,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import IconButton from '@mui/material/IconButton';
 import SideMenuMobile from './SideMenuMobile.js';
 import MenuButton from './MenuButton.js';
+import { useLocation } from 'react-router-dom';
 
 // Styled Container using Box for layout with proper responsive height
 const NavbarContainer = styled(Box)(({ theme }) => ({
@@ -46,6 +47,27 @@ const RefreshButton = styled(IconButton)(({ theme }) => ({
 export default function AppNavbar() {
   const [open, setOpen] = React.useState(false);
   const [isRotating, setIsRotating] = React.useState(false);
+  const location = useLocation();
+
+
+  const pathNameMap = {
+    '/notes': 'Notes',
+    //'/': 'Calendar',
+  };
+
+  const currentPath = location.pathname;
+  const displayName = pathNameMap[currentPath] || '';
+
+  const Title = styled(Typography)(({ theme }) => ({
+    color: theme.palette.text.primary,
+    fontFamily: '"Roboto", "Segoe UI", Helvetica, Arial, sans-serif',
+    fontWeight: 'bold',
+    fontSize: '2rem',
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    letterSpacing: '2px',
+  }));
 
   // Function to toggle the drawer open state
   const toggleDrawer = (newOpen) => {
@@ -70,7 +92,9 @@ export default function AppNavbar() {
           </MenuButton>
         </Box>
 
-        <RefreshButton aria-label="refresh" onClick={handleRefresh} sx={{ border: 'none', transition: 'transform 0.5s ease',transform: isRotating ? 'rotate(360deg)' : 'none', }}>
+        <Title variant="h6">{displayName}</Title>
+
+        <RefreshButton aria-label="refresh" onClick={handleRefresh} sx={{ border: 'none', transition: 'transform 0.5s ease', transform: isRotating ? 'rotate(360deg)' : 'none', }}>
           <RefreshIcon sx={{ fontSize: '2.5rem' }} />
         </RefreshButton>
       </NavbarContainer>
