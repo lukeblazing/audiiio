@@ -5,7 +5,6 @@
 @use './partials/note-text.scss' as noteText;
 @use './partials/note-bubble.scss' as noteBubble;
 @use './partials/note-menu.scss' as noteMenu;
-@use './modals/upload-modal.scss' as uploadForm;
 @use './views/bubble-view.scss' as bubbleView;
 
 .rs-notes {
@@ -19,6 +18,5 @@
     @include noteText.noteText();
     @include noteMenu.noteMenu();
     @include noteBubble.noteBubble();
-    @include uploadForm.uploadForm();
     @include bubbleView.bubbleView();
 }

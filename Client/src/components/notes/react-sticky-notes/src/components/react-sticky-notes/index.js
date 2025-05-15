@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import reducer from './reducers/reducer';
 import * as icons from './icons';
 import { h, getColorCodes, getNotes, getUUID } from './utils';
-import { NormalView, BubbleView, PageView, FullscreenView } from './views' ;
-import { UploadModal } from './modals' ;
+import { NormalView, BubbleView, PageView } from './views' ;
 class ReactStickyNotes extends Component {
 	static defaultProps = {
 		useCSS: true,
@@ -21,7 +20,6 @@ class ReactStickyNotes extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			modal: null,
 			viewSize: 'normalview',
 			items: getNotes(props.colorCodes, props.notes)
 		};
@@ -101,14 +99,6 @@ class ReactStickyNotes extends Component {
 			type: 'changeview'
 		});
 	}
-	changeModal = (e, modal) => {
-		this.dispatch({
-			type: 'changemodal',
-			payload:{
-				modal
-			}
-		});
-	}
 	saveJSON = (e, json) => {
 		this.dispatch({
 			type: 'import',
@@ -118,15 +108,9 @@ class ReactStickyNotes extends Component {
 		});
 	}
 	render() {
-		const { items, viewSize, modal } = this.state;
+		const { items, viewSize } = this.state;
         let View = null;
-        if(modal){
-			switch(modal){
-				case "upload":
-					View = UploadModal
-				break;
-			}
-		}else{
+
 			switch(viewSize){
 				case "pageview":
 					View = PageView
@@ -134,14 +118,10 @@ class ReactStickyNotes extends Component {
 				case "bubbleview":
 					View = BubbleView
 				break;
-				case "fullscreen":
-					View = FullscreenView
-				break;
 				default:
 					View = NormalView
 				break;
 			}
-		}
 		return h( View, {
 			...this.props,
 			items,
@@ -152,7 +132,6 @@ class ReactStickyNotes extends Component {
 				addItem: this.addItem,
 				updateItem: this.updateItem,
 				deleteItem: this.deleteItem,
-				changeModal: this.changeModal,
 				saveJSON: this.saveJSON
 			}
 		})

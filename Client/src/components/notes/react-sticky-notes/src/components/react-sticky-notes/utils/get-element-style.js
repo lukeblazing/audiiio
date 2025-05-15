@@ -14,18 +14,18 @@ export function getElementStyle(nodeName, props, defaultStyle={}) {
                 style = {
                     ...defaultStyle,
                     position: 'absolute',
-                    left: props.viewSize==="pageview"||props.viewSize==="fullscreen"?0:props.data.position?`${props.data.position.x}px`:0,
-                    top: props.viewSize==="pageview"||props.viewSize==="fullscreen"?0:props.data.position?`${props.data.position.y}px`:0,
-                    width: props.viewSize==="pageview"||props.viewSize==="fullscreen"?"100%":null,
-                    height: props.viewSize==="pageview"||props.viewSize==="fullscreen"?"100%":null
+                    left: props.viewSize==="pageview"||0,
+                    top: props.viewSize==="pageview"||0,
+                    width: props.viewSize==="pageview"||null,
+                    height: props.viewSize==="pageview"||null
                 }
                 if(props.data.selected){
                     style.zIndex = 1;
                 }
         break;
         case "note-body":
-            style.width = props.viewSize==="pageview"||props.viewSize==="fullscreen"?"100%":props.noteWidth,
-            style.height = props.viewSize==="pageview"||props.viewSize==="fullscreen"?"100%":props.noteHeight,
+            style.width = props.viewSize==="pageview"||props.noteWidth,
+            style.height = props.viewSize==="pageview"||props.noteHeight,
             style.backgroundColor= props.data.color,
             style.overflow = "auto";
             if(props.data.selected){

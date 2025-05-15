@@ -1,5 +1,5 @@
 const reducer = (state, action) => {
-    const viewSizes = ['bubbleview', 'normalview', 'pageview','fullscreen'];
+    const viewSizes = ['bubbleview', 'normalview', 'pageview'];
     const params = action.payload&&action.payload.data?Object.keys(action.payload.data):[];
     let { items, viewSize, modal } = state;
     switch (action.type) {
