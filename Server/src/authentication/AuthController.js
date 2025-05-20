@@ -22,12 +22,12 @@ class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV !== 'development',
       sameSite: 'Strict', // Protect against CSRF attacks
-      maxAge: 360000000, // 1 hour expiration in milliseconds
+      maxAge: 10 * 24 * 60 * 60 * 1000, // 10 day expiry
     });
 
     // Respond with success
-    res.status(200).json({ 
-      message: 'Login successful',         
+    res.status(200).json({
+      message: 'Login successful',
       user: { email, name: credentialsResult.storedName, role: credentialsResult.storedUserRole },
     });
   }
@@ -50,7 +50,7 @@ class AuthController {
       // Compare the given password with the hashed password in the database
       const passwordMatch = await bcrypt.compare(password, storedPasswordHash);
 
-      return {passwordMatch, storedUserRole, storedName};
+      return { passwordMatch, storedUserRole, storedName };
     } catch (err) {
       console.error('Error validating credentials', err);
       return { error: `Error validating credentials: ${err.message}` };
@@ -81,29 +81,29 @@ class AuthController {
           message: 'Email is already in use',
         });
       }
-  
+
       // Hash the password before storing it in the database
       const saltRounds = 10; // 10 is a good balance between security and performance
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-  
+
       // Insert the new user into the database
       const insertUserQuery = 'INSERT INTO app_users (email, password, name, role) VALUES ($1, $2, $3, $4) RETURNING email, name, role';
       const result = await pool.query(insertUserQuery, [email, hashedPassword, name, 'user']);
-  
+
       // Return the newly created user details (excluding the password)
       const newUser = result.rows[0];
-  
+
       // Generate a JWT token for the new user
       const token = this.generateToken({ name: newUser.name, email: newUser.email, role: 'user' });
-  
+
       // Set the token in an HTTP-only, secure cookie
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         sameSite: 'Strict', // Protect against CSRF attacks
-        maxAge: 3600000, // 1 hour expiration in milliseconds
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 day expiry
       });
-  
+
       // Send back a success response with the new user details
       res.status(201).json({
         success: true,
@@ -112,10 +112,10 @@ class AuthController {
           name: newUser.name,
         },
       });
-      
+
     } catch (err) {
       console.error('Error creating user:', err);
-  
+
       // Send a 500 error response
       res.status(500).json({
         success: false,
@@ -127,7 +127,7 @@ class AuthController {
 
   // Generate JWT for the response cookie
   generateToken(payload) {
-    return jwt.sign(payload, process.env.JWT_SECRET, { algorithm: 'HS256', expiresIn: '3d' });
+    return jwt.sign(payload, process.env.JWT_SECRET, { algorithm: 'HS256', expiresIn: '7d' });
   }
 
   // Handle Logout, clear the cookie in the user's browser
@@ -160,6 +160,25 @@ class AuthController {
         role: decoded.role
       };
 
+      // If less than 5 days left, issue a new token and set it in the cookie
+      const now = Math.floor(Date.now() / 1000);
+      const timeLeft = decoded.exp - now;
+      const FIVE_DAYS_IN_SECONDS = 5 * 24 * 60 * 60;
+      if (timeLeft < FIVE_DAYS_IN_SECONDS) {
+        const newToken = this.generateToken({
+          email: decoded.email,
+          name: decoded.name,
+          role: decoded.role,
+        });
+
+        res.cookie('token', newToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV !== 'development',
+          sameSite: 'Strict',
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
+      }
+
       // Continue to the next middleware or route handler
       next();
     } catch (err) {
@@ -167,32 +186,32 @@ class AuthController {
     }
   }
 
-    // Middleware to verify the token from the cookie
-    verifyOptionalToken(req, res, next) {
-      const cookies = parseCookies(req.headers.cookie);
-      const token = cookies['token'];
-  
-      if (!token) {
-        return next();
-      }
-  
-      try {
-        // Verify the token using the secret key
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  
-        // Attach user info (email and role) to the request object
-        req.user = {
-          name: decoded.name,
-          email: decoded.email,
-          role: decoded.role
-        };
-  
-        // Continue to the next middleware or route handler
-        next();
-      } catch (err) {
-        return next();
-      }
+  // Middleware to verify the token from the cookie
+  verifyOptionalToken(req, res, next) {
+    const cookies = parseCookies(req.headers.cookie);
+    const token = cookies['token'];
+
+    if (!token) {
+      return next();
     }
+
+    try {
+      // Verify the token using the secret key
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Attach user info (email and role) to the request object
+      req.user = {
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role
+      };
+
+      // Continue to the next middleware or route handler
+      next();
+    } catch (err) {
+      return next();
+    }
+  }
 }
 
 export default new AuthController();
