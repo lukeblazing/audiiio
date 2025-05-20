@@ -22,7 +22,7 @@ class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV !== 'development',
       sameSite: 'Strict', // Protect against CSRF attacks
-      maxAge: 10 * 24 * 60 * 60 * 1000, // 10 day expiry
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 day expiry
     });
 
     // Respond with success
@@ -175,7 +175,7 @@ class AuthController {
           httpOnly: true,
           secure: process.env.NODE_ENV !== 'development',
           sameSite: 'Strict',
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 day expiry
         });
       }
 
