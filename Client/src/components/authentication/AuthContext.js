@@ -10,7 +10,7 @@ export const useAuth = () => useContext(AuthContext);
 // Create the AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [hasAccessCode, setHasAccessCode] = useState(false);
+  const [hasAccessCode, setHasAccessCode] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
