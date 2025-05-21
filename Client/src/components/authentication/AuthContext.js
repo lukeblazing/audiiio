@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }) => {
         setHasAccessCode(true);
         return { valid: true, ...result };
       } else {
+        setHasAccessCode(false);
         return { valid: false };
       }
     } catch (error) {
