@@ -10,6 +10,7 @@ export const useAuth = () => useContext(AuthContext);
 // Create the AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [hasAccessCode, setHasAccessCode] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
@@ -46,14 +47,44 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Check if the user has a JWT for a previously entered access code
+  const checkAccessCode = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/checkAccessCode`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // If you expect some result data, you can process it here
+        const result = await response.json();
+        setHasAccessCode(true);
+        return { valid: true, ...result };
+      } else {
+        return { valid: false };
+      }
+    } catch (error) {
+      console.error('Failed to check access code:', error);
+      return { valid: false, error: error.message };
+    }
+  };
+
   const handleLogin = (responseJSON) => {
     setIsAuthenticated(true); // Login user
     setUserRole(responseJSON.role); // Set user role
     setUserData(responseJSON.user);
   };
 
+  const handleAccessCodeGranted = (responseJSON) => {
+    setHasAccessCode(true);
+  }
+
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setHasAccessCode(false);
     setUserRole(null);
     setUserData(null);
   };
@@ -61,13 +92,14 @@ export const AuthProvider = ({ children }) => {
   // Check authentication status on component mount
   useEffect(() => {
     checkAuthStatus();
+    checkAccessCode();
   }, []);
 
   if (loading)
     return <LoadingSpinner />
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userRole, handleLogin, handleLogout, userData }}>
+    <AuthContext.Provider value={{ isAuthenticated, hasAccessCode, handleAccessCodeGranted, userRole, handleLogin, handleLogout, userData }}>
       {children}
     </AuthContext.Provider>
   );

@@ -10,6 +10,23 @@ import { dirname } from 'path';
 import AuthController from './authentication/AuthController.js'
 import db from './database/db.js';
 import webpush from 'web-push';
+import multer from 'multer';
+import { get_event_from_audio_input, openai_transcription } from './openai_api/openai_transcription.js';
+
+// Multer for audio file uploading
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 1 * 1024 * 1024, // 1MB
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['audio/webm', 'audio/wav', 'audio/mpeg', 'audio/mp4'];
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(new Error('Unsupported file type'), false);
+    }
+    cb(null, true);
+  }
+});
 
 // Create __dirname equivalent in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -23,7 +40,7 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet());
 
 // Middleware to parse JSON bodies
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
 
 // Enable cors for prod url
 const corsOptions = {
@@ -60,7 +77,7 @@ app.use((req, res, next) => {
 });
 
 // Sign up: Create a new user
-app.post('/api/signUp', async (req, res) => {
+app.post('/api/signUp', AuthController.verifyOptionalToken, async (req, res) => {
   try {
 
     // temporarily disable sign up
@@ -82,7 +99,7 @@ app.post('/api/signUp', async (req, res) => {
 });
 
 // Route for handling login
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', AuthController.verifyOptionalToken, async (req, res) => {
   try {
     return await AuthController.login(req, res);
   } catch (error) {
@@ -96,7 +113,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Route for handling logout
-app.post('/api/logout', (req, res) => {
+app.post('/api/logout', AuthController.verifyOptionalToken, (req, res) => {
   try {
     return AuthController.logout(req, res);
   } catch (error) {
@@ -118,6 +135,24 @@ app.get('/api/authCheck', AuthController.verifyToken, (req, res) => {
   res.status(200).json({ message: `Welcome ${userEmail}, you are authorized for /protected route as ${userRole}.`, user: req.user });
 });
 
+// START ACCESS CODE
+app.post('/api/submitAccessCode', async (req, res) => {
+  try {
+    return await AuthController.submitAccessCode(req, res);
+  } catch (error) {
+    // If there's a server error, return a 500 status code
+    return res.status(500).json({
+      success: false,
+      message: 'An internal server error occurred',
+      error: error.message
+    });
+  }
+});
+
+app.get('/api/checkAccessCode', AuthController.verifyOptionalToken, (req, res) => {
+  res.status(200).json({ message: `Access Code Valid.` });
+});
+// END ACCESS CODE
 
 
 // GET /api/calendar/getAllEventsForUser
@@ -125,7 +160,7 @@ app.get('/api/authCheck', AuthController.verifyToken, (req, res) => {
 // This includes calendars owned by the user and those where they are added.
 app.get('/api/calendar/getAllEventsForUser', AuthController.verifyOptionalToken, async (req, res) => {
   let query = ``;
-  if (req?.user?.role && req.user.email && req.user.name && (['lukeblazing@yahoo.com', 'chelsyjohnson1234@gmail.com'].map(e => e.toLowerCase()).includes(req.user.email.toLowerCase())) ) {
+  if (req?.user?.role && req.user.email && req.user.name && (['lukeblazing@yahoo.com', 'chelsyjohnson1234@gmail.com'].map(e => e.toLowerCase()).includes(req.user.email.toLowerCase()))) {
     query = `
       SELECT *
       FROM events
@@ -146,6 +181,91 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyOptionalToken,
   try {
     const result = await db.query(query);
     return res.status(200).json({ events: result.rows });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// --------------------------------------------------------------------
+// POST /api/calendar/createEventAudioInput
+// Create an event in a particular calendar.
+app.post('/api/calendar/createEventAudioInput', AuthController.verifyToken, upload.single('audio'), async (req, res) => {
+  if (!req?.user?.role) {
+    return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
+  }
+  if (!req?.user?.email) {
+    return res.status(401).json({ message: 'Access denied. No email provided.' });
+  }
+
+  let parsed_audio_text;
+  let event;
+  let selectedDate;
+
+  try {
+    const buffer = req.file.buffer;
+    parsed_audio_text = await openai_transcription(buffer);
+
+    selectedDate = new Date(req.body.selected_date);
+    if (isNaN(selectedDate)) {
+      return res.status(400).json({ message: 'Invalid date from client.' });
+    }
+
+  } catch (e) {
+    console.log(e)
+    return res.status(500).json({ message: 'Internal server error parsing audio input.' });
+  }
+
+
+  try {
+    event = await get_event_from_audio_input(parsed_audio_text, selectedDate);
+  } catch (e) {
+    console.log(e)
+    return res.status(500).json({ message: 'Internal server error parsing audio transcription.' });
+  }
+
+
+  // Now we insert the generated Event to the given day
+  if (!event || !event.title || !event.start) {
+    return res.status(400).json({ message: 'Missing required event fields.' });
+  }
+
+  // override the AI-generated date with the current date
+  const overrideDate = (original, base) => {
+    const adjusted = new Date(original);
+    adjusted.setFullYear(base.getFullYear());
+    adjusted.setMonth(base.getMonth());
+    adjusted.setDate(base.getDate());
+    return adjusted;
+  };
+  
+  event.start = overrideDate(new Date(event.start), selectedDate);
+  
+  if (event.end_time) {
+    event.end_time = overrideDate(new Date(event.end_time), selectedDate);
+  }
+  // end override AI-generated date with the current date
+
+
+  try {
+    const query = `
+      INSERT INTO events (calendar_id, category_id, title, description, start, end_time, all_day, recurrence_rule, created_by)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING *
+    `;
+    const values = [
+      event.calendar_id || null,
+      event.category_id || null,
+      event.title,
+      event.description || null,
+      new Date(event.start).toISOString(),   // sanitize
+      event.end_time ? new Date(event.end_time).toISOString() : null,  // sanitize
+      event.all_day || false,
+      event.recurrence_rule || null,
+      req.user.email,                        // always use auth token email as created_by
+    ];
+    const result = await db.query(query, values);
+    return res.status(201).json({ event: result.rows[0] });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Internal server error' });
@@ -415,6 +535,26 @@ app.get('/api/availableUsers', AuthController.verifyToken, async (req, res) => {
 // ------------------------------
 // End Push Notification Endpoints
 // ------------------------------
+
+// Place *after* all routes, before the 404 handler if you have one
+app.use((err, req, res, next) => {
+  // Multer-specific handling
+  if (err instanceof multer.MulterError) {
+    // Hide field names, stack, etc.
+    return res.status(400).json({ message: 'Upload failed' });
+  }
+
+  // Handle other known error types here…
+
+  // Fallback: generic 500 in production, detailed in dev
+  const isProd = process.env.NODE_ENV === 'production';
+  const payload = isProd
+    ? { message: 'Internal server error' }
+    : { message: err.message, stack: err.stack };
+
+  console.error(err);          // Always log full stack server‑side
+  res.status(500).json(payload);
+});
 
 
 // Serve static files from the React app build directory

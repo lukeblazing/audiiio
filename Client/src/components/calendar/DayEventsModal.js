@@ -1,5 +1,5 @@
 // EventModal.js
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Modal,
@@ -10,7 +10,7 @@ import {
   Stack,
   Collapse
 } from '@mui/material';
-import { Add, Remove, ArrowBackIosNew } from '@mui/icons-material';
+import { Add, Remove, ArrowBackIosNew, Mic, Stop } from '@mui/icons-material';
 import {
   format,
   startOfDay,
@@ -97,7 +97,168 @@ function DayEventsModal({
   const [openDescAndColor, setOpenDescAndColor] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  /* new-event form state */
+  // Audio input - improved
+  const MAX_SECONDS = 60;
+  const MIN_SECONDS = 2;
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [isMicLoading, setIsMicLoading] = useState(false);
+  const [micError, setMicError] = useState(null);
+  const recordingStartTimeRef = useRef(null);
+
+  const mediaRecorderRef = useRef(null);
+  const recordedChunksRef = useRef([]);
+  const recordTimeoutRef = useRef(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (recordTimeoutRef.current) clearTimeout(recordTimeoutRef.current);
+      if (mediaRecorderRef.current?.state === 'recording') stopRecording();
+    };
+  }, []);
+
+  const getSupportedMimeType = () => {
+    const types = [
+      'audio/webm',
+      'audio/ogg;codecs=opus',
+      'audio/mp4',
+      'audio/mpeg',
+      'audio/wav'
+    ];
+    for (const type of types) {
+      if (MediaRecorder.isTypeSupported(type)) return type;
+    }
+    return '';
+  };
+
+  const startRecording = async () => {
+    if (isRecording || isMicLoading || !window.MediaRecorder) return;
+    setIsMicLoading(true);
+    setMicError(null);
+
+    const mimeType = getSupportedMimeType();
+    if (!mimeType) {
+      setIsMicLoading(false);
+      setMicError('Unsupported recording format.');
+      console.warn('No supported audio format');
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = mediaRecorder;
+      recordedChunksRef.current = [];
+
+      const controller = new AbortController();
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onerror = (event) => {
+        if (!isMountedRef.current) return;
+        setIsMicLoading(false);
+        setIsRecording(false);
+        setMicError('Mic error.');
+        console.warn('Microphone error:', event.error);
+      };
+
+      mediaRecorder.onstop = async () => {
+        if (!isMountedRef.current) return;
+        setIsRecording(false);
+        setIsMicLoading(true);
+
+        const duration = (Date.now() - recordingStartTimeRef.current) / 1000;
+        recordingStartTimeRef.current = null;
+
+        if (duration < MIN_SECONDS || duration > MAX_SECONDS) {
+          setMicError(duration < MIN_SECONDS ? 'Too short.' : 'Too long.');
+          console.warn('Invalid duration:', duration);
+          setIsMicLoading(false);
+          return;
+        }
+
+        try {
+          const blob = new Blob(recordedChunksRef.current, { type: mimeType });
+          const formData = new FormData();
+          formData.append('audio', blob, `event.${mimeType.split('/')[1]}`);
+          formData.append('selected_date', selectedDate.toISOString());
+
+          const endpoint = process.env.REACT_APP_API_BASE_URL
+            ? `${process.env.REACT_APP_API_BASE_URL}/calendar/createEventAudioInput`
+            : '/createEventAudioInput';
+
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include',
+            signal: controller.signal,
+          });
+
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(json.error || 'Upload failed');
+
+          fetchCalendarEvents();
+        } catch (err) {
+          if (!isMountedRef.current) return;
+          setMicError('Upload error.');
+          console.warn('Upload failed:', err);
+        } finally {
+          recordedChunksRef.current = [];
+          setIsMicLoading(false);
+        }
+      };
+
+      mediaRecorder.start();
+      recordingStartTimeRef.current = Date.now();
+      setIsRecording(true);
+      setIsMicLoading(false);
+
+      recordTimeoutRef.current = setTimeout(() => {
+        if (mediaRecorder.state === 'recording') stopRecording();
+      }, MAX_SECONDS * 1000);
+    } catch (err) {
+      if (!isMountedRef.current) return;
+      setIsMicLoading(false);
+      setIsRecording(false);
+      setMicError('Mic unavailable or permission denied.');
+      console.warn('getUserMedia error:', err);
+    }
+  };
+
+  const stopRecording = () => {
+    const mr = mediaRecorderRef.current;
+    if (isMicLoading || !mr || mr.state !== 'recording') return;
+
+    try {
+      mr.stop();
+      mr.stream.getTracks().forEach((t) => t.stop());
+      mediaRecorderRef.current = null;
+      if (recordTimeoutRef.current) {
+        clearTimeout(recordTimeoutRef.current);
+        recordTimeoutRef.current = null;
+      }
+    } catch (err) {
+      console.warn('Error stopping recording:', err);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (recordTimeoutRef.current) {
+        clearTimeout(recordTimeoutRef.current);
+        recordTimeoutRef.current = null;
+      }
+      if (isRecording) {
+        stopRecording();
+      }
+    };
+  }, []);
+
   const [newEvent, setNewEvent] = useState({
     title: '',
     description: '',
@@ -167,7 +328,6 @@ function DayEventsModal({
   // Function to delete an event
   const onDeleteEvent = async (eventId) => {
     setIsLoading(true);
-
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/event`, {
         method: 'DELETE',
@@ -500,8 +660,56 @@ function DayEventsModal({
               Close
             </Button>
           )}
+          {/* ── microphone button ───────────────────────── */}
+          {mode === 'view' && isAuthenticated && window.MediaRecorder && (
+            <IconButton
+              aria-label="Start recording"
+              aria-pressed={isRecording}
+              onClick={startRecording}
+              disabled={isMicLoading}
+              sx={{
+                position: 'absolute',
+                bottom: 16,
+                right: 16,
+              }}
+            >
+              {isMicLoading ? <CircularProgress size={28} /> : <Mic />}
+            </IconButton>
+          )}
         </Box>
       </Modal>
+      {/* ── recording overlay ─────────────────────────── */}
+      {isRecording && (
+        <Box
+          role="dialog"
+          aria-label="Recording in progress"
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            backdropFilter: 'blur(4px)',
+            backgroundColor: 'rgba(0,0,0,0.25)',
+            zIndex: 1301,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <IconButton
+            onClick={stopRecording}
+            sx={{
+              bgcolor: 'error.main',
+              color: '#fff',
+              width: 80,
+              height: 80,
+              '&:hover': { bgcolor: 'error.dark' },
+            }}
+          >
+            <Stop sx={{ fontSize: 40 }} />
+          </IconButton>
+        </Box>
+      )}
+
+
     </>
   );
 }

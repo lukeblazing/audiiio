@@ -144,26 +144,36 @@ class AuthController {
   verifyToken(req, res, next) {
     const cookies = parseCookies(req.headers.cookie);
     const token = cookies['token'];
+    const accessCodeToken = cookies['access_code_token'];
 
-    if (!token) {
+    if (!token || !accessCodeToken) {
       return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
     try {
       // Verify the token using the secret key
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Verify the access code token using the secret key
+      const decodedAccessCode = jwt.verify(accessCodeToken, process.env.JWT_SECRET);
 
       // Attach user info (email and role) to the request object
       req.user = {
         name: decoded.name,
         email: decoded.email,
-        role: decoded.role
+        role: decoded.role,
+        has_access_code: true,
+        access_code: decodedAccessCode.access_code
       };
 
       // If less than 5 days left, issue a new token and set it in the cookie
       const now = Math.floor(Date.now() / 1000);
+
       const timeLeft = decoded.exp - now;
+      const timeLeftAccessCode = decodedAccessCode.exp - now;
+
       const FIVE_DAYS_IN_SECONDS = 5 * 24 * 60 * 60;
+
+      // Refresh main token if needed
       if (timeLeft < FIVE_DAYS_IN_SECONDS) {
         const newToken = this.generateToken({
           email: decoded.email,
@@ -179,6 +189,20 @@ class AuthController {
         });
       }
 
+      // Refresh access code token if needed
+      if (timeLeftAccessCode < FIVE_DAYS_IN_SECONDS) {
+        const newAccessCodeToken = this.generateAccessCodeToken({
+          access_code: decodedAccessCode.access_code,
+        });
+
+        res.cookie('access_code_token', newAccessCodeToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV !== 'development',
+          sameSite: 'Strict',
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
+      }
+
       // Continue to the next middleware or route handler
       next();
     } catch (err) {
@@ -190,26 +214,67 @@ class AuthController {
   verifyOptionalToken(req, res, next) {
     const cookies = parseCookies(req.headers.cookie);
     const token = cookies['token'];
+    const accessCodeToken = cookies['access_code_token'];
 
-    if (!token) {
-      return next();
+    if (!accessCodeToken) {
+      return res.status(403).json({ message: 'No access code provided.' });
     }
 
     try {
-      // Verify the token using the secret key
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Attach user info (email and role) to the request object
+      // Verify the access code token using the secret key
+      const decodedAccessCode = jwt.verify(accessCodeToken, process.env.JWT_SECRET);
       req.user = {
-        name: decoded.name,
-        email: decoded.email,
-        role: decoded.role
-      };
+        has_access_code: true,
+        access_code: decodedAccessCode.access_code
+      }
+
+      if (token) {
+        // Verify the token using the secret key
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Attach user info (email and role) to the request object
+        req.user = {
+          ...req.user,
+          name: decoded.name,
+          email: decoded.email,
+          role: decoded.role
+        };
+      }
 
       // Continue to the next middleware or route handler
       next();
     } catch (err) {
-      return next();
+      return res.status(403).json({ message: 'No access code or auth token provided.' });
+    }
+  }
+
+  // Sign up a guest user with their provided access code
+  async submitAccessCode(req, res) {
+    try {
+      const { accessCode } = req.body;
+
+      if (
+        !accessCode ||
+        accessCode.toString() !== process.env.ACCESS_CODE
+      ) {
+        return res.status(401).json({ valid: false, message: 'Invalid access code.' });
+      }
+
+      // Create a JWT for access code, with minimal claims
+      const accessCodeToken = this.generateToken({ access_code: accessCode.toString() });
+
+      // Set the cookie
+      res.cookie('access_code_token', accessCodeToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        sameSite: 'Strict', // Protect against CSRF attacks
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 day expiry
+      });
+
+      return res.status(200).json({ valid: true, message: 'Access code accepted.' });
+    } catch (error) {
+      console.error('Error in submitAccessCode:', error);
+      return res.status(500).json({ valid: false, message: 'Server error.' });
     }
   }
 }
