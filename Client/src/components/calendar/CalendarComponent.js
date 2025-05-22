@@ -336,20 +336,19 @@ const CalendarComponent = ({ }) => {
     const today = new Date();
     const isToday = isSameDay(date, today);
     const isPast = isBefore(date, startOfDay(today));
-
+  
     return {
-      className: isPast && !isToday ? "past-date" : "",
+      className: [
+        isPast && !isToday ? "past-date" : "",
+        isToday ? "calendar-today" : ""
+      ].join(" "),
       style: {
         cursor: "pointer",
         transition: "background-color 0.2s ease",
         position: "relative",
         overflow: "hidden",
-        border: isToday
-          ? `1px solid ${theme.palette.primary.main}`
-          : `1px solid ${theme.palette.divider}`,
-        boxShadow: isToday
-          ? `inset 0 0 2px lightgray`
-          : "none",
+        border: `1px solid ${theme.palette.divider}`,
+        boxShadow: "none",
         backgroundColor: "transparent",
         borderRadius: "0px",
       },
@@ -385,6 +384,23 @@ const CalendarComponent = ({ }) => {
           border-top: 1px solid ${theme.palette.divider} !important;
         }
 
+        .calendar-today {
+          /* The border below is just a fallback, but may get cut off on the right edge */
+          /* border: 1.5px solid #1976d2 !important; */
+          z-index: 1;
+          position: relative;
+        }
+        .calendar-today::after {
+          content: "";
+          pointer-events: none;
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          border: 2px solid #1976d2; /* or theme.palette.primary.main */
+          border-radius: 6px;
+          z-index: 2;
+          box-sizing: border-box;
+          /* Optional: add a shadow/glow if you want it to "float" above */
+        }
 
         /* Selected cell styling */
         .rbc-selected-cell {

@@ -144,33 +144,26 @@ class AuthController {
   verifyToken(req, res, next) {
     const cookies = parseCookies(req.headers.cookie);
     const token = cookies['token'];
-    const accessCodeToken = cookies['access_code_token'];
 
-    if (!token || !accessCodeToken) {
+    if (!token) {
       return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
     try {
       // Verify the token using the secret key
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      // Verify the access code token using the secret key
-      const decodedAccessCode = jwt.verify(accessCodeToken, process.env.JWT_SECRET);
 
       // Attach user info (email and role) to the request object
       req.user = {
+        ...req.user,
         name: decoded.name,
         email: decoded.email,
         role: decoded.role,
-        has_access_code: true,
-        access_code: decodedAccessCode.access_code
       };
 
       // If less than 5 days left, issue a new token and set it in the cookie
       const now = Math.floor(Date.now() / 1000);
-
       const timeLeft = decoded.exp - now;
-      const timeLeftAccessCode = decodedAccessCode.exp - now;
-
       const FIVE_DAYS_IN_SECONDS = 5 * 24 * 60 * 60;
 
       // Refresh main token if needed
@@ -189,8 +182,64 @@ class AuthController {
         });
       }
 
+      // Continue to the next middleware or route handler
+      next();
+    } catch (err) {
+      return res.status(403).json({ message: 'Invalid or expired token.' });
+    }
+  }
+
+  // Middleware to verify the token from the cookie
+  verifyOptionalToken(req, res, next) {
+    const cookies = parseCookies(req.headers.cookie);
+    const token = cookies['token'];
+
+    try {
+      if (token) {
+        // Verify the token using the secret key
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Attach user info (email and role) to the request object
+        req.user = {
+          ...req.user,
+          name: decoded.name,
+          email: decoded.email,
+          role: decoded.role,
+        };
+      }
+
+      // Continue to the next middleware or route handler
+      next();
+    } catch (err) {
+      return res.status(403).json({ message: 'Invalid or expired token.' });
+    }
+  }
+
+  // Middleware to verify the token from the cookie
+  verifyAccessCodeToken(req, res, next) {
+    const cookies = parseCookies(req.headers.cookie);
+    const accessCodeToken = cookies['access_code_token'];
+
+    if (!accessCodeToken) {
+      return res.status(403).json({ message: 'No access code provided.' });
+    }
+
+    try {
+      // Verify the access code token using the secret key
+      const decodedAccessCode = jwt.verify(accessCodeToken, process.env.JWT_SECRET);
+      req.user = {
+        ...req.user,
+        has_access_code: true,
+        access_code: decodedAccessCode.access_code
+      }
+
+      // If less than 5 days left, issue a new token and set it in the cookie
+      const now = Math.floor(Date.now() / 1000);
+      const timeLeft = decodedAccessCode.exp - now;
+      const FIVE_DAYS_IN_SECONDS = 5 * 24 * 60 * 60;
+
       // Refresh access code token if needed
-      if (timeLeftAccessCode < FIVE_DAYS_IN_SECONDS) {
+      if (timeLeft < FIVE_DAYS_IN_SECONDS) {
         const newAccessCodeToken = this.generateAccessCodeToken({
           access_code: decodedAccessCode.access_code,
         });
@@ -206,45 +255,7 @@ class AuthController {
       // Continue to the next middleware or route handler
       next();
     } catch (err) {
-      return res.status(403).json({ message: 'Invalid or expired token.' });
-    }
-  }
-
-  // Middleware to verify the token from the cookie
-  verifyOptionalToken(req, res, next) {
-    const cookies = parseCookies(req.headers.cookie);
-    const token = cookies['token'];
-    const accessCodeToken = cookies['access_code_token'];
-
-    if (!accessCodeToken) {
-      return res.status(403).json({ message: 'No access code provided.' });
-    }
-
-    try {
-      // Verify the access code token using the secret key
-      const decodedAccessCode = jwt.verify(accessCodeToken, process.env.JWT_SECRET);
-      req.user = {
-        has_access_code: true,
-        access_code: decodedAccessCode.access_code
-      }
-
-      if (token) {
-        // Verify the token using the secret key
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // Attach user info (email and role) to the request object
-        req.user = {
-          ...req.user,
-          name: decoded.name,
-          email: decoded.email,
-          role: decoded.role
-        };
-      }
-
-      // Continue to the next middleware or route handler
-      next();
-    } catch (err) {
-      return res.status(403).json({ message: 'No access code or auth token provided.' });
+      return res.status(403).json({ message: 'No valid access code provided.' });
     }
   }
 

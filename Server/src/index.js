@@ -77,7 +77,7 @@ app.use((req, res, next) => {
 });
 
 // Sign up: Create a new user
-app.post('/api/signUp', AuthController.verifyOptionalToken, async (req, res) => {
+app.post('/api/signUp', AuthController.verifyAccessCodeToken, async (req, res) => {
   try {
 
     // temporarily disable sign up
@@ -99,7 +99,7 @@ app.post('/api/signUp', AuthController.verifyOptionalToken, async (req, res) => 
 });
 
 // Route for handling login
-app.post('/api/login', AuthController.verifyOptionalToken, async (req, res) => {
+app.post('/api/login', AuthController.verifyAccessCodeToken, async (req, res) => {
   try {
     return await AuthController.login(req, res);
   } catch (error) {
@@ -113,7 +113,7 @@ app.post('/api/login', AuthController.verifyOptionalToken, async (req, res) => {
 });
 
 // Route for handling logout
-app.post('/api/logout', AuthController.verifyOptionalToken, (req, res) => {
+app.post('/api/logout', AuthController.verifyAccessCodeToken, (req, res) => {
   try {
     return AuthController.logout(req, res);
   } catch (error) {
@@ -149,7 +149,7 @@ app.post('/api/submitAccessCode', async (req, res) => {
   }
 });
 
-app.get('/api/checkAccessCode', AuthController.verifyOptionalToken, (req, res) => {
+app.get('/api/checkAccessCode', AuthController.verifyAccessCodeToken, (req, res) => {
   res.status(200).json({ message: `Access Code Valid.` });
 });
 // END ACCESS CODE
@@ -158,7 +158,7 @@ app.get('/api/checkAccessCode', AuthController.verifyOptionalToken, (req, res) =
 // GET /api/calendar/getAllEventsForUser
 // Retrieve all events from any calendar associated with the user.
 // This includes calendars owned by the user and those where they are added.
-app.get('/api/calendar/getAllEventsForUser', AuthController.verifyOptionalToken, async (req, res) => {
+app.get('/api/calendar/getAllEventsForUser', AuthController.verifyAccessCodeToken, AuthController.verifyOptionalToken, async (req, res) => {
   let query = ``;
   if (req?.user?.role && req.user.email && req.user.name && (['lukeblazing@yahoo.com', 'chelsyjohnson1234@gmail.com'].map(e => e.toLowerCase()).includes(req.user.email.toLowerCase()))) {
     query = `
@@ -190,7 +190,7 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyOptionalToken,
 // --------------------------------------------------------------------
 // POST /api/calendar/createEventAudioInput
 // Create an event in a particular calendar.
-app.post('/api/calendar/createEventAudioInput', AuthController.verifyToken, upload.single('audio'), async (req, res) => {
+app.post('/api/calendar/createEventAudioInput', AuthController.verifyAccessCodeToken, AuthController.verifyToken, upload.single('audio'), async (req, res) => {
   if (!req?.user?.role) {
     return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   }
@@ -275,7 +275,7 @@ app.post('/api/calendar/createEventAudioInput', AuthController.verifyToken, uplo
 // --------------------------------------------------------------------
 // POST /api/calendar/event
 // Create an event in a particular calendar.
-app.post('/api/calendar/event', AuthController.verifyToken, async (req, res) => {
+app.post('/api/calendar/event', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
   if (!req?.user?.role) {
     return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   }
@@ -314,7 +314,7 @@ app.post('/api/calendar/event', AuthController.verifyToken, async (req, res) => 
 // --------------------------------------------------------------------
 // DELETE /api/calendar/event
 // Delete a specified event.
-app.delete('/api/calendar/event', AuthController.verifyToken, async (req, res) => {
+app.delete('/api/calendar/event', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
   if (!req?.user?.role) {
     return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   }
@@ -341,7 +341,8 @@ app.delete('/api/calendar/event', AuthController.verifyToken, async (req, res) =
 // --------------------------------------------------------------------
 // POST /api/calendar/calendar
 // Create a new calendar. The authenticated user becomes the owner.
-app.post('/api/calendar/calendar', AuthController.verifyToken, async (req, res) => {
+app.post('/api/calendar/calendar', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
+  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   if (!req?.user?.role) {
     return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   }
@@ -370,7 +371,8 @@ app.post('/api/calendar/calendar', AuthController.verifyToken, async (req, res) 
 // --------------------------------------------------------------------
 // DELETE /api/calendar/calendar
 // Delete a calendar. Only the owner is allowed to delete it.
-app.delete('/api/calendar/calendar', AuthController.verifyToken, async (req, res) => {
+app.delete('/api/calendar/calendar', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
+  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   if (!req?.user?.role) {
     return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   }
@@ -399,7 +401,8 @@ app.delete('/api/calendar/calendar', AuthController.verifyToken, async (req, res
 
 // GET /api/calendar/getCalendarsForUser
 // Retrieve all calendars that the user owns or is added to.
-app.get('/api/calendar/getCalendarsForUser', AuthController.verifyToken, async (req, res) => {
+app.get('/api/calendar/getCalendarsForUser', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
+  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   if (!req?.user?.email) {
     return res.status(401).json({ message: 'Access denied. No email provided.' });
   }
@@ -417,7 +420,8 @@ app.get('/api/calendar/getCalendarsForUser', AuthController.verifyToken, async (
 
 // GET /api/calendar/categories
 // Retrieve all categories for a given calendar.
-app.get('/api/calendar/categories', AuthController.verifyToken, async (req, res) => {
+app.get('/api/calendar/categories', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
+  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   if (!req?.user?.email) {
     return res.status(401).json({ message: 'Access denied. No email provided.' });
   }
@@ -441,7 +445,8 @@ app.get('/api/calendar/categories', AuthController.verifyToken, async (req, res)
 
 // POST /api/subscribe
 // Registers a push subscription for the authenticated user.
-app.post('/api/subscribe', AuthController.verifyToken, async (req, res) => {
+app.post('/api/subscribe', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
+  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   console.log("/api/subscribe");
   const subscription = req.body.subscription;
   if (!subscription) {
@@ -468,8 +473,8 @@ app.post('/api/subscribe', AuthController.verifyToken, async (req, res) => {
 
 // POST /api/unsubscribe
 // Removes the push subscription for the authenticated user.
-app.post('/api/unsubscribe', AuthController.verifyToken, async (req, res) => {
-  console.log("/api/unsubscribe");
+app.post('/api/unsubscribe', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
+  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   try {
     // Delete the subscription record from the database for the authenticated user.
     await db.query(
@@ -487,7 +492,8 @@ app.post('/api/unsubscribe', AuthController.verifyToken, async (req, res) => {
 // POST /api/sendNotification
 // Sends a push notification to a target user.
 // Expects { targetEmail, title, body, url } in the request body.
-app.post('/api/sendNotification', AuthController.verifyToken, async (req, res) => {
+app.post('/api/sendNotification', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
+  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   const { targetEmail, title, body: messageBody, url } = req.body;
   if (!targetEmail || !messageBody) {
     return res.status(400).json({ message: 'targetEmail and message body are required.' });
@@ -517,7 +523,8 @@ app.post('/api/sendNotification', AuthController.verifyToken, async (req, res) =
 });
 
 // GET /api/availableUsers
-app.get('/api/availableUsers', AuthController.verifyToken, async (req, res) => {
+app.get('/api/availableUsers', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
+  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   try {
     const result = await db.query('SELECT user_email FROM push_subscriptions');
     // Map the result into a format suitable for your select box.
