@@ -190,87 +190,102 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyAccessCodeToke
 // --------------------------------------------------------------------
 // POST /api/calendar/createEventAudioInput
 // Create an event in a particular calendar.
-app.post('/api/calendar/createEventAudioInput', AuthController.verifyAccessCodeToken, AuthController.verifyToken, upload.single('audio'), async (req, res) => {
-  if (!req?.user?.role) {
-    return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  }
-  if (!req?.user?.email) {
-    return res.status(401).json({ message: 'Access denied. No email provided.' });
-  }
+app.post(
+  '/api/calendar/createEventAudioInput',
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  upload.single('audio'),
+  async (req, res) => {
+    /* ------------------------------------------------------------------ */
+    /* 1.  Quick auth checks                                              */
+    /* ------------------------------------------------------------------ */
+    if (!req?.user?.role)  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
+    if (!req?.user?.email) return res.status(401).json({ message: 'Access denied. No email provided.' });
 
-  let parsed_audio_text;
-  let event;
-  let selectedDate;
-
-  try {
-    const buffer = req.file.buffer;
-    parsed_audio_text = await openai_transcription(buffer);
-
-    selectedDate = new Date(req.body.selected_date);
-    if (isNaN(selectedDate)) {
-      return res.status(400).json({ message: 'Invalid date from client.' });
+    /* ------------------------------------------------------------------ */
+    /* 2.  Transcribe + parse                                             */
+    /* ------------------------------------------------------------------ */
+    let transcription, event, selectedDate;
+    try {
+      transcription  = await openai_transcription(req.file.buffer);
+      selectedDate   = new Date(req.body.selected_date);
+      if (isNaN(+selectedDate)) throw new Error('Bad date');
+    } catch (err) {
+      console.error(err);
+      return res.status(400).json({ message: 'Invalid date or could not parse audio.' });
     }
 
-  } catch (e) {
-    console.log(e)
-    return res.status(500).json({ message: 'Internal server error parsing audio input.' });
+    if (!transcription?.trim()) {
+      return res.status(400).json({ message: 'Audio transcription is empty or unintelligible.' });
+    }
+
+    try {
+      event = await get_event_from_audio_input(transcription, selectedDate);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Internal server error parsing audio transcription.' });
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* 3.  Time‑field normalisation & validation                          */
+    /* ------------------------------------------------------------------ */
+    const toInt = (s) => (s === '' || s === undefined || s === null ? null : Number.parseInt(s, 10));
+
+    const startH = toInt(event.start_time_hours);
+    const startM = toInt(event.start_time_minutes);
+    const endH   = toInt(event.end_time_hours);
+    const endM   = toInt(event.end_time_minutes);
+
+    if (!event?.title?.trim() || !Number.isInteger(startH) || !Number.isInteger(startM)) {
+      return res.status(400).json({ message: 'Missing or invalid required event fields.' });
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* 4.  Build start / end                                              */
+    /* ------------------------------------------------------------------ */
+    const withTime = (base, h, m) => {
+      const d = new Date(base);           // clones selectedDate
+      d.setHours(h, m || 0, 0, 0);
+      return d;
+    };
+
+    event.start     = withTime(selectedDate, startH, startM);
+    event.end_time  = Number.isInteger(endH) && Number.isInteger(endM)
+                        ? withTime(selectedDate, endH, endM)
+                        : null;
+
+    /* ------------------------------------------------------------------ */
+    /* 5.  Persist                                                        */
+    /* ------------------------------------------------------------------ */
+    try {
+      const query  = `
+        INSERT INTO events
+          (calendar_id, category_id, title, description, start, end_time,
+           all_day, recurrence_rule, created_by)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        RETURNING *;
+      `;
+      const vals   = [
+        event.calendar_id ?? null,
+        event.category_id ?? null,
+        event.title.trim(),
+        event.description ?? null,
+        event.start,                // pass Date objects directly
+        event.end_time,
+        event.all_day ?? false,
+        event.recurrence_rule ?? null,
+        req.user.email,
+      ];
+
+      const { rows } = await db.query(query, vals);
+      return res.status(201).json({ event: rows[0] });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
   }
+);
 
-
-  try {
-    event = await get_event_from_audio_input(parsed_audio_text, selectedDate);
-  } catch (e) {
-    console.log(e)
-    return res.status(500).json({ message: 'Internal server error parsing audio transcription.' });
-  }
-
-
-  // Now we insert the generated Event to the given day
-  if (!event || !event.title || !event.start) {
-    return res.status(400).json({ message: 'Missing required event fields.' });
-  }
-
-  // override the AI-generated date with the current date
-  const overrideDate = (original, base) => {
-    const adjusted = new Date(original);
-    adjusted.setFullYear(base.getFullYear());
-    adjusted.setMonth(base.getMonth());
-    adjusted.setDate(base.getDate());
-    return adjusted;
-  };
-  
-  event.start = overrideDate(new Date(event.start), selectedDate);
-  
-  if (event.end_time) {
-    event.end_time = overrideDate(new Date(event.end_time), selectedDate);
-  }
-  // end override AI-generated date with the current date
-
-
-  try {
-    const query = `
-      INSERT INTO events (calendar_id, category_id, title, description, start, end_time, all_day, recurrence_rule, created_by)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING *
-    `;
-    const values = [
-      event.calendar_id || null,
-      event.category_id || null,
-      event.title,
-      event.description || null,
-      new Date(event.start).toISOString(),   // sanitize
-      event.end_time ? new Date(event.end_time).toISOString() : null,  // sanitize
-      event.all_day || false,
-      event.recurrence_rule || null,
-      req.user.email,                        // always use auth token email as created_by
-    ];
-    const result = await db.query(query, values);
-    return res.status(201).json({ event: result.rows[0] });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
 
 // --------------------------------------------------------------------
 // POST /api/calendar/event

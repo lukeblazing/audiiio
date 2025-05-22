@@ -19,7 +19,7 @@ export async function openai_transcription(
     model,
     language: "en",
     prompt:
-      "The following audio input is a description of an upcoming scheduled event for a concrete pumping operator's calendar.",
+      "The following audio input is a description of an upcoming scheduled event for a user's calendar.",
   });
 
   return text;
@@ -32,11 +32,11 @@ export async function get_event_from_audio_input(transcription, selectedDate) {
         messages: [
             {
                 role: "system",
-                content: "You are an assistant that extracts event information from a user's message and returns it as a JSON object following the provided schema."
+                content: "You are a calendar scheduling assistant that extracts event information from a user's message and returns it as a JSON object following the provided schema."
             },
             {
                 role: "user",
-                content: `Extract the event details from this text: "${transcription}". Assume all dates and times are in the "America/Chicago" timezone (U.S. Central Time) unless otherwise specified by the user. Always return full ISO8601 date-time strings including the timezone offset. The day, month, and year for this event match today's date: ${selectedDate}, unless otherwise specified by the user. Return only the JSON object as specified.`
+                content: `Extract the event details from the user transcript: "${transcription}". Return only the JSON object as specified.`
             }
         ],
         response_format: {
@@ -48,33 +48,45 @@ export async function get_event_from_audio_input(transcription, selectedDate) {
                     "required": [
                         "title",
                         "description",
+                        "start_time_hours",
+                        "start_time_minutes",
+                        "end_time_hours",
+                        "end_time_minutes",
                         "category_id",
-                        "start",
-                        "end_time"
                     ],
                     "properties": {
-                        "start": {
-                            "type": "string",
-                            "example": "2023-03-25T14:00:00-06:00",
-                            "description": "The start time of the event. Assume all dates and times are in the America/Chicago timezone (U.S. Central Time) unless otherwise specified by the user. Always return full ISO8601 date-time strings including the timezone offset."
-                        },
                         "title": {
                             "type": "string",
                             "description": "The title of the event."
                         },
-                        "end_time": {
-                            "type": "string",
-                            "example": "2023-03-25T16:00:00-06:00",
-                            "description": "The end time of the event. Assume all dates and times are in the America/Chicago timezone (U.S. Central Time) unless otherwise specified by the user. Always return full ISO8601 date-time strings including the timezone offset."
-                        },
-                        "category_id": {
-                            "type": "string",
-                            "description": "A plain text color identifier for the event category used in calendar representation."
-                        },
                         "description": {
                             "type": "string",
                             "description": "A description providing details about the event."
-                        }
+                        },
+                        "start_time_hours": {
+                            "type": "string",
+                            "example": "7",
+                            "description": "The hours, as would be displayed on a digital clock, which represent the start time of the event. Default to 8."
+                        },
+                        "start_time_minutes": {
+                            "type": "string",
+                            "example": "15",
+                            "description": "The minutes, as would be displayed on a digital clock, which represent the start time of the event. Default to 0."
+                        },
+                        "end_time_hours": {
+                            "type": "integer",
+                            "example": "8",
+                            "description": "The hours, as would be displayed on a digital clock, which represent the end time of the event. Default to \"\"."
+                        },
+                        "end_time_minutes": {
+                            "type": "integer",
+                            "example": "0",
+                            "description": "The minutes, as would be displayed on a digital clock, which represent the end time of the event. Default to \"\""
+                        },
+                        "category_id": {
+                            "type": "string",
+                            "description": "A plain text color identifier for the event color used in calendar representation. Only use HTML color names in lowercase (e.g. lightblue)."
+                        },
                     },
                     "additionalProperties": false
                 },
