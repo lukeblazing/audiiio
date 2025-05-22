@@ -574,7 +574,7 @@ function DayEventsModal({
             <Typography
               key={idx}
               sx={{
-                background: 'rgba(0,0,0,0.05)',
+                background: eventBackground(ev.category_id),
                 borderRadius: 1,
                 p: 1.5, mb: 1,
                 border: `1px solid ${getBorderColor(ev.category_id)}`
@@ -611,7 +611,7 @@ function DayEventsModal({
           <Box sx={{ width: '100%', maxHeight: '60vh', overflowY: 'auto', px: 1 }}>
             <Typography
               sx={{
-                background: 'rgba(0,0,0,0.05)',
+                background: eventBackground(eventToDelete.category_id),
                 borderRadius: 1,
                 p: 1.5,
                 mb: 1,

@@ -85,7 +85,7 @@ export async function get_event_from_audio_input(transcription, selectedDate) {
                         },
                         "category_id": {
                             "type": "string",
-                            "description": "A plain text color identifier for the event color used in calendar representation. Only use HTML color names in lowercase (e.g. lightblue)."
+                            "description": "A plain text color identifier for the event color used in calendar representation. Only use HTML color names in lowercase (e.g. cornflowerblue)."
                         },
                     },
                     "additionalProperties": false
