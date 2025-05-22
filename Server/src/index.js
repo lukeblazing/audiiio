@@ -243,11 +243,11 @@ app.post(
     /* ------------------------------------------------------------------ */
     /* 4.  Build start / end                                              */
     /* ------------------------------------------------------------------ */
-    const withTime = (base, h, m) => {
-      const d = new Date(base);           // clones selectedDate
-      d.setHours(h, m || 0, 0, 0);
-      return d;
-    };
+    const withTime = (isoDateWithZone, h, m) => {
+      const d = new Date(isoDateWithZone);      // d is in UTC, but constructed from the user's offset
+      d.setUTCHours(h, m || 0, 0, 0);           // set hours/minutes as UTC (matches offset)
+      return d;                                 // d is now a Date representing the correct UTC instant
+    };    
 
     event.start     = withTime(selectedDate, startH, startM);
     event.end_time  = Number.isInteger(endH) && Number.isInteger(endM)
