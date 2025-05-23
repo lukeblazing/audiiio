@@ -120,6 +120,26 @@ function DayEventsModal({
     };
   }, []);
 
+  function toLocalISOString(date) {
+    const pad = n => n < 10 ? '0' + n : n;
+    const offset = -date.getTimezoneOffset();
+    const sign = offset >= 0 ? '+' : '-';
+    const absOffset = Math.abs(offset);
+    const hours = pad(Math.floor(absOffset / 60));
+    const minutes = pad(absOffset % 60);
+  
+    return (
+      date.getFullYear() + '-' +
+      pad(date.getMonth() + 1) + '-' +
+      pad(date.getDate()) + 'T' +
+      pad(date.getHours()) + ':' +
+      pad(date.getMinutes()) + ':' +
+      pad(date.getSeconds()) + '.' +
+      (date.getMilliseconds() / 1000).toFixed(3).slice(2, 5) +
+      sign + hours + ':' + minutes
+    );
+  }
+
   const getSupportedMimeType = () => {
     const types = [
       'audio/webm',
@@ -186,7 +206,7 @@ function DayEventsModal({
           const blob = new Blob(recordedChunksRef.current, { type: mimeType });
           const formData = new FormData();
           formData.append('audio', blob, `event.${mimeType.split('/')[1]}`);
-          formData.append('selected_date', selectedDate.toISOString());
+          formData.append('selected_date', toLocalISOString(selectedDate));
 
           const endpoint = process.env.REACT_APP_API_BASE_URL
             ? `${process.env.REACT_APP_API_BASE_URL}/calendar/createEventAudioInput`

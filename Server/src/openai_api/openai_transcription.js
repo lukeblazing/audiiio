@@ -36,7 +36,7 @@ export async function get_event_from_audio_input(transcription, selectedDate) {
             },
             {
                 role: "user",
-                content: `Extract the event details from the user transcript: "${transcription}". Return only the JSON object as specified.`
+                content: `Extract the event details from the user transcript: "${transcription}". The user is scheduling an event on the following day with the following timezone offset: "${selectedDate}". Return only the JSON object as specified.`
             }
         ],
         response_format: {
@@ -48,10 +48,8 @@ export async function get_event_from_audio_input(transcription, selectedDate) {
                     "required": [
                         "title",
                         "description",
-                        "start_time_hours",
-                        "start_time_minutes",
-                        "end_time_hours",
-                        "end_time_minutes",
+                        "start_time",
+                        "end_time",
                         "category_id",
                     ],
                     "properties": {
@@ -63,25 +61,15 @@ export async function get_event_from_audio_input(transcription, selectedDate) {
                             "type": "string",
                             "description": "A description providing details about the event."
                         },
-                        "start_time_hours": {
+                        "start_time": {
                             "type": "string",
-                            "example": "7",
-                            "description": "The hours, as would be displayed on a digital clock, which represent the start time of the event. Default to 8."
+                            "example": selectedDate,
+                            "description": `The start time of the event in ISO format, using the same timezone offset as ${selectedDate}.`
                         },
-                        "start_time_minutes": {
+                        "end_time": {
                             "type": "string",
-                            "example": "15",
-                            "description": "The minutes, as would be displayed on a digital clock, which represent the start time of the event. Default to 0."
-                        },
-                        "end_time_hours": {
-                            "type": "integer",
-                            "example": "8",
-                            "description": "The hours, as would be displayed on a digital clock, which represent the end time of the event. Default to \"\"."
-                        },
-                        "end_time_minutes": {
-                            "type": "integer",
-                            "example": "0",
-                            "description": "The minutes, as would be displayed on a digital clock, which represent the end time of the event. Default to \"\""
+                            "example": selectedDate,
+                            "description": `The end time of the event in ISO format, using the same timezone offset as ${selectedDate}.`
                         },
                         "category_id": {
                             "type": "string",

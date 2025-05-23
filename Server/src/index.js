@@ -63,7 +63,7 @@ startCronJobs();
 
 // Configure VAPID details
 webpush.setVapidDetails(
-  'mailto:lukeblazing@yahoo.com',
+  'mailto:camp_cellars6k@icloud.com',
   process.env.VAPID_PUBLIC_KEY,
   process.env.VAPID_PRIVATE_KEY
 );
@@ -189,7 +189,6 @@ app.get('/api/calendar/getAllEventsForUser', AuthController.verifyAccessCodeToke
 
 // --------------------------------------------------------------------
 // POST /api/calendar/createEventAudioInput
-// Create an event in a particular calendar.
 app.post(
   '/api/calendar/createEventAudioInput',
   AuthController.verifyAccessCodeToken,
@@ -199,7 +198,7 @@ app.post(
     /* ------------------------------------------------------------------ */
     /* 1.  Quick auth checks                                              */
     /* ------------------------------------------------------------------ */
-    if (!req?.user?.role)  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
+    if (!req?.user?.role) return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
     if (!req?.user?.email) return res.status(401).json({ message: 'Access denied. No email provided.' });
 
     /* ------------------------------------------------------------------ */
@@ -207,9 +206,8 @@ app.post(
     /* ------------------------------------------------------------------ */
     let transcription, event, selectedDate;
     try {
-      transcription  = await openai_transcription(req.file.buffer);
-      selectedDate   = new Date(req.body.selected_date);
-      if (isNaN(+selectedDate)) throw new Error('Bad date');
+      transcription = await openai_transcription(req.file.buffer);
+      selectedDate = req.body.selected_date;
     } catch (err) {
       console.error(err);
       return res.status(400).json({ message: 'Invalid date or could not parse audio.' });
@@ -221,51 +219,50 @@ app.post(
 
     try {
       event = await get_event_from_audio_input(transcription, selectedDate);
+
+      const [datePart] = selectedDate.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+
+      // get Date() objs from the gpt-4o-mini response
+      event.start = new Date(event.start_time);
+      event.end_time = new Date(event.end_time);
+
+      // Set Y-M-D to match selectedDate
+      event.start.setFullYear(year, month - 1, day);
+      event.end_time.setFullYear(year, month - 1, day);
+
+      // If start and end_time have the same hour, delete end_time
+      if (event.start.getHours() === event.end_time.getHours()) {
+        delete event.end_time;
+      }
     } catch (err) {
       console.error(err);
       return res.status(500).json({ message: 'Internal server error parsing audio transcription.' });
     }
 
-    /* ------------------------------------------------------------------ */
-    /* 3.  Time‑field normalisation & validation                          */
-    /* ------------------------------------------------------------------ */
-    const toInt = (s) => (s === '' || s === undefined || s === null ? null : Number.parseInt(s, 10));
 
-    const startH = toInt(event.start_time_hours);
-    const startM = toInt(event.start_time_minutes);
-    const endH   = toInt(event.end_time_hours);
-    const endM   = toInt(event.end_time_minutes);
+    // Helper to check for valid dates
+    function isValidDate(d) {
+      return d instanceof Date && !isNaN(d.getTime());
+    }
 
-    if (!event?.title?.trim() || !Number.isInteger(startH) || !Number.isInteger(startM)) {
+    if (!event?.title?.trim() || !isValidDate(event.start)) {
       return res.status(400).json({ message: 'Missing or invalid required event fields.' });
     }
 
-    /* ------------------------------------------------------------------ */
-    /* 4.  Build start / end                                              */
-    /* ------------------------------------------------------------------ */
-    const withTime = (isoDateWithZone, h, m) => {
-      const d = new Date(isoDateWithZone);      // d is in UTC, but constructed from the user's offset
-      d.setUTCHours(h, m || 0, 0, 0);           // set hours/minutes as UTC (matches offset)
-      return d;                                 // d is now a Date representing the correct UTC instant
-    };    
-
-    event.start     = withTime(selectedDate, startH, startM);
-    event.end_time  = Number.isInteger(endH) && Number.isInteger(endM)
-                        ? withTime(selectedDate, endH, endM)
-                        : null;
 
     /* ------------------------------------------------------------------ */
     /* 5.  Persist                                                        */
     /* ------------------------------------------------------------------ */
     try {
-      const query  = `
+      const query = `
         INSERT INTO events
           (calendar_id, category_id, title, description, start, end_time,
            all_day, recurrence_rule, created_by)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
         RETURNING *;
       `;
-      const vals   = [
+      const vals = [
         event.calendar_id ?? null,
         event.category_id ?? null,
         event.title.trim(),

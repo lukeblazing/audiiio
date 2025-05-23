@@ -385,8 +385,6 @@ const CalendarComponent = ({ }) => {
         }
 
         .calendar-today {
-          /* The border below is just a fallback, but may get cut off on the right edge */
-          /* border: 1.5px solid #1976d2 !important; */
           z-index: 1;
           position: relative;
         }
@@ -395,7 +393,7 @@ const CalendarComponent = ({ }) => {
           pointer-events: none;
           position: absolute;
           top: 0; left: 0; right: 0; bottom: 0;
-          border: 2px solid #1976d2; /* or theme.palette.primary.main */
+          border: 2px solid ${theme.palette.primary.main};
           border-radius: 6px;
           z-index: 2;
           box-sizing: border-box;
@@ -405,7 +403,7 @@ const CalendarComponent = ({ }) => {
         /* Selected cell styling */
         .rbc-selected-cell {
           background: rgba(16, 85, 153, 0.88) !important;
-          border-radius: 4px;
+          border-radius: 6px;
           transition: background-color 0.2s ease-in-out;
         }
 
