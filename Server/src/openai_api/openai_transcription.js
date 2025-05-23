@@ -19,7 +19,7 @@ export async function openai_transcription(
     model,
     language: "en",
     prompt:
-      "The following audio input is a description of an upcoming scheduled event for a user's calendar.",
+      "The following audio input is a description of an upcoming scheduled event for a user's calendar. Here are spellings for some names the user MIGHT have mentioned, ONLY use these spellings if the user mentions these names: [\"Chelsy\", \"Cory\", \"Prada\"]",
   });
 
   return text;
@@ -32,7 +32,7 @@ export async function get_event_from_audio_input(transcription, selectedDate) {
         messages: [
             {
                 role: "system",
-                content: "You are a calendar scheduling assistant that extracts event information from a user's message and returns it as a JSON object following the provided schema. Spell the name Chelsy: C-h-e-l-s-y."
+                content: "You are a calendar scheduling assistant that extracts event information from a user's message and returns it as a JSON object following the provided schema."
             },
             {
                 role: "user",
