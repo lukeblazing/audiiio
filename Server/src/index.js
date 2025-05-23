@@ -232,7 +232,7 @@ app.post(
       event.end_time.setFullYear(year, month - 1, day);
 
       // If start and end_time have the same hour, delete end_time
-      if (event.start.getHours() === event.end_time.getHours()) {
+      if ((event.start.getHours() === event.end_time.getHours()) || (event.end_time <= event.start)) {
         delete event.end_time;
       }
     } catch (err) {
