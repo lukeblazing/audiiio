@@ -32,7 +32,7 @@ export async function get_event_from_audio_input(transcription, selectedDate) {
         messages: [
             {
                 role: "system",
-                content: "You are a calendar scheduling assistant that extracts event information from a user's message and returns it as a JSON object following the provided schema."
+                content: "You are a calendar scheduling assistant that extracts event information from a user's message and returns it as a JSON object following the provided schema. Spell the name Chelsy: C-h-e-l-s-y."
             },
             {
                 role: "user",
