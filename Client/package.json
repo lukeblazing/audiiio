@@ -17,6 +17,7 @@
     "@babel/preset-env": "^7.25.4",
     "@babel/preset-react": "^7.24.7",
     "@babel/runtime": "^7.25.6",
+    "@daniel-szulc/react-weather-widget": "^1.1.1",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.2",
