@@ -109,19 +109,27 @@ export default function OpenMeteoForecast({ date, onClose }) {
     const [hourly, setHourly] = useState(null);
     const [loading, setLoading] = useState(false);
     const [locError, setLocError] = useState('');
+    const [requested, setRequested] = useState(false);
 
     /* ---- 1.  geolocation ---- */
-    useEffect(() => {
-        setCoords(null); setWeather(null); setHourly(null); setLocError('');
 
+    useEffect(() => {
+        if (!requested) return;
         if (!navigator.geolocation) { setLocError('Geolocation not supported.'); return; }
 
         setLoading(true);
         navigator.geolocation.getCurrentPosition(
-            pos => { setCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude }); setLoading(false); },
-            () => { setLocError('Could not get your location.'); setLoading(false); }
+            pos => {
+                setCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+                setLoading(false);
+            },
+            () => {
+                setLocError('Could not get your location.');
+                setLoading(false);
+            }
         );
-    }, [date]);
+    }, [requested]);
+
 
     /* ---- 2.  fetch forecast ---- */
     useEffect(() => {
@@ -165,6 +173,13 @@ export default function OpenMeteoForecast({ date, onClose }) {
     }, [coords, date]);
 
     /* ---- 3.  early returns ---- */
+    if (!requested)
+    return (
+        <Box sx={{ p: 6, textAlign: 'center' }}>
+            <Typography variant="h6">Get local forecast</Typography>
+            <button onClick={() => setRequested(true)}>Allow Location</button>
+        </Box>
+    );
     if (loading)
         return (
             <Box sx={{ p: 6, textAlign: 'center' }}>
@@ -199,7 +214,7 @@ export default function OpenMeteoForecast({ date, onClose }) {
         <Fade in>
             <Box
                 sx={{
-                    position: 'relative', 
+                    position: 'relative',
                     width: '100%',
                     maxWidth: 900,
                     overflow: 'clip',
