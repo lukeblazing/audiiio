@@ -364,8 +364,8 @@ app.get('/api/weather', AuthController.verifyAccessCodeToken, AuthController.ver
   const isValidLon = (lon) => lon >= -180 && lon <= 180;
   const isValidDate = (str) => /^\d{4}-\d{2}-\d{2}$/.test(str); // basic YYYY-MM-DD check
 
-  const lat = '44.986656';
-  const lon = '-93.258133';
+  const lat = process.env.WEATHER_LATITUDE;
+  const lon = process.env.WEATHER_LONGITUDE;
   const date = req.query.date;
 
   if (!isValidDate(date)) {
