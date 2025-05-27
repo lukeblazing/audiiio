@@ -5,7 +5,7 @@ import { parseCookies } from './authUtils.js';
 
 class AuthController {
   // Handles Login and cookie generation
-  async login(req, res) {
+  login = async (req, res) => {
     const { email, password } = req.body;
 
     // Validate provided email and password are correct
@@ -33,7 +33,7 @@ class AuthController {
   }
 
   // Validate email and password
-  async getCredentials(email, password) {
+  getCredentials = async (email, password) => {
     try {
       const queryText = 'SELECT password, name, role FROM app_users WHERE lower(email) = lower($1)';
       const result = await pool.query(queryText, [email]);
@@ -58,7 +58,7 @@ class AuthController {
   }
 
   // Create a new user and automatically log them in
-  async createUser(req, res) {
+  createUser = async (req, res) => {
     try {
       const { email, name, password } = req.body;
 
@@ -126,7 +126,7 @@ class AuthController {
   }
 
   // Generate JWT for the response cookie
-  generateToken(payload) {
+  generateToken = (payload) => {
     return jwt.sign(payload, process.env.JWT_SECRET, { algorithm: 'HS256', expiresIn: '7d' });
   }
 
@@ -141,7 +141,7 @@ class AuthController {
   }
 
   // Middleware to verify the token from the cookie
-  verifyToken(req, res, next) {
+  verifyToken = (req, res, next) => {
     const cookies = parseCookies(req.headers.cookie);
     const token = cookies['token'];
 
@@ -185,12 +185,13 @@ class AuthController {
       // Continue to the next middleware or route handler
       next();
     } catch (err) {
+      console.log(err)
       return res.status(403).json({ message: 'Invalid or expired token.' });
     }
   }
 
   // Middleware to verify the token from the cookie
-  verifyOptionalToken(req, res, next) {
+  verifyOptionalToken = (req, res, next) => {
     const cookies = parseCookies(req.headers.cookie);
     const token = cookies['token'];
 
@@ -216,7 +217,7 @@ class AuthController {
   }
 
   // Middleware to verify the token from the cookie
-  verifyAccessCodeToken(req, res, next) {
+  verifyAccessCodeToken = (req, res, next) => {
     const cookies = parseCookies(req.headers.cookie);
     const accessCodeToken = cookies['access_code_token'];
 
@@ -240,7 +241,7 @@ class AuthController {
 
       // Refresh access code token if needed
       if (timeLeft < FIVE_DAYS_IN_SECONDS) {
-        const newAccessCodeToken = this.generateAccessCodeToken({
+        const newAccessCodeToken = this.generateToken({
           access_code: decodedAccessCode.access_code,
         });
 
@@ -260,7 +261,7 @@ class AuthController {
   }
 
   // Sign up a guest user with their provided access code
-  async submitAccessCode(req, res) {
+  submitAccessCode = async (req, res) => {
     try {
       const { accessCode } = req.body;
 
