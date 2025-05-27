@@ -104,73 +104,46 @@ function MiniChart({ values, color = '#90caf9', height = 60, unit = '', minBarHe
 
 export default function OpenMeteoForecast({ date, onClose }) {
     const theme = useTheme();
-    const [coords, setCoords] = useState(null);
     const [weather, setWeather] = useState(null);
     const [hourly, setHourly] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [locError, setLocError] = useState('');
 
-    /* ---- 1.  Get IP-based location ---- */
+    /* ---- 2.  Fetch forecast from backend ---- */
     useEffect(() => {
-        // fetch('https://ipapi.co/json/')
-        //     .then(res => res.json())
-        //     .then(data => {
-        //         if (data.latitude && data.longitude) {
-        //             setCoords({ lat: data.latitude, lon: data.longitude });
-        //         } else {
-        //             throw new Error();
-        //         }
-        //     })
-        //     .catch(() => {
-        //         setLocError('Could not determine your location from IP.');
-        //         setLoading(false);
-        //     });
-        setCoords({ lat: 44.986656, lon: -93.258133 });
-    }, []);
+        const fetchWeather = async () => {
+            setLoading(true);
+            const day = format(new Date(date.getTime() + 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
 
-    /* ---- 2.  Fetch forecast ---- */
-    useEffect(() => {
-        if (!coords) return;
-        setLoading(true);
-        const day = format(new Date(date.getTime() + 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
-        const url =
-            `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}` +
-            `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode` +
-            `&hourly=temperature_2m,precipitation,weathercode` +
-            `&start_date=${day}&end_date=${day}` +
-            `&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`;
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/weather?date=${day}`, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
 
-        fetch(url)
-            .then(r => r.json())
-            .then(data => {
-                setWeather(
-                    data.daily?.time?.length
-                        ? {
-                              date: data.daily.time[0],
-                              temp_max: data.daily.temperature_2m_max[0],
-                              temp_min: data.daily.temperature_2m_min[0],
-                              precip: data.daily.precipitation_sum[0],
-                              weathercode: data.daily.weathercode[0],
-                          }
-                        : null
-                );
-                setHourly(
-                    data.hourly?.time
-                        ? {
-                              time: data.hourly.time,
-                              temp: data.hourly.temperature_2m,
-                              precip: data.hourly.precipitation,
-                              wcode: data.hourly.weathercode,
-                          }
-                        : null
-                );
-            })
-            .catch(() => {
+                if (!res.ok) {
+                    console.error('Failed to fetch weather:', res.status);
+                    setWeather(null);
+                    setHourly(null);
+                    return;
+                }
+
+                const data = await res.json();
+                setWeather(data.weather || null);
+                setHourly(data.hourly || null);
+            } catch (error) {
+                console.error('Weather fetch error:', error);
                 setWeather(null);
                 setHourly(null);
-            })
-            .finally(() => setLoading(false));
-    }, [coords, date]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchWeather();
+    }, [date]);
 
     /* ---- 3.  early returns ---- */
     if (loading)
@@ -178,13 +151,6 @@ export default function OpenMeteoForecast({ date, onClose }) {
             <Box sx={{ p: 6, textAlign: 'center' }}>
                 <CircularProgress sx={{ mb: 2 }} />
                 <Typography>Loading weather…</Typography>
-            </Box>
-        );
-
-    if (locError)
-        return (
-            <Box sx={{ p: 6, textAlign: 'center', color: 'warning.main' }}>
-                <Typography>{locError}</Typography>
             </Box>
         );
 

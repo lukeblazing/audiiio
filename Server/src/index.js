@@ -350,6 +350,69 @@ app.delete('/api/calendar/event', AuthController.verifyAccessCodeToken, AuthCont
   }
 });
 
+
+// GET /api/weather
+app.get('/api/weather', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
+  if (!req?.user?.role) {
+    return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
+  }
+  if (!req?.user?.email) {
+    return res.status(401).json({ message: 'Access denied. No email provided.' });
+  }
+
+  const isValidLat = (lat) => lat >= -90 && lat <= 90;
+  const isValidLon = (lon) => lon >= -180 && lon <= 180;
+  const isValidDate = (str) => /^\d{4}-\d{2}-\d{2}$/.test(str); // basic YYYY-MM-DD check
+
+  const lat = '44.986656';
+  const lon = '-93.258133';
+  const date = req.query.date;
+
+  if (!isValidDate(date)) {
+    return res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD.' });
+  }
+  if (!isValidLat(lat) || !isValidLon(lon)) {
+    return res.status(400).json({ error: 'Invalid coordinates.' });
+  }
+
+  const url =
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+    `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode` +
+    `&hourly=temperature_2m,precipitation,weathercode` +
+    `&start_date=${date}&end_date=${date}` +
+    `&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!data?.daily?.time?.length) {
+      return res.status(404).json({ error: 'No weather data found for this date.' });
+    }
+
+    const weather = {
+      date: data.daily.time[0],
+      temp_max: data.daily.temperature_2m_max[0],
+      temp_min: data.daily.temperature_2m_min[0],
+      precip: data.daily.precipitation_sum[0],
+      weathercode: data.daily.weathercode[0],
+    };
+
+    const hourly = {
+      time: data.hourly.time,
+      temp: data.hourly.temperature_2m,
+      precip: data.hourly.precipitation,
+      wcode: data.hourly.weathercode,
+    };
+
+    return res.status(200).json({ weather, hourly });
+  } catch (err) {
+    console.error('Weather API fetch failed:', err);
+    return res.status(500).json({ error: 'Failed to fetch weather data' });
+  }
+});
+
+
 // --------------------------------------------------------------------
 // POST /api/calendar/calendar
 // Create a new calendar. The authenticated user becomes the owner.
