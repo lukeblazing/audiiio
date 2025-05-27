@@ -107,41 +107,38 @@ export default function OpenMeteoForecast({ date, onClose }) {
     const [coords, setCoords] = useState(null);
     const [weather, setWeather] = useState(null);
     const [hourly, setHourly] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [locError, setLocError] = useState('');
-    const [requested, setRequested] = useState(false);
 
-    /* ---- 1.  geolocation ---- */
-
+    /* ---- 1.  Get IP-based location ---- */
     useEffect(() => {
-        if (!requested) return;
-        if (!navigator.geolocation) { setLocError('Geolocation not supported.'); return; }
+        // fetch('https://ipapi.co/json/')
+        //     .then(res => res.json())
+        //     .then(data => {
+        //         if (data.latitude && data.longitude) {
+        //             setCoords({ lat: data.latitude, lon: data.longitude });
+        //         } else {
+        //             throw new Error();
+        //         }
+        //     })
+        //     .catch(() => {
+        //         setLocError('Could not determine your location from IP.');
+        //         setLoading(false);
+        //     });
+        setCoords({ lat: 44.986656, lon: -93.258133 });
+    }, []);
 
-        setLoading(true);
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                setCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude });
-                setLoading(false);
-            },
-            () => {
-                setLocError('Could not get your location.');
-                setLoading(false);
-            }
-        );
-    }, [requested]);
-
-
-    /* ---- 2.  fetch forecast ---- */
+    /* ---- 2.  Fetch forecast ---- */
     useEffect(() => {
         if (!coords) return;
         setLoading(true);
-
         const day = format(new Date(date.getTime() + 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
         const url =
             `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}` +
             `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode` +
             `&hourly=temperature_2m,precipitation,weathercode` +
-            `&start_date=${day}&end_date=${day}&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`;
+            `&start_date=${day}&end_date=${day}` +
+            `&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`;
 
         fetch(url)
             .then(r => r.json())
@@ -149,37 +146,33 @@ export default function OpenMeteoForecast({ date, onClose }) {
                 setWeather(
                     data.daily?.time?.length
                         ? {
-                            date: data.daily.time[0],
-                            temp_max: data.daily.temperature_2m_max[0],
-                            temp_min: data.daily.temperature_2m_min[0],
-                            precip: data.daily.precipitation_sum[0],
-                            weathercode: data.daily.weathercode[0],
-                        }
+                              date: data.daily.time[0],
+                              temp_max: data.daily.temperature_2m_max[0],
+                              temp_min: data.daily.temperature_2m_min[0],
+                              precip: data.daily.precipitation_sum[0],
+                              weathercode: data.daily.weathercode[0],
+                          }
                         : null
                 );
                 setHourly(
                     data.hourly?.time
                         ? {
-                            time: data.hourly.time,
-                            temp: data.hourly.temperature_2m,
-                            precip: data.hourly.precipitation,
-                            wcode: data.hourly.weathercode,
-                        }
+                              time: data.hourly.time,
+                              temp: data.hourly.temperature_2m,
+                              precip: data.hourly.precipitation,
+                              wcode: data.hourly.weathercode,
+                          }
                         : null
                 );
-                setLoading(false);
             })
-            .catch(() => { setWeather(null); setHourly(null); setLoading(false); });
+            .catch(() => {
+                setWeather(null);
+                setHourly(null);
+            })
+            .finally(() => setLoading(false));
     }, [coords, date]);
 
     /* ---- 3.  early returns ---- */
-    if (!requested)
-    return (
-        <Box sx={{ p: 6, textAlign: 'center' }}>
-            <Typography variant="h6">Get local forecast</Typography>
-            <button onClick={() => setRequested(true)}>Allow Location</button>
-        </Box>
-    );
     if (loading)
         return (
             <Box sx={{ p: 6, textAlign: 'center' }}>
@@ -187,12 +180,14 @@ export default function OpenMeteoForecast({ date, onClose }) {
                 <Typography>Loading weather…</Typography>
             </Box>
         );
+
     if (locError)
         return (
             <Box sx={{ p: 6, textAlign: 'center', color: 'warning.main' }}>
                 <Typography>{locError}</Typography>
             </Box>
         );
+
     if (!weather)
         return (
             <Box sx={{ p: 6, textAlign: 'center', color: 'text.secondary' }}>
@@ -228,7 +223,6 @@ export default function OpenMeteoForecast({ date, onClose }) {
                     boxShadow: 10,
                 }}
             >
-                {/* --------- close button (top-left corner) --------- */}
                 {onClose && (
                     <IconButton
                         onClick={onClose}
@@ -245,7 +239,6 @@ export default function OpenMeteoForecast({ date, onClose }) {
                     </IconButton>
                 )}
 
-                {/* ---------- header ---------- */}
                 <Stack spacing={1} alignItems="center" sx={{ mb: { xs: 2, sm: 3 } }}>
                     <Typography variant="h4" sx={{ letterSpacing: 2, fontSize: { xs: 22, sm: 30 } }}>
                         {format(new Date(weather.date), 'eeee, MMM d')}
@@ -253,8 +246,6 @@ export default function OpenMeteoForecast({ date, onClose }) {
                     <Divider flexItem sx={{ my: 1, borderColor: 'rgba(255,255,255,.15)' }} />
                 </Stack>
 
-
-                {/* ---------- summary ---------- */}
                 <Grid
                     container
                     spacing={{ xs: 2, sm: 4 }}
@@ -284,37 +275,35 @@ export default function OpenMeteoForecast({ date, onClose }) {
                     </Grid>
                 </Grid>
 
-                {/* ---------- hourly strip & charts ---------- */}
-                {
-                    hours.length > 0 && (
-                        <>
-                            <Divider sx={{ my: { xs: 3, md: 4 }, borderColor: 'rgba(255,255,255,.15)' }} />
+                {hours.length > 0 && (
+                    <>
+                        <Divider sx={{ my: { xs: 3, md: 4 }, borderColor: 'rgba(255,255,255,.15)' }} />
 
-                            <Grid container spacing={{ xs: 2, md: 4 }}>
-                                <Grid item xs={12} md={7}>
-                                    <Typography sx={{ mb: 1, opacity: 0.8 }}>Temperature (°F)</Typography>
-                                    <MiniChart
-                                        values={hours.map(h => ({ time: h.time, value: h.temp }))}
-                                        height={80}
-                                        color={theme.palette.primary.light}
-                                        unit="°F"
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={5}>
-                                    <Typography sx={{ mb: 1, opacity: 0.8 }}>Precipitation (in)</Typography>
-                                    <MiniChart
-                                        values={hours.map(h => ({ time: h.time, value: h.precip }))}
-                                        height={80}
-                                        color={theme.palette.info.light}
-                                        minBarHeight={2}
-                                        unit="in"
-                                    />
-                                </Grid>
+                        <Grid container spacing={{ xs: 2, md: 4 }}>
+                            <Grid item xs={12} md={7}>
+                                <Typography sx={{ mb: 1, opacity: 0.8 }}>Temperature (°F)</Typography>
+                                <MiniChart
+                                    values={hours.map(h => ({ time: h.time, value: h.temp }))}
+                                    height={80}
+                                    color={theme.palette.primary.light}
+                                    unit="°F"
+                                />
                             </Grid>
-                        </>
-                    )
-                }
-            </Box >
-        </Fade >
+                            <Grid item xs={12} md={5}>
+                                <Typography sx={{ mb: 1, opacity: 0.8 }}>Precipitation (in)</Typography>
+                                <MiniChart
+                                    values={hours.map(h => ({ time: h.time, value: h.precip }))}
+                                    height={80}
+                                    color={theme.palette.info.light}
+                                    minBarHeight={2}
+                                    unit="in"
+                                />
+                            </Grid>
+                        </Grid>
+                    </>
+                )}
+            </Box>
+        </Fade>
     );
 }
+
