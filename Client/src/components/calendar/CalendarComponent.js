@@ -401,10 +401,14 @@ const CalendarComponent = ({ }) => {
           z-index: 2;
         }
 
-        /* 2️⃣  Individual cells that are part of the drag selection */
         .rbc-selected-cell{
           background: rgba(16, 85, 153, 0.75);
+          content: "";
+          pointer-events: none;
           border-radius: 6px !important;
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          z-index: 1;
         }
 
         /* Month view wrapper */
