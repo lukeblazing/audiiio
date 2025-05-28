@@ -400,7 +400,7 @@ const CalendarComponent = ({ }) => {
 
         /* 2️⃣  Individual cells that are part of the drag selection */
         .rbc-selected-cell{
-          background: rgba(16,85,153,.25);
+          background: rgba(16, 85, 153, 0.75);
           border-radius: 6px !important;
         }
 
