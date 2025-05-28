@@ -58,7 +58,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
       bgcolor="transparent"
       border="4px solid"
       borderColor={theme.palette.divider}
-      borderRadius="8px 8px 0 0"
+      borderRadius="0 0 0 0"
       borderBottom="none"
       flexWrap="nowrap"
     >
@@ -347,7 +347,6 @@ const CalendarComponent = ({ }) => {
         transition: "background-color 0.2s ease",
         position: "relative",
         overflow: "hidden",
-        border: `1px solid ${theme.palette.divider}`,
         boxShadow: "none",
         borderRadius: "0px",
       },
@@ -375,12 +374,12 @@ const CalendarComponent = ({ }) => {
           background-color: transparent;
         }
 
-        .rbc-row {
-          border: none !important;
-        }
-
-        .rbc-month-row + .rbc-month-row {
+        .rbc-month-row {
           border-top: 1px solid ${theme.palette.divider} !important;
+        }
+        
+        .rbc-day-bg {
+          border-left: 1px solid ${theme.palette.divider} !important;
         }
 
         .calendar-today {

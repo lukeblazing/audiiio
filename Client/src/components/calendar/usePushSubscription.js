@@ -1,5 +1,5 @@
 // src/hooks/usePushSubscription.js
-import { useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -8,6 +8,12 @@ function urlBase64ToUint8Array(base64String) {
     .replace(/_/g, '/');
   const rawData = window.atob(base64);
   return new Uint8Array(rawData.split('').map(char => char.charCodeAt(0)));
+}
+
+async function getCurrentSubscription() {
+  if (!('serviceWorker' in navigator && 'PushManager' in window)) return null;
+  const registration = await navigator.serviceWorker.ready;
+  return registration.pushManager.getSubscription();
 }
 
 async function subscribeUser(registration) {
@@ -28,13 +34,11 @@ async function subscribeUser(registration) {
   const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/subscribe`, {
     method: 'POST',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ subscription }),
   });
-  
-  const data = await response.json();
+
+  return subscription;
 }
 
 async function unsubscribeUser(registration) {
@@ -44,46 +48,71 @@ async function unsubscribeUser(registration) {
     await fetch(`${process.env.REACT_APP_API_BASE_URL}/unsubscribe`, {
       method: 'POST',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
-    console.log('User unsubscribed and subscription record removed.');
   }
 }
 
 function usePushSubscription() {
-  // This function must be called from a user-generated event handler.
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  // Check current subscription on mount
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      const subscription = await getCurrentSubscription();
+      if (isMounted) setIsSubscribed(!!subscription && Notification.permission === 'granted');
+    })();
+    return () => { isMounted = false; }
+  }, []);
+
+  // Enable notifications (subscribe)
   const enablePushSubscription = useCallback(async () => {
     if (!('serviceWorker' in navigator && 'PushManager' in window)) {
       console.warn("Push messaging is not supported in this browser.");
-      return;
+      return false;
     }
-    
     try {
       const registration = await navigator.serviceWorker.ready;
-      
       if (Notification.permission === 'granted') {
         await subscribeUser(registration);
+        setIsSubscribed(true);
+        return true;
       } else if (Notification.permission === 'default') {
-        // Request permission from a user gesture
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
           await subscribeUser(registration);
-        } else if (permission === 'denied') {
-          await unsubscribeUser(registration);
-          console.log('Notification permission denied. Unsubscribing...');
+          setIsSubscribed(true);
+          return true;
         }
-      } else if (Notification.permission === 'denied') {
-        await unsubscribeUser(registration);
-        console.log('Notification permission has been denied.');
       }
+      // If denied or not granted
+      setIsSubscribed(false);
+      return false;
     } catch (error) {
       console.error("Error during push subscription process:", error);
+      setIsSubscribed(false);
+      return false;
     }
   }, []);
 
-  return { enablePushSubscription };
+  // Disable notifications (unsubscribe)
+  const disablePushSubscription = useCallback(async () => {
+    if (!('serviceWorker' in navigator && 'PushManager' in window)) {
+      setIsSubscribed(false);
+      return;
+    }
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      await unsubscribeUser(registration);
+      setIsSubscribed(false);
+    } catch (error) {
+      console.error("Error during push unsubscription process:", error);
+      setIsSubscribed(false);
+    }
+  }, []);
+
+  return { isSubscribed, enablePushSubscription, disablePushSubscription };
 }
 
 export default usePushSubscription;

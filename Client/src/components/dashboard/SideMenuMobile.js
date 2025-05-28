@@ -8,14 +8,29 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-import MenuButton from './MenuButton.js';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import MenuContent from './MenuContent.js';
 import { useAuth } from '../authentication/AuthContext.js';
 import usePushSubscription from '../calendar/usePushSubscription';
 
 function SideMenuMobile({ open, toggleDrawer }) {
   const { isAuthenticated, handleLogout, userData } = useAuth();
-  const { enablePushSubscription } = usePushSubscription();
+  const {
+    isSubscribed,
+    enablePushSubscription,
+    disablePushSubscription
+  } = usePushSubscription();
+
+  // Handle toggle switch
+  const handleToggleNotifications = async (event) => {
+    const checked = event.target.checked;
+    if (checked) {
+      await enablePushSubscription();
+    } else {
+      await disablePushSubscription();
+    }
+  };
 
   const attemptLogout = async () => {
     try {
@@ -74,9 +89,18 @@ function SideMenuMobile({ open, toggleDrawer }) {
               {userData ? userData.name : 'Guest'}
             </Typography>
           </Stack>
-          <MenuButton onClick={enablePushSubscription} sx={{ border: 'none' }}>
-            <NotificationsRoundedIcon />
-          </MenuButton>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isSubscribed}
+                onChange={handleToggleNotifications}
+                inputProps={{ 'aria-label': 'Enable push notifications' }}
+              />
+            }
+            label={<NotificationsRoundedIcon />}
+            labelPlacement="start"
+            sx={{ ml: 1, mr: 1 }}
+          />
         </Stack>
         <Divider />
         <Stack sx={{ flexGrow: 1 }}>

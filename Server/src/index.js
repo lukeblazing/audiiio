@@ -12,6 +12,7 @@ import db from './database/db.js';
 import webpush from 'web-push';
 import multer from 'multer';
 import { get_event_from_audio_input, openai_transcription } from './openai_api/openai_transcription.js';
+import { notifyUsersAboutEvent } from './notifications/notification-utils.js';
 
 // Multer for audio file uploading
 const upload = multer({
@@ -313,12 +314,19 @@ app.post('/api/calendar/event', AuthController.verifyAccessCodeToken, AuthContro
       event.end_time ? new Date(event.end_time).toISOString() : null,  // sanitize
       event.all_day || false,
       event.recurrence_rule || null,
-      req.user.email,                        // always use auth token email as created_by
+      req.user.email,
     ];
     const result = await db.query(query, values);
-    return res.status(201).json({ event: result.rows[0] });
+
+    // -- Respond to the client immediately!
+    res.status(201).json({ event: result.rows[0] });
+
+    // -- Kick off the notification in the background (no await)
+    notifyUsersAboutEvent(event, req.user);
+
   } catch (err) {
     console.error(err);
+    // If DB insert failed, client will get this
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -516,8 +524,7 @@ app.get('/api/calendar/categories', AuthController.verifyAccessCodeToken, AuthCo
 // POST /api/subscribe
 // Registers a push subscription for the authenticated user.
 app.post('/api/subscribe', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  console.log("/api/subscribe");
+  // return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   const subscription = req.body.subscription;
   if (!subscription) {
     return res.status(400).json({ message: 'Subscription object is required.' });
@@ -544,7 +551,7 @@ app.post('/api/subscribe', AuthController.verifyAccessCodeToken, AuthController.
 // POST /api/unsubscribe
 // Removes the push subscription for the authenticated user.
 app.post('/api/unsubscribe', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
+  // return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   try {
     // Delete the subscription record from the database for the authenticated user.
     await db.query(
