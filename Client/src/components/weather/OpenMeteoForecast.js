@@ -96,12 +96,24 @@ export default function OpenMeteoForecast({ date, onClose }) {
 
   if (isLoading) {
     return (
-      <Box sx={{ py: 6, textAlign: 'center', width: 1, minHeight: '50dvh' }}>
+      <Box
+        sx={{
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          background: 'linear-gradient(135deg, #fce38a 0%, #f38181 50%, #a18cd1 100%)',
+        }}
+      >
         <CircularProgress sx={{ mb: 2 }} />
         <Typography>Loading weather…</Typography>
       </Box>
     );
   }
+
 
   if (isError || !data?.weather) {
     return (
