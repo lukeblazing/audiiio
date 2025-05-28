@@ -360,8 +360,6 @@ app.get('/api/weather', AuthController.verifyAccessCodeToken, AuthController.ver
     return res.status(401).json({ message: 'Access denied. No email provided.' });
   }
 
-  const isValidLat = (lat) => lat >= -90 && lat <= 90;
-  const isValidLon = (lon) => lon >= -180 && lon <= 180;
   const isValidDate = (str) => /^\d{4}-\d{2}-\d{2}$/.test(str); // basic YYYY-MM-DD check
 
   const lat = process.env.WEATHER_LATITUDE;
@@ -370,9 +368,6 @@ app.get('/api/weather', AuthController.verifyAccessCodeToken, AuthController.ver
 
   if (!isValidDate(date)) {
     return res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD.' });
-  }
-  if (!isValidLat(lat) || !isValidLon(lon)) {
-    return res.status(400).json({ error: 'Invalid coordinates.' });
   }
 
   const url =

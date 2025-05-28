@@ -25,7 +25,7 @@ import { eventBackground } from './CalendarComponent';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CircularProgress from '@mui/material/CircularProgress';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
-import OpenMeteoForecast from '../weather/weather-widget';
+import OpenMeteoForecast from '../weather/OpenMeteoForecast';
 
 /* ───────────────────────── helpers ───────────────────────── */
 
