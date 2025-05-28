@@ -382,6 +382,10 @@ const CalendarComponent = ({ }) => {
           border-left: 1px solid ${theme.palette.divider} !important;
         }
 
+        .rbc-month-row .rbc-day-bg:first-child {
+          border-left: none !important;
+        }
+
         .calendar-today {
           z-index: 1;
           position: relative;
