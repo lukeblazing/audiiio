@@ -723,7 +723,6 @@ function DayEventsModal({
             position: 'fixed',
             inset: 0,
             backdropFilter: 'blur(4px)',
-            backgroundColor: 'rgba(0,0,0,0.25)',
             zIndex: 1301,
             display: 'flex',
             alignItems: 'center',

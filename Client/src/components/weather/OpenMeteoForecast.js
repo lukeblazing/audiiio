@@ -90,45 +90,6 @@ function useWeather(date) {
   return state;
 }
 
-const ChartWrap = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'flex-end',
-  gap: theme.spacing(0.5),
-  padding: theme.spacing(0.5),
-  borderRadius: theme.shape.borderRadius,
-  background: theme.palette.action.hover,
-  height: '10vh',
-}));
-
-function MiniChart({ series }) {
-  if (!series?.length) return null;
-  const values = series.map((d) => d.v);
-  const max = Math.max(...values);
-  const min = Math.min(...values);
-  const range = max - min || 1;
-
-  return (
-    <ChartWrap>
-      {series.map((d) => (
-        <Box
-          key={d.t}
-          component="span"
-          title={`${format(new Date(d.t), 'haaa')}: ${d.v}${d.unit}`}
-          sx={{
-            flex: 1,
-            borderRadius: 1,
-            height: `calc(${((d.v - min) / range) * 100}% + 4px)`,
-            background:
-              d.unit === 'in'
-                ? (theme) => theme.palette.info.main
-                : (theme) => theme.palette.primary.main,
-          }}
-        />
-      ))}
-    </ChartWrap>
-  );
-}
-
 export default function OpenMeteoForecast({ date, onClose }) {
   const theme = useTheme();
   const { data, isLoading, isError } = useWeather(date);
@@ -168,16 +129,15 @@ export default function OpenMeteoForecast({ date, onClose }) {
       component="section"
       sx={{
         width: '90vw',
-        height: '70vh',
+        height: '40vh',
         mx: 'auto',
         px: 2,
         py: 3,
         display: 'flex',
         flexDirection: 'column',
         gap: 3,
-        bgcolor: 'background.paper',
+        background: 'linear-gradient(135deg,rgba(252, 227, 138, 0.72) 0%,rgba(243, 129, 129, 0.42) 50%,rgba(161, 140, 209, 0.4) 100%)',
         borderRadius: 4,
-        boxShadow: 3,
       }}
     >
       <Box
@@ -227,38 +187,6 @@ export default function OpenMeteoForecast({ date, onClose }) {
           {getPrecipType(data.weather.weathercode)}
         </Typography>
       </Stack>
-
-      {!!daylightHours.length && (
-        <>
-          <Divider />
-          <Stack spacing={3}>
-            <div>
-              <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                Temperature (°F)
-              </Typography>
-              <MiniChart
-                series={daylightHours.map((h) => ({
-                  t: h.t,
-                  v: h.temp,
-                  unit: '°',
-                }))}
-              />
-            </div>
-            <div>
-              <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                Precipitation (in)
-              </Typography>
-              <MiniChart
-                series={daylightHours.map((h) => ({
-                  t: h.t,
-                  v: h.precip,
-                  unit: 'in',
-                }))}
-              />
-            </div>
-          </Stack>
-        </>
-      )}
     </Box>
   );
 }
