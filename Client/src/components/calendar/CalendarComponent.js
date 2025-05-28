@@ -442,7 +442,14 @@ const CalendarComponent = ({ }) => {
         .rbc-header {
           font-size: 1rem;
           font-weight: bold;
-          border: 1px solid ${theme.palette.divider} !important;
+          border-left: 1px solid ${theme.palette.divider} !important;
+          border-top: none !important;
+          border-bottom: none !important;
+        }
+
+        /* Remove left border from the first header (Monday/Sunday, depending on your week start) */
+        .rbc-header:first-child {
+          border-left: none !important;
         }
 
         /* Hide 'show more' link */
