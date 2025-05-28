@@ -425,6 +425,7 @@ const CalendarComponent = ({ }) => {
             left: 50%;
             width: 40%;
             height: 0.75px;
+            background: rgba(255, 250, 245, 0.4); /* Very soft white with slight opacity */
             pointer-events: none;
             z-index: 0;
         }
