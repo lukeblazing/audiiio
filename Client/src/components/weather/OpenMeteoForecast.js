@@ -147,32 +147,45 @@ export default function OpenMeteoForecast({ date, onClose }) {
         display: 'flex',
         flexDirection: 'column',
         gap: 3,
-        background: 'linear-gradient(135deg,rgba(252, 227, 138, 0.72) 0%,rgba(243, 129, 129, 0.42) 50%,rgba(161, 140, 209, 0.4) 100%)',
+        background: `
+      linear-gradient(135deg, rgba(252, 227, 138, 1) 0%, rgba(243, 129, 129, 0.8) 40%, rgba(161, 140, 209, 0.9) 100%),
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 4px)
+    `,
         borderRadius: 4,
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          mb: 1,
-        }}
-      >
+      <Box sx={{ position: 'relative', mb: 1 }}>
         <Typography
-          component="h2"
+          component="h1"
           sx={{
-            flex: 1,
             textAlign: 'center',
-            fontWeight: 600,
+            fontWeight: 800,
             letterSpacing: 1.1,
-            fontSize: 'clamp(1.2rem, 5vw, 1.6rem)',
+            fontSize: 'clamp(1.4rem, 5vw, 2rem)',
+            color: 'white',
+            textShadow: `
+      -1px -1px 0 #000,
+       1px -1px 0 #000,
+      -1px  1px 0 #000,
+       1px  1px 0 #000
+    `,
           }}
         >
           {format(new Date(data.weather.date), 'eeee, MMM d')}
         </Typography>
+
+
         {onClose && (
-          <IconButton onClick={onClose} aria-label="close forecast">
+          <IconButton
+            onClick={onClose}
+            aria-label="close forecast"
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              color: 'white',
+            }}
+          >
             <CloseIcon />
           </IconButton>
         )}
@@ -198,6 +211,6 @@ export default function OpenMeteoForecast({ date, onClose }) {
           {getPrecipType(data.weather.weathercode)}
         </Typography>
       </Stack>
-    </Box>
+    </Box >
   );
 }
