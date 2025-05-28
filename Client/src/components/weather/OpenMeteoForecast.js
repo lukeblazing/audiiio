@@ -105,7 +105,6 @@ export default function OpenMeteoForecast({ date, onClose }) {
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
-          background: 'linear-gradient(135deg, #fce38a 0%, #f38181 50%, #a18cd1 100%)',
         }}
       >
         <CircularProgress sx={{ mb: 2 }} />
