@@ -336,7 +336,7 @@ const CalendarComponent = ({ }) => {
     const today = new Date();
     const isToday = isSameDay(date, today);
     const isPast = isBefore(date, startOfDay(today));
-  
+
     return {
       className: [
         isPast && !isToday ? "past-date" : "",
@@ -349,7 +349,6 @@ const CalendarComponent = ({ }) => {
         overflow: "hidden",
         border: `1px solid ${theme.palette.divider}`,
         boxShadow: "none",
-        backgroundColor: "transparent",
         borderRadius: "0px",
       },
     };
@@ -387,35 +386,30 @@ const CalendarComponent = ({ }) => {
         .calendar-today {
           z-index: 1;
           position: relative;
+          background: transparent;
         }
         .calendar-today::after {
           content: "";
           pointer-events: none;
-          position: absolute;
-          top: 0; left: 0; right: 0; bottom: 0;
           border: 2px solid ${theme.palette.primary.main};
           border-radius: 6px;
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
           z-index: 2;
-          box-sizing: border-box;
-          /* Optional: add a shadow/glow if you want it to "float" above */
         }
 
-        /* Selected cell styling */
-        .rbc-selected-cell {
-          background: rgba(16, 85, 153, 0.88) !important;
-          border-radius: 6px;
-          transition: background-color 0.2s ease-in-out;
+        /* 2️⃣  Individual cells that are part of the drag selection */
+        .rbc-selected-cell{
+          background: rgba(16,85,153,.25);
+          border-radius: 6px !important;
         }
 
         /* Month view wrapper */
         .rbc-month-view {
-          border-radius: 0 0 8px 8px;
           border: 4px solid ${theme.palette.divider};
         }
         .past-date {
             position: relative;
-            background: rgba(250, 245, 240, 0.8); /* Soft white with a warm undertone */
-            border-radius: 4px;
             overflow: hidden;
         }
 
@@ -427,7 +421,6 @@ const CalendarComponent = ({ }) => {
             left: 50%;
             width: 40%;
             height: 0.75px;
-            background: rgba(255, 250, 245, 0.4); /* Very soft white with slight opacity */
             pointer-events: none;
             z-index: 0;
         }
@@ -440,10 +433,6 @@ const CalendarComponent = ({ }) => {
         .past-date::after {
             transform: translate(-50%, -50%) rotate(-45deg);
             box-shadow: -0.5px -0.5px 1px rgba(0, 0, 0, 0.1);
-        }
-
-        .rbc-month-view .rbc-day-bg:last-child {
-          border-right: none !important;
         }
 
         /* Header cell (day names) */
