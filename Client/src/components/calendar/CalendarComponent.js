@@ -56,11 +56,8 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
       alignItems="center"
       padding={1}
       bgcolor="transparent"
-      border="4px solid"
-      borderColor={theme.palette.divider}
-      borderRadius="0 0 0 0"
-      borderBottom="none"
       flexWrap="nowrap"
+      borderBottom={`1px solid ${theme.palette.divider}`}
     >
       <Box
         onClick={goToBack}
@@ -112,7 +109,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
             textTransform: "none",
             backgroundColor: "transparent",
             border: "transparent",
-            color: theme.palette.primary.main,
+            color: theme.palette.divider,
             transition: "background-color 0.2s ease",
             marginTop: "8px"
           }}
@@ -409,7 +406,7 @@ const CalendarComponent = ({ }) => {
 
         /* Month view wrapper */
         .rbc-month-view {
-          border: 4px solid ${theme.palette.divider};
+          border: none;
         }
         .past-date {
             position: relative;
@@ -443,9 +440,10 @@ const CalendarComponent = ({ }) => {
         .rbc-header {
           font-size: 1rem;
           font-weight: bold;
-          border-left: 1px solid ${theme.palette.divider} !important;
+          border-right: 1px solid ${theme.palette.divider} !important;
           border-top: none !important;
           border-bottom: none !important;
+          border-left: none !important;
         }
 
         /* Remove left border from the first header (Monday/Sunday, depending on your week start) */
@@ -456,13 +454,6 @@ const CalendarComponent = ({ }) => {
         /* Hide 'show more' link */
         .rbc-show-more {
           display: none;
-        }
-
-        /* Date cell text styling */
-        .rbc-date-cell {
-          font-size: 1.4rem;
-          font-weight: normal;
-          transition: font-size 0.2s ease;
         }
 
         /* Responsive font sizes */
@@ -506,6 +497,8 @@ const CalendarComponent = ({ }) => {
               width: '90vw',
               height: 'min(max(60vh, 50vw), 120vw)',
               bgcolor: 'background.paper',
+              borderRadius: 1,
+              border: `1px solid ${theme.palette.divider}`
             }}
           >
             <BigCalendar
