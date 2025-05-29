@@ -73,7 +73,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           transition: "background-color 0.2s ease",
         }}
       >
-        <ChevronLeft sx={{ color: theme.palette.divider, fontSize: "1.8rem" }} />
+        <ChevronLeft sx={{ color: theme.palette.text.secondary, fontSize: "1.8rem" }} />
       </Box>
       <Box
         display="flex"
@@ -109,7 +109,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
             textTransform: "none",
             backgroundColor: "transparent",
             border: "transparent",
-            color: theme.palette.divider,
+            color: theme.palette.text.secondary,
             transition: "background-color 0.2s ease",
             marginTop: "8px"
           }}
@@ -131,7 +131,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           transition: "background-color 0.2s ease",
         }}
       >
-        <ChevronRight sx={{ color: theme.palette.divider, fontSize: "1.8rem" }} />
+        <ChevronRight sx={{ color: theme.palette.text.secondary, fontSize: "1.8rem" }} />
       </Box>
     </Box>
   );
