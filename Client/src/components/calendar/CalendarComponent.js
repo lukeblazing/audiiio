@@ -496,7 +496,7 @@ const CalendarComponent = ({ }) => {
             sx={{
               width: '90vw',
               height: 'min(max(60vh, 50vw), 120vw)',
-              bgcolor: 'background.paper',
+              bgcolor: '#181c2b',
               borderRadius: 1,
               border: `2px solid ${theme.palette.divider}`
             }}
