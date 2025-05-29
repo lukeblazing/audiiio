@@ -23,7 +23,7 @@ import Typography from "@mui/material/Typography";
 import LoadingSpinner from "../loading-components/LoadingSpinner.js";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import Button from "@mui/material/Button";
-import { ArrowBack, ArrowForward, } from "@mui/icons-material";
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { useAuth } from '../authentication/AuthContext';
 import DayEventsModal from "./DayEventsModal.js";
 import { formatFullEventTime } from "./DayEventsModal.js";
@@ -73,7 +73,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           transition: "background-color 0.2s ease",
         }}
       >
-        <ArrowBack sx={{ color: theme.palette.primary.main, fontSize: "1.8rem" }} />
+        <ChevronLeft sx={{ color: theme.palette.divider, fontSize: "1.8rem" }} />
       </Box>
       <Box
         display="flex"
@@ -131,7 +131,7 @@ const CalendarToolbar = ({ date, onNavigate, localizer }) => {
           transition: "background-color 0.2s ease",
         }}
       >
-        <ArrowForward sx={{ color: theme.palette.primary.main, fontSize: "1.8rem" }} />
+        <ChevronRight sx={{ color: theme.palette.divider, fontSize: "1.8rem" }} />
       </Box>
     </Box>
   );
@@ -498,7 +498,7 @@ const CalendarComponent = ({ }) => {
               height: 'min(max(60vh, 50vw), 120vw)',
               bgcolor: 'background.paper',
               borderRadius: 1,
-              border: `1px solid ${theme.palette.divider}`
+              border: `2px solid ${theme.palette.divider}`
             }}
           >
             <BigCalendar
