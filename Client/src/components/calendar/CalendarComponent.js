@@ -400,7 +400,7 @@ const CalendarComponent = ({ }) => {
         }
 
         .rbc-selected-cell {
-          background: ${theme.palette.divider};
+          background: rgba(16, 85, 153, 0.45);
           z-index: 1;
         }
 
