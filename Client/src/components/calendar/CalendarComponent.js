@@ -497,8 +497,8 @@ const CalendarComponent = ({ }) => {
             sx={{
               width: '90vw',
               height: 'min(max(60vh, 50vw), 120vw)',
-              maxWidth: '800px',
-              maxHeight: '800px',
+              maxWidth: '1000px',
+              maxHeight: '750px',
               bgcolor: 'background.paper',
               borderRadius: 1,
               border: `2px solid ${theme.palette.divider}`
