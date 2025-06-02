@@ -361,6 +361,7 @@ app.delete('/api/calendar/event', AuthController.verifyAccessCodeToken, AuthCont
 
 // GET /api/weather
 app.get('/api/weather', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
+  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   if (!req?.user?.role) {
     return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
   }

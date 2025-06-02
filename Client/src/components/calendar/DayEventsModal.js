@@ -24,8 +24,6 @@ import { useAuth } from '../authentication/AuthContext';
 import { eventBackground } from './CalendarComponent';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CircularProgress from '@mui/material/CircularProgress';
-import WbSunnyIcon from '@mui/icons-material/WbSunny';
-import OpenMeteoForecast from '../weather/OpenMeteoForecast';
 
 /* ───────────────────────── helpers ───────────────────────── */
 
@@ -102,8 +100,6 @@ function DayEventsModal({
   // Audio input - improved
   const MAX_SECONDS = 60;
   const MIN_SECONDS = 2;
-
-  const [isWeatherPressed, setIsWeatherPressed] = useState(false);
 
   const [isRecording, setIsRecording] = useState(false);
   const [isMicLoading, setIsMicLoading] = useState(false);
@@ -700,44 +696,8 @@ function DayEventsModal({
               {isMicLoading ? <CircularProgress size={28} /> : <Mic />}
             </IconButton>
           )}
-          {mode === 'view' && isAuthenticated && (
-            <IconButton
-              aria-label="View weather"
-              aria-pressed={isWeatherPressed}
-              onClick={() => setIsWeatherPressed((prev) => !prev)}
-              sx={{
-                position: 'absolute',
-                bottom: 16,
-                left: 16,
-              }}
-            >
-              {<WbSunnyIcon />}
-            </IconButton>
-          )}
         </Box>
       </Modal>
-      {/* weather pop-up */}
-      {isWeatherPressed && (
-        <Box
-          sx={{
-            position: 'fixed',
-            inset: 0,
-            backdropFilter: 'blur(4px)',
-            zIndex: 1301,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          onClick={() => setIsWeatherPressed(false)}
-        >
-          <Box onClick={e => e.stopPropagation()}>
-            <OpenMeteoForecast
-              date={selectedDate}
-              onClose={() => setIsWeatherPressed(false)}
-            />
-          </Box>
-        </Box>
-      )}
       {/* ── recording overlay ─────────────────────────── */}
       {isRecording && (
         <Box
