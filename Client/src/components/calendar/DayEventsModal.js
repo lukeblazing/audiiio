@@ -66,7 +66,6 @@ const getBorderColor = (category) =>
 
 const sharedModalBoxSx = {
   backdropFilter: 'blur(20px)',
-  background: 'rgba(255,255,255,0.05)',
   borderRadius: 2,
   border: '1px solid #ccc',
   boxShadow: '0 8px 16px rgba(0,0,0,0.12)',
