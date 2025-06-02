@@ -401,6 +401,7 @@ const CalendarComponent = ({ }) => {
 
         .rbc-selected-cell {
           background: rgba(16, 85, 153, 0.45);
+          pointer-events: none;
           z-index: 1;
         }
 
