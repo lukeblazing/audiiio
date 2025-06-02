@@ -214,15 +214,16 @@ function getRgbValues(color) {
   return rgbMatch ? rgbMatch.slice(0, 3).join(",") : "0,0,0";
 }
 
-export function eventBackground(eventCategoryId) {
+export function eventBackground(borderColor) {
+  if (!isValidCssColor(borderColor)) borderColor = "#A91A2E";
 
-  const borderColor = isValidCssColor(eventCategoryId) ? eventCategoryId : "dodgerblue";
+  const rgb = getRgbValues(borderColor);
+  const isBlack = rgb.replace(/\s/g, '') === "0,0,0";
 
-  return isValidCssColor(borderColor)
-    ? `rgba(${getRgbValues(borderColor)}, 0.06)`
-    : "transparent";
+  if (isBlack) return `rgba(${rgb}, 0.2)`;
+
+  return `rgba(${rgb}, 0.06)`;
 }
-
 
 // The CalendarComponent now receives events via props
 const CalendarComponent = ({ }) => {
