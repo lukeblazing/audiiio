@@ -215,7 +215,7 @@ function getRgbValues(color) {
 }
 
 export function eventBackground(borderColor) {
-  if (!isValidCssColor(borderColor)) borderColor = "#A91A2E";
+  if (!isValidCssColor(borderColor)) borderColor = "dodgerblue";
 
   const rgb = getRgbValues(borderColor);
   const isBlack = rgb.replace(/\s/g, '') === "0,0,0";
