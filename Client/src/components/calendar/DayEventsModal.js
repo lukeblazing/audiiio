@@ -501,7 +501,6 @@ function DayEventsModal({
             onChange={(e) => setNewEvent({ ...newEvent, category_id: e.target.value })}
           />
           <TextField
-            sx={{ flex: 1, minWidth: 0 }}
             label="End Date"
             type="date"
             margin="normal"
