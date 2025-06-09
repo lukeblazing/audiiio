@@ -500,6 +500,41 @@ function DayEventsModal({
             value={newEvent.category_id}
             onChange={(e) => setNewEvent({ ...newEvent, category_id: e.target.value })}
           />
+          <TextField
+            sx={{ flex: 1, minWidth: 0 }}
+            label="End Date"
+            type="date"
+            margin="normal"
+            value={
+              newEvent.end_time
+                ? new Date(newEvent.end_time).toISOString().slice(0, 10)
+                : ''
+            }
+            onChange={e => {
+              const dayStr = e.target.value; // "yyyy-mm-dd"
+              if (!dayStr) return;
+              // Use current end_time or fall back to start time
+              let prev = newEvent.end_time
+                ? new Date(newEvent.end_time)
+                : newEvent.start
+                  ? new Date(newEvent.start)
+                  : new Date();
+
+              // Keep the same time as prev (or start)
+              const [h, m, s, ms] = [
+                prev.getHours(),
+                prev.getMinutes(),
+                prev.getSeconds(),
+                prev.getMilliseconds()
+              ];
+              // Parse the date
+              const [yyyy, mm, dd] = dayStr.split('-').map(Number);
+
+              const newEnd = new Date(yyyy, mm - 1, dd, h, m, s, ms);
+
+              setNewEvent({ ...newEvent, end_time: newEnd });
+            }}
+          />
         </Stack>
       </Collapse>
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
@@ -545,18 +580,18 @@ function DayEventsModal({
         />
         <TextField
           label="End Time"
-          type="datetime-local"
+          type="time"
           margin="normal"
           sx={{
-            '& input[type="datetime-local"]': {
-              WebkitAppearance: 'none',
-              MozAppearance: 'textfield',
-              appearance: 'textfield',
-              height: 56,
-              padding: '0 14px',
-              lineHeight: 'normal',
-              display: 'flex',
-              alignItems: 'center',
+            '& input[type="time"]': {
+              WebkitAppearance: 'none', // Disable native iOS appearance
+              MozAppearance: 'textfield', // For Firefox
+              appearance: 'textfield', // General CSS property
+              height: 56, // Match MUI's default TextField height
+              padding: '0 14px', // Adjusted padding to center the text vertically
+              lineHeight: 'normal', // Reset line height to normal
+              display: 'flex', // Use flex to align items
+              alignItems: 'center', // Vertically center
               boxSizing: 'border-box',
               borderRadius: 4,
               flex: 1, 
@@ -571,12 +606,22 @@ function DayEventsModal({
           }}
           value={
             newEvent.end_time
-              ? format(new Date(newEvent.end_time), "yyyy-MM-dd'T'HH:mm")
+              ? `${String(new Date(newEvent.end_time).getHours()).padStart(2, '0')}:${String(new Date(newEvent.end_time).getMinutes()).padStart(2, '0')}`
               : ''
           }
+          onPointerDown={(e) => {
+            if (!newEvent.end_time) {
+              const baseDate = new Date(selectedDate);
+              baseDate.setHours(10, 0, 0, 0);          // 10:00 AM
+              setNewEvent({ ...newEvent, end_time: baseDate });
+              e.currentTarget.value = '10:00';
+            }
+          }}
           onChange={(e) => {
-            const date = new Date(e.target.value);
-            setNewEvent({ ...newEvent, end_time: date });
+            const [hours, minutes] = e.target.value.split(':').map(Number);
+            const baseDate = newEvent.end_time ? new Date(newEvent.end_time) : new Date(selectedDate);
+            baseDate.setHours(hours, minutes, 0, 0);
+            setNewEvent({ ...newEvent, end_time: baseDate });
           }}
         />
       </Box>
@@ -589,7 +634,7 @@ function DayEventsModal({
           </> : 'Create'}
         </Button>
       </Box>
-    </Box>
+    </Box >
   );
 
   const RemoveBody = (
