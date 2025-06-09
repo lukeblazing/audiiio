@@ -222,7 +222,7 @@ export function eventBackground(borderColor, opacity = 0.15) {
 
   if (isBlack) return `rgba(${rgb}, 0.2)`;
 
-  return `rgba(${rgb}, 0.2)`;
+  return `rgba(${rgb}, ${opacity})`;
 }
 
 // The CalendarComponent now receives events via props
@@ -292,7 +292,7 @@ const CalendarComponent = ({ }) => {
       marginBottom: "2px",
       display: "flex",
       alignItems: "center",
-      background: eventBackground(event.category_id, 0.8),
+      background: eventBackground(event.category_id, 0.4),
       filter: isPastDay ? "blur(1px) brightness(0.85)" : "none",
     };
 
