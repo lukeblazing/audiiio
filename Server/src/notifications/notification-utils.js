@@ -9,8 +9,10 @@ export async function notifyUsersAboutEvent(event, user) {
     const subscriptions = subsResult.rows;
     const eventDate = new Date(event.start);
     const formattedDate = eventDate.toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
+      weekday: 'long',   // This adds the day of the week
+      month: 'short',    // "Nov"
+      day: 'numeric',    // "6"
+      year: 'numeric'    // "2026" if you want to show the year
     });
     const notificationPayload = JSON.stringify({
       title: `${user.name}`,

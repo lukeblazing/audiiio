@@ -396,7 +396,17 @@ function DayEventsModal({
 
       <Typography variant="h6" sx={{ flex: 1, textAlign: 'center' }}>
         {mode === 'create'
-          ? 'Create Event'
+          ? (
+            <>
+              Create Event
+              <br />
+              {selectedDate && (
+                <Typography variant="subtitle2">
+                  {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+                </Typography>
+              )}
+            </>
+          )
           : mode === 'remove'
             ? 'Delete Event'
             : mode === 'confirm_remove'
@@ -505,7 +515,7 @@ function DayEventsModal({
             type="date"
             margin="normal"
             sx={{
-              flex: 1, 
+              flex: 1,
               minWidth: 0,
               '& input[type="date"]': {
                 WebkitAppearance: 'none', // Disable native iOS appearance
@@ -564,9 +574,8 @@ function DayEventsModal({
           label="Start Time"
           type="time"
           margin="normal"
-          slotProps={{ input: { step: 900 } }}
           sx={{
-            flex: 1, 
+            flex: 1,
             minWidth: 0,
             '& input[type="time"]': {
               WebkitAppearance: 'none', // Disable native iOS appearance
@@ -604,7 +613,7 @@ function DayEventsModal({
           type="time"
           margin="normal"
           sx={{
-            flex: 1, 
+            flex: 1,
             minWidth: 0,
             '& input[type="time"]': {
               WebkitAppearance: 'none', // Disable native iOS appearance
@@ -617,7 +626,7 @@ function DayEventsModal({
               alignItems: 'center', // Vertically center
               boxSizing: 'border-box',
               borderRadius: 4,
-              flex: 1, 
+              flex: 1,
               minWidth: 0
             },
             '& input::-webkit-calendar-picker-indicator': {

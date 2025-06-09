@@ -78,7 +78,7 @@ export default function AppNavbar() {
     setIsRotating(true);
     setTimeout(() => {
       window.location.reload();
-    }, 30);
+    }, 2);
   };
 
   return (
