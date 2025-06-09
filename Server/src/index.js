@@ -237,10 +237,7 @@ app.post(
       const sign = offsetMatch[1] === '+' ? 1 : -1;
       const hours = parseInt(offsetMatch[2], 10);
       const minutes = parseInt(offsetMatch[3], 10);
-      offsetHours = sign * (hours + minutes / 60);
-
-      console.log('event.start.getHours():', event.start.getHours());
-      console.log('Calculated (event.start.getHours() - offsetHours):', (event.start.getHours() - offsetHours));
+      let offsetHours = sign * (hours + minutes / 60);
 
       if ((event.start.getHours() + offsetHours) <= 0) {
         event.start.setDate(event.start.getDate() + 1);
