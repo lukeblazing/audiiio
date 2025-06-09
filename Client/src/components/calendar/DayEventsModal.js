@@ -513,7 +513,28 @@ function DayEventsModal({
           />
           <Stack direction="row" spacing={1} alignItems="center">
             <TextField
-              sx={{ flex: 1, minWidth: 0 }}
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                '& input[type="date"]': {
+                  WebkitAppearance: 'none', // Disable native iOS appearance
+                  MozAppearance: 'textfield', // For Firefox
+                  appearance: 'textfield', // General CSS property
+                  height: 56, // Match MUI's default TextField height
+                  padding: '0 14px', // Adjusted padding to center the text vertically
+                  lineHeight: 'normal', // Reset line height to normal
+                  display: 'flex', // Use flex to align items
+                  alignItems: 'center', // Vertically center
+                  boxSizing: 'border-box',
+                  borderRadius: 4,
+                },
+                '& input::-webkit-calendar-picker-indicator': {
+                  opacity: 1,
+                  width: 24,
+                  height: 24,
+                  cursor: 'pointer',
+                },
+              }}
               label="End Date"
               margin="normal"
               type="date"
@@ -549,7 +570,7 @@ function DayEventsModal({
                 aria-label="Clear End Date"
                 onClick={() => setNewEvent({ ...newEvent, end_time: '' })}
                 sx={{
-                  mt: 1.5, // aligns with TextField
+                  mt: 2,
                   height: 40,
                   width: 40,
                   borderRadius: '6px',
