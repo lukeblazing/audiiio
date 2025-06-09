@@ -505,6 +505,28 @@ function DayEventsModal({
             label="End Date"
             type="date"
             margin="normal"
+            sx={{
+              '& input[type="time"]': {
+                WebkitAppearance: 'none', // Disable native iOS appearance
+                MozAppearance: 'textfield', // For Firefox
+                appearance: 'textfield', // General CSS property
+                height: 56, // Match MUI's default TextField height
+                padding: '0 14px', // Adjusted padding to center the text vertically
+                lineHeight: 'normal', // Reset line height to normal
+                display: 'flex', // Use flex to align items
+                alignItems: 'center', // Vertically center
+                boxSizing: 'border-box',
+                borderRadius: 4,
+                flex: 1, 
+                minWidth: 0
+              },
+              '& input::-webkit-calendar-picker-indicator': {
+                opacity: 1,
+                width: 24,
+                height: 24,
+                cursor: 'pointer',
+              },
+            }}
             value={
               newEvent.end_time
                 ? new Date(newEvent.end_time).toISOString().slice(0, 10)
