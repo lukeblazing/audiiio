@@ -233,20 +233,35 @@ app.post(
       event.end_time.setFullYear(year, month - 1, day);
 
       // Inline extraction of offset hours from ISO string
+      console.log('selectedDate:', selectedDate);
+
       const offsetMatch = selectedDate.match(/([+-])(\d{2}):(\d{2})$/);
+      console.log('offsetMatch:', offsetMatch);
+
       let offsetHours = 0;
       if (offsetMatch) {
         const sign = offsetMatch[1] === '+' ? 1 : -1;
         const hours = parseInt(offsetMatch[2], 10);
         const minutes = parseInt(offsetMatch[3], 10);
         offsetHours = sign * (hours + minutes / 60);
+        console.log(`Parsed offset: sign=${sign}, hours=${hours}, minutes=${minutes}, offsetHours=${offsetHours}`);
+      } else {
+        console.log('No offset found in selectedDate, using offsetHours=0');
       }
 
-      // Check for day rollover (UTC)
+      console.log('event.start.getHours():', event.start.getHours());
+      console.log('Calculated (event.start.getHours() - offsetHours):', (event.start.getHours() - offsetHours));
+
       if ((event.start.getHours() - offsetHours) >= 24) {
+        console.log('Rolling day forward: incrementing start and end_time by 1 day');
         event.start.setDate(event.start.getDate() + 1);
         event.end_time.setDate(event.end_time.getDate() + 1);
+      } else {
+        console.log('No day rollover needed');
       }
+
+      console.log('Adjusted event.start:', event.start);
+      console.log('Adjusted event.end_time:', event.end_time);
 
       // If end_time is before start, delete end_time
       if (event.end_time <= event.start) {
