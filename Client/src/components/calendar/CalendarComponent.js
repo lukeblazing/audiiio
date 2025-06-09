@@ -222,7 +222,7 @@ export function eventBackground(borderColor) {
 
   if (isBlack) return `rgba(${rgb}, 0.2)`;
 
-  return `rgba(${rgb}, 0.2)`;
+  return `rgba(${rgb}, 0.4)`;
 }
 
 // The CalendarComponent now receives events via props
