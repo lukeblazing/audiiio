@@ -68,7 +68,7 @@ const sharedModalBoxSx = {
   border: '1px solid #ccc',
   boxShadow: '0 8px 16px rgba(0,0,0,0.12)',
   p: 2,
-  maxWidth: '90vw',
+  maxWidth: 'min(90vw, 500px)',
   maxHeight: '80vh',
   width: '100%',
   position: 'absolute',
@@ -505,7 +505,9 @@ function DayEventsModal({
             type="date"
             margin="normal"
             sx={{
-              '& input[type="time"]': {
+              flex: 1, 
+              minWidth: 0,
+              '& input[type="date"]': {
                 WebkitAppearance: 'none', // Disable native iOS appearance
                 MozAppearance: 'textfield', // For Firefox
                 appearance: 'textfield', // General CSS property
@@ -516,8 +518,6 @@ function DayEventsModal({
                 alignItems: 'center', // Vertically center
                 boxSizing: 'border-box',
                 borderRadius: 4,
-                flex: 1, 
-                minWidth: 0
               },
               '& input::-webkit-calendar-picker-indicator': {
                 opacity: 1,
@@ -558,7 +558,7 @@ function DayEventsModal({
           />
         </Stack>
       </Collapse>
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
         <TextField
           required
           label="Start Time"
@@ -566,6 +566,8 @@ function DayEventsModal({
           margin="normal"
           slotProps={{ input: { step: 900 } }}
           sx={{
+            flex: 1, 
+            minWidth: 0,
             '& input[type="time"]': {
               WebkitAppearance: 'none', // Disable native iOS appearance
               MozAppearance: 'textfield', // For Firefox
@@ -577,8 +579,6 @@ function DayEventsModal({
               alignItems: 'center', // Vertically center
               boxSizing: 'border-box',
               borderRadius: 4,
-              flex: 1, 
-              minWidth: 0
             },
             '& input::-webkit-calendar-picker-indicator': {
               opacity: 1,
@@ -604,6 +604,8 @@ function DayEventsModal({
           type="time"
           margin="normal"
           sx={{
+            flex: 1, 
+            minWidth: 0,
             '& input[type="time"]': {
               WebkitAppearance: 'none', // Disable native iOS appearance
               MozAppearance: 'textfield', // For Firefox

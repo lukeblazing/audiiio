@@ -486,7 +486,7 @@ const CalendarComponent = ({ }) => {
         <Box
           sx={{
             width: '100%',
-            display: 'flex',
+            display: 'fixed',
             justifyContent: 'center',
             alignItems: 'flex-start',
             overflowY: 'visible',
