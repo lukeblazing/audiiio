@@ -292,7 +292,7 @@ const CalendarComponent = ({ }) => {
       marginBottom: "2px",
       display: "flex",
       alignItems: "center",
-      background: eventBackground(event.category_id, 0.35),
+      background: eventBackground(event.category_id, 0.2),
       filter: isPastDay ? "blur(1px) brightness(0.85)" : "none",
     };
 

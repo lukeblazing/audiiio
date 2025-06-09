@@ -647,8 +647,6 @@ function DayEventsModal({
               alignItems: 'center', // Vertically center
               boxSizing: 'border-box',
               borderRadius: 4,
-              flex: 1,
-              minWidth: 0
             },
             '& input::-webkit-calendar-picker-indicator': {
               opacity: 1,
@@ -832,8 +830,6 @@ function DayEventsModal({
           </IconButton>
         </Box>
       )}
-
-
     </>
   );
 }
