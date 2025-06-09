@@ -488,12 +488,14 @@ function DayEventsModal({
       <Collapse in={openDescAndColor} timeout="auto" unmountOnExit>
         <Stack spacing={2} sx={{ mt: 2 }}>
           <TextField
-            label="Description" fullWidth margin="normal"
+            sx={{ flex: 1, minWidth: 0 }}
+            label="Description" margin="normal"
             value={newEvent.description}
             onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
           />
           <TextField
-            label="Color" fullWidth margin="normal"
+            sx={{ flex: 1, minWidth: 0 }}
+            label="Color" margin="normal"
             value={newEvent.category_id}
             onChange={(e) => setNewEvent({ ...newEvent, category_id: e.target.value })}
           />
@@ -506,6 +508,7 @@ function DayEventsModal({
           type="time"
           fullWidth
           margin="normal"
+          slotProps={{ input: { step: 900 } }}
           sx={{
             '& input[type="time"]': {
               WebkitAppearance: 'none', // Disable native iOS appearance

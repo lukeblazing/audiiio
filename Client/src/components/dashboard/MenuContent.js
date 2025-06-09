@@ -12,7 +12,6 @@ import Box from '@mui/material/Box';
 
 const mainListItems = [
   { text: 'Calendar', icon: <HomeRoundedIcon />, path: '/' },
-  { text: 'Notes', icon: <NoteRoundedIcon />, path: '/notes' },
 ];
 
 const secondaryListItems = [

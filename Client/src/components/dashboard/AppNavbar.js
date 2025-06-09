@@ -51,7 +51,6 @@ export default function AppNavbar() {
 
 
   const pathNameMap = {
-    '/notes': 'Notes',
     //'/': 'Calendar',
   };
 
