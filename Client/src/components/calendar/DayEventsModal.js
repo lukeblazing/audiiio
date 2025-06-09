@@ -541,6 +541,13 @@ function DayEventsModal({
                 ? new Date(newEvent.end_time).toISOString().slice(0, 10)
                 : ''
             }
+            onFocus={e => { // when the user selects the end date input, it'll default to the start date (instead of current date)
+              if (!newEvent.end_time && newEvent.start) {
+                const d = new Date(newEvent.start);
+                setNewEvent(ev => ({ ...ev, end_time: new Date(d) }));
+                e.target.value = d.toISOString().slice(0, 10);
+              }
+            }}
             onChange={e => {
               const dayStr = e.target.value; // "yyyy-mm-dd"
               if (!dayStr) return;
