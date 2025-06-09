@@ -459,7 +459,8 @@ function DayEventsModal({
     <Box component="form" onSubmit={onCreateEvent} sx={{ width: '100%', px: 1 }}>
       <Stack direction="row" spacing={2} alignItems="flex-start">
         <TextField
-          label="Title" fullWidth required margin="normal"
+          label="Title" required margin="normal"
+          sx={{ flex: 1, minWidth: 0 }}
           value={newEvent.title}
           onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
         />
@@ -506,7 +507,6 @@ function DayEventsModal({
           required
           label="Start Time"
           type="time"
-          fullWidth
           margin="normal"
           slotProps={{ input: { step: 900 } }}
           sx={{
@@ -521,6 +521,8 @@ function DayEventsModal({
               alignItems: 'center', // Vertically center
               boxSizing: 'border-box',
               borderRadius: 4,
+              flex: 1, 
+              minWidth: 0
             },
             '& input::-webkit-calendar-picker-indicator': {
               opacity: 1,
@@ -544,7 +546,6 @@ function DayEventsModal({
         <TextField
           label="End Time"
           type="datetime-local"
-          fullWidth
           margin="normal"
           sx={{
             '& input[type="datetime-local"]': {
@@ -558,6 +559,8 @@ function DayEventsModal({
               alignItems: 'center',
               boxSizing: 'border-box',
               borderRadius: 4,
+              flex: 1, 
+              minWidth: 0
             },
             '& input::-webkit-calendar-picker-indicator': {
               opacity: 1,
