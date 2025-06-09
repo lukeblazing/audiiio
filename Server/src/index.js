@@ -240,7 +240,7 @@ app.post(
 
       let offsetHours = 0;
       if (offsetMatch) {
-        const sign = offsetMatch[1] === '+' ? 1 : -1;
+        const sign = offsetMatch[1] === '+' ? -1 : 1;
         const hours = parseInt(offsetMatch[2], 10);
         const minutes = parseInt(offsetMatch[3], 10);
         offsetHours = sign * (hours + minutes / 60);
