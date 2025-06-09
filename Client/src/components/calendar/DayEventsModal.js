@@ -24,6 +24,7 @@ import { useAuth } from '../authentication/AuthContext';
 import { eventBackground } from './CalendarComponent';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CircularProgress from '@mui/material/CircularProgress';
+import CloseIcon from '@mui/icons-material/Close';
 
 /* ───────────────────────── helpers ───────────────────────── */
 
@@ -510,69 +511,61 @@ function DayEventsModal({
             value={newEvent.category_id}
             onChange={(e) => setNewEvent({ ...newEvent, category_id: e.target.value })}
           />
-          <TextField
-            label="End Date"
-            type="date"
-            margin="normal"
-            sx={{
-              flex: 1,
-              minWidth: 0,
-              '& input[type="date"]': {
-                WebkitAppearance: 'none', // Disable native iOS appearance
-                MozAppearance: 'textfield', // For Firefox
-                appearance: 'textfield', // General CSS property
-                height: 56, // Match MUI's default TextField height
-                padding: '0 14px', // Adjusted padding to center the text vertically
-                lineHeight: 'normal', // Reset line height to normal
-                display: 'flex', // Use flex to align items
-                alignItems: 'center', // Vertically center
-                boxSizing: 'border-box',
-                borderRadius: 4,
-              },
-              '& input::-webkit-calendar-picker-indicator': {
-                opacity: 1,
-                width: 24,
-                height: 24,
-                cursor: 'pointer',
-              },
-            }}
-            value={
-              newEvent.end_time
-                ? new Date(newEvent.end_time).toISOString().slice(0, 10)
-                : ''
-            }
-            onPointerDown={(e) => { // when the user selects the end date input, it'll default to the start date (instead of current date)
-              if (!newEvent.end_time && newEvent.start) {
-                const d = new Date(newEvent.start);
-                setNewEvent(ev => ({ ...ev, end_time: new Date(d) }));
-                e.target.value = d.toISOString().slice(0, 10);
-              }
-            }}
-            onChange={e => {
-              const dayStr = e.target.value; // "yyyy-mm-dd"
-              if (!dayStr) return;
-              // Use current end_time or fall back to start time
-              let prev = newEvent.end_time
-                ? new Date(newEvent.end_time)
-                : newEvent.start
-                  ? new Date(newEvent.start)
-                  : new Date();
-
-              // Keep the same time as prev (or start)
-              const [h, m, s, ms] = [
-                prev.getHours(),
-                prev.getMinutes(),
-                prev.getSeconds(),
-                prev.getMilliseconds()
-              ];
-              // Parse the date
-              const [yyyy, mm, dd] = dayStr.split('-').map(Number);
-
-              const newEnd = new Date(yyyy, mm - 1, dd, h, m, s, ms);
-
-              setNewEvent({ ...newEvent, end_time: newEnd });
-            }}
-          />
+          <Stack direction="row" spacing={1} alignItems="center">
+            <TextField
+              sx={{ flex: 1, minWidth: 0 }}
+              label="End Date"
+              margin="normal"
+              type="date"
+              value={newEvent.end_time ? new Date(newEvent.end_time).toISOString().slice(0, 10) : ''}
+              onPointerDown={(e) => {
+                if (!newEvent.end_time && newEvent.start) {
+                  const d = new Date(newEvent.start);
+                  setNewEvent(ev => ({ ...ev, end_time: new Date(d) }));
+                  e.target.value = d.toISOString().slice(0, 10);
+                }
+              }}
+              onChange={e => {
+                const dayStr = e.target.value; // "yyyy-mm-dd"
+                if (!dayStr) return;
+                let prev = newEvent.end_time
+                  ? new Date(newEvent.end_time)
+                  : newEvent.start
+                    ? new Date(newEvent.start)
+                    : new Date();
+                const [h, m, s, ms] = [
+                  prev.getHours(),
+                  prev.getMinutes(),
+                  prev.getSeconds(),
+                  prev.getMilliseconds()
+                ];
+                const [yyyy, mm, dd] = dayStr.split('-').map(Number);
+                const newEnd = new Date(yyyy, mm - 1, dd, h, m, s, ms);
+                setNewEvent({ ...newEvent, end_time: newEnd });
+              }}
+            />
+            {newEvent.end_time && (
+              <IconButton
+                aria-label="Clear End Date"
+                onClick={() => setNewEvent({ ...newEvent, end_time: '' })}
+                sx={{
+                  mt: 1.5, // aligns with TextField
+                  height: 40,
+                  width: 40,
+                  borderRadius: '6px',
+                  color: '#fff',
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(255,255,255,0.23)',
+                  ml: 0.5,
+                  transition: 'background-color 0.2s',
+                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
+                }}
+                size="small"
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
+          </Stack>
         </Stack>
       </Collapse>
       <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
