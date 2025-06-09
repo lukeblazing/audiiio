@@ -232,7 +232,17 @@ app.post(
       event.start.setFullYear(year, month - 1, day);
       event.end_time.setFullYear(year, month - 1, day);
 
-      // If start and end_time have the same hour, or end_time is before start, delete end_time
+      const tempDate = new Date(selectedDate);
+      const offsetHours = -tempDate.getTimezoneOffset() / 60; // Central: -6 (CST), -5 (CDT)
+
+      // Check for day rollover (UTC)
+      // If local hour + offset >= 24, need to increment day
+      if ((event.start.getHours() - offsetHours) >= 24) {
+          event.start.setDate(event.start.getDate() + 1);
+          event.end_time.setDate(event.end_time.getDate() + 1);
+      }
+
+      // If end_time is before start, delete end_time
       if (event.end_time <= event.start) {
         delete event.end_time;
       }
