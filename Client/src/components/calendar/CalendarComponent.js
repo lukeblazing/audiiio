@@ -214,7 +214,7 @@ function getRgbValues(color) {
   return rgbMatch ? rgbMatch.slice(0, 3).join(",") : "0,0,0";
 }
 
-export function eventBackground(borderColor) {
+export function eventBackground(borderColor, opacity = 0.2) {
   if (!isValidCssColor(borderColor)) borderColor = "dodgerblue";
 
   const rgb = getRgbValues(borderColor);
@@ -222,7 +222,7 @@ export function eventBackground(borderColor) {
 
   if (isBlack) return `rgba(${rgb}, 0.2)`;
 
-  return `rgba(${rgb}, 0.4)`;
+  return `rgba(${rgb}, 0.2)`;
 }
 
 // The CalendarComponent now receives events via props
@@ -292,7 +292,7 @@ const CalendarComponent = ({ }) => {
       marginBottom: "2px",
       display: "flex",
       alignItems: "center",
-      background: eventBackground(event.category_id),
+      background: eventBackground(event.category_id, 0.3),
       filter: isPastDay ? "blur(1px) brightness(0.85)" : "none",
     };
 
