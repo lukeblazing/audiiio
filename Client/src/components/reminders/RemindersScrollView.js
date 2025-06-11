@@ -135,6 +135,8 @@ export default function NotificationsInput() {
 
   const remove = (id) => setNotifications((list) => list.filter((n) => n.id !== id));
 
+  const theme = useTheme();
+
   return (
     <Box sx={{ maxWidth: 420, mx: 'auto', p: 3 }}>
       <Card elevation={0} sx={{ p: 3, borderRadius: 4, boxShadow: '0 3px 12px rgba(0,0,0,0.04)' }}>
@@ -150,39 +152,70 @@ export default function NotificationsInput() {
             error={!!error && error.toLowerCase().includes('message')}
           />
 
-          <ToggleButtonGroup
-            value={form.freq}
-            exclusive
-            onChange={setField('freq')}
-            size="small"
-            sx={{
-              width: '100%',
-              display: 'flex',
-              flexWrap: { xs: 'wrap', sm: 'nowrap' },
-              gap: 0.5,
-              '.MuiToggleButton-root': {
-                flex: 1,
-                minWidth: { xs: '48%', sm: 'auto' },
+          {/* Frequency selection: "Once" as full-width, others below */}
+          <Stack spacing={1}>
+            <ToggleButton
+              value="ONCE"
+              selected={form.freq === 'ONCE'}
+              onClick={() => setForm(f => ({ ...f, freq: 'ONCE' }))}
+              fullWidth
+              sx={{
+                borderRadius: 2,
                 textTransform: 'capitalize',
                 fontWeight: 500,
-                borderRadius: 2,
-                px: 1.5,
-                transition: 'background-color .15s',
-                '&:hover': { bgcolor: 'action.hover' },
-                '&.Mui-selected': {
-                  bgcolor: 'primary.main',
-                  color: 'primary.contrastText',
-                  '&:hover': { bgcolor: 'primary.dark' },
+                minHeight: 42,
+                border: form.freq === 'ONCE'
+                  ? `2px solid ${theme.palette.primary.main}`
+                  : `1px solid ${theme.palette.divider}`,
+                backgroundColor: form.freq === 'ONCE' ? 'primary.main' : 'background.paper',
+                color: form.freq === 'ONCE' ? 'primary.contrastText' : 'text.primary',
+                '&:hover': {
+                  backgroundColor: form.freq === 'ONCE'
+                    ? theme.palette.primary.dark
+                    : theme.palette.action.hover,
                 },
-              },
-            }}
-          >
-            {FREQUENCIES.map((f) => (
-              <ToggleButton key={f} value={f} disableRipple>
-                {f.toLowerCase()}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
+                mb: 1 // adds spacing below "Once" button
+              }}
+              disableRipple
+            >
+              Once
+            </ToggleButton>
+            <ToggleButtonGroup
+              value={form.freq}
+              exclusive
+              onChange={(e, v) => v && setForm(f => ({ ...f, freq: v }))}
+              size="small"
+              sx={{
+                width: '100%',
+                gap: 0.5,
+                '.MuiToggleButton-root': {
+                  flex: 1,
+                  textTransform: 'capitalize',
+                  fontWeight: 500,
+                  borderRadius: 2,
+                  minHeight: 42,
+                  px: 1.5,
+                  borderLeft: '1px solid',
+                  borderColor: 'divider',
+                  '&:first-of-type': {
+                    borderLeft: 'none',
+                  },
+                  '&.Mui-selected': {
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                    '&:hover': { bgcolor: 'primary.dark' },
+                    borderColor: 'primary.main',
+                  },
+                },
+              }}
+            >
+              {FREQUENCIES.filter(f => f !== 'ONCE').map((f) => (
+                <ToggleButton key={f} value={f} disableRipple>
+                  {f.toLowerCase()}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          </Stack>
 
           {form.freq === 'WEEKLY' && (
             <ToggleButtonGroup
@@ -190,6 +223,13 @@ export default function NotificationsInput() {
               onChange={(e, v) => setForm((f) => ({ ...f, byweekday: v }))}
               size="small"
               fullWidth
+              sx={{
+                mt: 1,
+                '.MuiToggleButton-root': {
+                  flex: 1,
+                  borderRadius: 2,
+                }
+              }}
             >
               {WEEKDAYS.map(({ short, label }) => (
                 <ToggleButton key={short} value={short} disableRipple>
@@ -257,7 +297,7 @@ export default function NotificationsInput() {
                   cursor: 'pointer',
                 },
               }}
-              value={`${form.date}T${form.time}`}
+              value={form.date && form.time ? `${form.date}T${form.time}` : ''}
               onChange={(e) => {
                 const [d, t] = e.target.value.split('T');
                 setForm((f) => ({ ...f, date: d, time: t || f.time }));
@@ -342,7 +382,7 @@ export default function NotificationsInput() {
           ))
         ) : (
           <Typography align="center" sx={{ opacity: 0.6 }}>
-            Nothing yet. Add a reminder above.
+            **this does not work yet**
           </Typography>
         )}
       </Stack>
