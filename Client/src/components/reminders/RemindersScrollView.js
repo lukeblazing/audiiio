@@ -15,7 +15,6 @@ import {
 import EventIcon from '@mui/icons-material/Event';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-/* ────────── constants ────────── */
 const FREQUENCIES = ['ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'];
 const WEEKDAYS = [
   { short: 'MO', label: 'Mon' },
@@ -27,10 +26,8 @@ const WEEKDAYS = [
   { short: 'SU', label: 'Sun' },
 ];
 
-/* ────────── helpers ────────── */
 function buildRRule({ freq, byweekday, time, date, monthDay, month, day }) {
   if (freq === 'ONCE') return `ON:${date}T${time}`;
-
   let r = `RRULE:FREQ=${freq};INTERVAL=1`;
   if (freq === 'WEEKLY' && byweekday.length) r += `;BYDAY=${byweekday.join(',')}`;
   if (freq === 'MONTHLY') r += `;BYMONTHDAY=${monthDay}`;
@@ -38,10 +35,8 @@ function buildRRule({ freq, byweekday, time, date, monthDay, month, day }) {
   return `${r};TIME=${time}`;
 }
 
-/* ────────── list card ────────── */
 function ReminderCard({ id, message, freq, date, time, monthDay, month, day, onDelete }) {
   const theme = useTheme();
-
   let whenLine = '';
   if (freq === 'MONTHLY') whenLine = `Every month on day ${monthDay} at ${time}`;
   else if (freq === 'YEARLY') whenLine = `Every year on ${month}/${day} at ${time}`;
@@ -65,7 +60,6 @@ function ReminderCard({ id, message, freq, date, time, monthDay, month, day, onD
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Stack>
-
         <Typography variant="body2" sx={{ mt: 1 }}>
           {whenLine}
         </Typography>
@@ -74,47 +68,68 @@ function ReminderCard({ id, message, freq, date, time, monthDay, month, day, onD
   );
 }
 
-/* ────────── main component ────────── */
 export default function NotificationsInput() {
-  const todayISO = new Date().toISOString().slice(0, 10);
-  const today = new Date();
-
   const [form, setForm] = useState({
     message: '',
     freq: 'ONCE',
     byweekday: [],
-    date: todayISO,               // for ONCE
-    monthDay: today.getDate(),    // for MONTHLY
+    date: '',
+    monthDay: '',
     time: '09:00',
-    month: today.getMonth() + 1,  // 1–12 for YEARLY
-    day: today.getDate(),         // 1–31 for YEARLY
+    month: '',
+    day: '',
   });
 
   const [notifications, setNotifications] = useState([]);
+  const [error, setError] = useState(null);
 
   const setField = (name) => (e, v = null) =>
     setForm((f) => ({ ...f, [name]: v ?? e.target.value }));
 
-  const isValid =
-    form.message.trim() &&
-    (!(form.freq === 'WEEKLY') || form.byweekday.length) &&
-    (!(form.freq === 'ONCE') || form.date) &&
-    (!(form.freq === 'MONTHLY') || (form.monthDay >= 1 && form.monthDay <= 31)) &&
-    (!(form.freq === 'YEARLY') || (form.month >= 1 && form.month <= 12 && form.day >= 1 && form.day <= 31));
+  function isValid(form) {
+    if (!form.message.trim()) return 'Message is required.';
+    if (form.freq === 'WEEKLY' && !form.byweekday.length)
+      return 'Please select at least one weekday.';
+    if (form.freq === 'ONCE' && !form.date)
+      return 'Please select a date for your one-time reminder.';
+    if (form.freq === 'MONTHLY') {
+      const day = Number(form.monthDay);
+      if (!day || day < 1 || day > 31) return 'Monthly day must be between 1 and 31.';
+    }
+    if (form.freq === 'YEARLY') {
+      const month = Number(form.month);
+      const day = Number(form.day);
+      if (!month || month < 1 || month > 12) return 'Month must be between 1 and 12.';
+      if (!day || day < 1 || day > 31) return 'Day must be between 1 and 31.';
+    }
+    return null;
+  }
 
   const save = () => {
-    if (!isValid) return;
-    const rrule = buildRRule(form);
+    const validationMessage = isValid(form);
+    if (validationMessage) {
+      setError(validationMessage);
+      return;
+    }
+    setError(null);
+
+    const rrule = buildRRule({
+      ...form,
+      month: Number(form.month),
+      day: Number(form.day),
+      monthDay: Number(form.monthDay),
+    });
+
     setNotifications((old) => [...old, { id: Date.now(), ...form, rrule }]);
     setForm({
       message: '',
       freq: 'ONCE',
       byweekday: [],
-      date: todayISO,
-      monthDay: today.getDate(),
+      date: '',
+      monthDay: '',
       time: '09:00',
-      month: today.getMonth() + 1,
-      day: today.getDate(),
+      month: '',
+      day: '',
     });
   };
 
@@ -132,6 +147,7 @@ export default function NotificationsInput() {
             inputProps={{ maxLength: 80 }}
             required
             fullWidth
+            error={!!error && error.toLowerCase().includes('message')}
           />
 
           <ToggleButtonGroup
@@ -203,6 +219,7 @@ export default function NotificationsInput() {
                 setForm((f) => ({ ...f, date: d, time: t || f.time }));
               }}
               fullWidth
+              error={!!error && error.toLowerCase().includes('date')}
             />
           )}
 
@@ -215,14 +232,15 @@ export default function NotificationsInput() {
                 pattern="[0-9]*"
                 placeholder="MM"
                 value={form.month}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    month: Math.max(1, Math.min(12, Number(e.target.value))),
-                  }))
-                }
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (/^\d{0,2}$/.test(val)) {
+                    setForm((f) => ({ ...f, month: val }));
+                  }
+                }}
+                fullWidth
+                error={!!error && error.toLowerCase().includes('month')}
               />
-
               <TextField
                 label="Day"
                 type="tel"
@@ -230,14 +248,15 @@ export default function NotificationsInput() {
                 pattern="[0-9]*"
                 placeholder="DD"
                 value={form.day}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    day: Math.max(1, Math.min(31, Number(e.target.value))),
-                  }))
-                }
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (/^\d{0,2}$/.test(val)) {
+                    setForm((f) => ({ ...f, day: val }));
+                  }
+                }}
+                fullWidth
+                error={!!error && error.toLowerCase().includes('day')}
               />
-
             </Stack>
           )}
 
@@ -247,22 +266,28 @@ export default function NotificationsInput() {
               type="tel"
               inputMode="numeric"
               pattern="[0-9]*"
-              placeholder="MM"
-              inputProps={{ min: 1, max: 31 }}
+              placeholder="DD"
               value={form.monthDay}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  monthDay: Math.max(1, Math.min(31, Number(e.target.value))),
-                }))
-              }
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^\d{0,2}$/.test(val)) {
+                  setForm((f) => ({ ...f, monthDay: val }));
+                }
+              }}
               fullWidth
+              error={!!error && error.toLowerCase().includes('monthly')}
             />
           )}
 
-          <Button variant="contained" fullWidth disabled={!isValid} onClick={save}>
+          <Button variant="contained" fullWidth onClick={save}>
             Save
           </Button>
+
+          {error && (
+            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+              {error}
+            </Typography>
+          )}
         </Stack>
       </Card>
 
@@ -273,7 +298,7 @@ export default function NotificationsInput() {
           ))
         ) : (
           <Typography align="center" sx={{ opacity: 0.6 }}>
-            **this does not work yet**
+            Nothing yet. Add a reminder above.
           </Typography>
         )}
       </Stack>
