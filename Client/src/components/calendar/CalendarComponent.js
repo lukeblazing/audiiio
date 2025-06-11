@@ -485,67 +485,64 @@ const CalendarComponent = ({ }) => {
       ) : (
         <Box
           sx={{
-            width: '100%',
+            position: 'fixed',
+            top: '140px',          // adjust as needed!
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '90vw',
+            maxWidth: '1000px',
+            height: 'min(max(60vh, 50vw), 120vw)',
+            maxHeight: '750px',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'flex-start',
-            overflowY: 'visible',
-            paddingTop: 'calc(102px + env(safe-area-inset-top))'
+            bgcolor: 'background.paper',
+            borderRadius: 1,
+            border: `2px solid ${theme.palette.divider}`,
+            boxShadow: 3
           }}
         >
-          <Box
-            sx={{
-              width: '90vw',
-              height: 'min(max(60vh, 50vw), 120vw)',
-              maxWidth: '1000px',
-              maxHeight: '750px',
-              bgcolor: 'background.paper',
-              borderRadius: 1,
-              border: `2px solid ${theme.palette.divider}`
+          <BigCalendar
+            localizer={localizer}
+            events={calendarEvents}
+            startAccessor="start"
+            endAccessor="end"
+            selectable
+            longPressThreshold={0}
+            onSelectSlot={handleSelectSlot}
+            view={currentView}
+            views={[Views.MONTH, Views.DAY]}
+            date={currentDate}
+            onView={(view) => setCurrentView(view)}
+            onNavigate={(date) => setCurrentDate(date)}
+            drilldownView={null}
+            components={{
+              toolbar: CalendarToolbar,
+              month: {
+                dateHeader: (props) => (
+                  <DateHeader
+                    {...props}
+                    calendarEvents={calendarEvents}
+                    getEventStyle={getEventStyle}
+                  />
+                ),
+                event: () => null, // Suppress default event rendering in month view
+              },
+
+
             }}
-          >
-            <BigCalendar
-              localizer={localizer}
-              events={calendarEvents}
-              startAccessor="start"
-              endAccessor="end"
-              selectable
-              longPressThreshold={0}
-              onSelectSlot={handleSelectSlot}
-              view={currentView}
-              views={[Views.MONTH, Views.DAY]}
-              date={currentDate}
-              onView={(view) => setCurrentView(view)}
-              onNavigate={(date) => setCurrentDate(date)}
-              drilldownView={null}
-              components={{
-                toolbar: CalendarToolbar,
-                month: {
-                  dateHeader: (props) => (
-                    <DateHeader
-                      {...props}
-                      calendarEvents={calendarEvents}
-                      getEventStyle={getEventStyle}
-                    />
-                  ),
-                  event: () => null, // Suppress default event rendering in month view
-                },
+            dayPropGetter={dayPropGetter}
+            eventPropGetter={eventPropGetter}
+            style={{ width: "100%", height: "100%" }}
+          />
 
-
-              }}
-              dayPropGetter={dayPropGetter}
-              eventPropGetter={eventPropGetter}
-              style={{ height: "100%" }}
-            />
-
-            <DayEventsModal
-              open={dayEventsModalOpen}
-              onClose={() => setDayEventsModalOpen(false)}
-              selectedDate={selectedDate}
-              calendarEvents={calendarEvents}
-              fetchCalendarEvents={fetchCalendarEvents}
-            />
-          </Box>
+          <DayEventsModal
+            open={dayEventsModalOpen}
+            onClose={() => setDayEventsModalOpen(false)}
+            selectedDate={selectedDate}
+            calendarEvents={calendarEvents}
+            fetchCalendarEvents={fetchCalendarEvents}
+          />
         </Box>
       )}
     </>
