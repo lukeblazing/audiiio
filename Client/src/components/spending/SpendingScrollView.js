@@ -137,7 +137,9 @@ export default function SpendingInput() {
               value={form.amount}
               onChange={handleInputChange}
               placeholder="Amount"
-              type="number"
+              type="tel"
+              inputMode="numeric"
+              pattern="[0-9]*"
               inputProps={{
                 min: 0,
                 step: 0.01,
@@ -179,7 +181,7 @@ export default function SpendingInput() {
             color="text.secondary"
             sx={{ opacity: 0.7, fontWeight: 500 }}
           >
-            No spending yet. Add your first!
+            **this does not work yet**
           </Typography>
         ) : (
           spendingList.map((entry) => (
