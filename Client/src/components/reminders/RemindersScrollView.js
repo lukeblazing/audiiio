@@ -154,40 +154,48 @@ export default function NotificationsInput() {
 
           {/* Frequency selection: "Once" as full-width, others below */}
           <Stack spacing={1}>
-            <ToggleButton
-              value="ONCE"
-              selected={form.freq === 'ONCE'}
-              onClick={() => setForm(f => ({ ...f, freq: 'ONCE' }))}
-              fullWidth
-              sx={{
-                borderRadius: 2,
-                textTransform: 'capitalize',
-                fontWeight: 500,
-                minHeight: 42,
-                border: form.freq === 'ONCE'
-                  ? `2px solid ${theme.palette.primary.main}`
-                  : `1px solid ${theme.palette.divider}`,
-                backgroundColor: form.freq === 'ONCE' ? 'primary.main' : 'background.paper',
-                color: form.freq === 'ONCE' ? 'primary.contrastText' : 'text.primary',
-                '&:hover': {
-                  backgroundColor: form.freq === 'ONCE'
-                    ? theme.palette.primary.dark
-                    : theme.palette.action.hover,
-                },
-                mb: 1 // adds spacing below "Once" button
-              }}
-              disableRipple
-            >
-              Once
-            </ToggleButton>
+            {/* First row: "once" alone */}
             <ToggleButtonGroup
               value={form.freq}
               exclusive
               onChange={(e, v) => v && setForm(f => ({ ...f, freq: v }))}
               size="small"
+              fullWidth
               sx={{
-                width: '100%',
-                gap: 0.5,
+                '.MuiToggleButton-root': {
+                  textTransform: 'capitalize',
+                  fontWeight: 500,
+                  borderRadius: 2,
+                  minHeight: 42,
+                  px: 1.5,
+                  width: '100%',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  '&.Mui-selected': {
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                    borderColor: 'primary.main',
+                    '&:hover': { bgcolor: 'primary.dark' },
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="ONCE" disableRipple>
+                once
+              </ToggleButton>
+            </ToggleButtonGroup>
+
+            {/* Second row: all other frequencies */}
+            <ToggleButtonGroup
+              value={form.freq}
+              exclusive
+              onChange={(e, v) => v && setForm(f => ({ ...f, freq: v }))}
+              size="small"
+              fullWidth
+              sx={{
+                display: 'flex',
+                gap: 0.25,
+                flexWrap: 'wrap',
                 '.MuiToggleButton-root': {
                   flex: 1,
                   textTransform: 'capitalize',
@@ -195,21 +203,18 @@ export default function NotificationsInput() {
                   borderRadius: 2,
                   minHeight: 42,
                   px: 1.5,
-                  borderLeft: '1px solid',
+                  border: '1px solid',
                   borderColor: 'divider',
-                  '&:first-of-type': {
-                    borderLeft: 'none',
-                  },
                   '&.Mui-selected': {
                     bgcolor: 'primary.main',
                     color: 'primary.contrastText',
-                    '&:hover': { bgcolor: 'primary.dark' },
                     borderColor: 'primary.main',
+                    '&:hover': { bgcolor: 'primary.dark' },
                   },
                 },
               }}
             >
-              {FREQUENCIES.filter(f => f !== 'ONCE').map((f) => (
+              {FREQUENCIES.filter(f => f !== 'ONCE').map(f => (
                 <ToggleButton key={f} value={f} disableRipple>
                   {f.toLowerCase()}
                 </ToggleButton>
