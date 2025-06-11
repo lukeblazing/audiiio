@@ -7,7 +7,6 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
-import NoteRoundedIcon from '@mui/icons-material/NoteRounded';
 import Box from '@mui/material/Box';
 
 const mainListItems = [
