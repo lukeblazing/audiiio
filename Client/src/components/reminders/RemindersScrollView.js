@@ -154,42 +154,14 @@ export default function NotificationsInput() {
 
           {/* Frequency selection: "Once" as full-width, others below */}
           <Stack spacing={1}>
-            {/* First row: "once" alone */}
-            <ToggleButtonGroup
-              value={form.freq}
-              exclusive
-              onChange={(e, v) => v && setForm(f => ({ ...f, freq: v }))}
-              size="small"
-              fullWidth
-              sx={{
-                '.MuiToggleButton-root': {
-                  textTransform: 'capitalize',
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  minHeight: 42,
-                  px: 1.5,
-                  width: '100%',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  '&.Mui-selected': {
-                    bgcolor: 'primary.main',
-                    color: 'primary.contrastText',
-                    borderColor: 'primary.main',
-                    '&:hover': { bgcolor: 'primary.dark' },
-                  },
-                },
-              }}
-            >
-              <ToggleButton value="ONCE" disableRipple>
-                once
-              </ToggleButton>
-            </ToggleButtonGroup>
 
             {/* Second row: all other frequencies */}
             <ToggleButtonGroup
-              value={form.freq}
+              value={FREQUENCIES.includes(form.freq) && form.freq !== 'ONCE' ? form.freq : null}
               exclusive
-              onChange={(e, v) => v && setForm(f => ({ ...f, freq: v }))}
+              onChange={(e, v) => {
+                setForm(f => ({ ...f, freq: v || 'ONCE' })); // v will be null if deselected
+              }}
               size="small"
               fullWidth
               sx={{
@@ -220,6 +192,7 @@ export default function NotificationsInput() {
                 </ToggleButton>
               ))}
             </ToggleButtonGroup>
+
           </Stack>
 
           {form.freq === 'WEEKLY' && (

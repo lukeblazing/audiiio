@@ -83,6 +83,7 @@ export default function NavigationBottom() {
       <DropletPaper elevation={0}>
         {/* ◉ left bubble – hamburger menu */}
         <BubbleButton
+          disableRipple
           aria-label="open menu"
           onClick={() => setDrawerOpen(true)}
           sx={{ position: 'absolute', left: 8, top: -28 }}
