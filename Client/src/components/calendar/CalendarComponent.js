@@ -486,7 +486,7 @@ const CalendarComponent = ({ }) => {
         <Box
           sx={{
             position: 'fixed',
-            top: '140px',          // adjust as needed!
+            top: '170px',          // adjust as needed!
             left: '50%',
             transform: 'translateX(-50%)',
             width: '90vw',
