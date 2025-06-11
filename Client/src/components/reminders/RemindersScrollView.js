@@ -56,7 +56,7 @@ function ReminderCard({ id, message, freq, date, time, monthDay, month, day, onD
         <Stack direction="row" alignItems="center" spacing={1}>
           <EventIcon sx={{ color: theme.palette.primary.main }} />
           <Typography sx={{ flexGrow: 1, fontWeight: 600 }}>{message}</Typography>
-          <IconButton size="small" onClick={() => onDelete(id)}>
+          <IconButton size="small" onClick={() => onDelete(id)} disableRipple>
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Stack>
@@ -178,7 +178,7 @@ export default function NotificationsInput() {
             }}
           >
             {FREQUENCIES.map((f) => (
-              <ToggleButton key={f} value={f}>
+              <ToggleButton key={f} value={f} disableRipple>
                 {f.toLowerCase()}
               </ToggleButton>
             ))}
@@ -192,7 +192,7 @@ export default function NotificationsInput() {
               fullWidth
             >
               {WEEKDAYS.map(({ short, label }) => (
-                <ToggleButton key={short} value={short}>
+                <ToggleButton key={short} value={short} disableRipple>
                   {label[0]}
                 </ToggleButton>
               ))}
@@ -207,14 +207,14 @@ export default function NotificationsInput() {
                 flex: 1,
                 minWidth: 0,
                 '& input[type="time"]': {
-                  WebkitAppearance: 'none', // Disable native iOS appearance
-                  MozAppearance: 'textfield', // For Firefox
-                  appearance: 'textfield', // General CSS property
-                  height: 56, // Match MUI's default TextField height
-                  padding: '0 14px', // Adjusted padding to center the text vertically
-                  lineHeight: 'normal', // Reset line height to normal
-                  display: 'flex', // Use flex to align items
-                  alignItems: 'center', // Vertically center
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'textfield',
+                  appearance: 'textfield',
+                  height: 56,
+                  padding: '0 14px',
+                  lineHeight: 'normal',
+                  display: 'flex',
+                  alignItems: 'center',
                   boxSizing: 'border-box',
                   borderRadius: 4,
                 },
@@ -238,15 +238,15 @@ export default function NotificationsInput() {
               sx={{
                 flex: 1,
                 minWidth: 0,
-                '& input[type="time"]': {
-                  WebkitAppearance: 'none', // Disable native iOS appearance
-                  MozAppearance: 'textfield', // For Firefox
-                  appearance: 'textfield', // General CSS property
-                  height: 56, // Match MUI's default TextField height
-                  padding: '0 14px', // Adjusted padding to center the text vertically
-                  lineHeight: 'normal', // Reset line height to normal
-                  display: 'flex', // Use flex to align items
-                  alignItems: 'center', // Vertically center
+                '& input[type="datetime-local"]': {
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'textfield',
+                  appearance: 'textfield',
+                  height: 56,
+                  padding: '0 14px',
+                  lineHeight: 'normal',
+                  display: 'flex',
+                  alignItems: 'center',
                   boxSizing: 'border-box',
                   borderRadius: 4,
                 },
@@ -323,7 +323,7 @@ export default function NotificationsInput() {
             />
           )}
 
-          <Button variant="contained" fullWidth onClick={save}>
+          <Button variant="contained" fullWidth onClick={save} disableRipple>
             Save
           </Button>
 
