@@ -26,7 +26,6 @@ const DockShell = styled(Paper)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  border: `2px solid ${theme.palette.divider}`,
   background: 'transparent',
   backdropFilter: 'blur(14px)',
   overflow: 'hidden',
