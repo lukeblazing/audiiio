@@ -449,7 +449,7 @@ function DayEventsModal({
             key={idx}
             sx={{
               background: eventBackground(ev.category_id),
-              borderRadius: 1,
+              borderRadius: 3,
               p: 1.5, mb: 1,
               border: `3px solid ${getBorderColor(ev.category_id)}`
             }}
@@ -697,7 +697,7 @@ function DayEventsModal({
               key={idx}
               sx={{
                 background: eventBackground(ev.category_id),
-                borderRadius: 1,
+                borderRadius: 3,
                 p: 1.5, mb: 1,
                 border: `3px solid ${getBorderColor(ev.category_id)}`
               }}
@@ -734,7 +734,7 @@ function DayEventsModal({
             <Typography
               sx={{
                 background: eventBackground(eventToDelete.category_id),
-                borderRadius: 1,
+                borderRadius: 3,
                 p: 1.5,
                 mb: 1,
                 border: `3px solid ${getBorderColor(eventToDelete.category_id)}`
