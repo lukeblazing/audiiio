@@ -214,7 +214,7 @@ function getRgbValues(color) {
   return rgbMatch ? rgbMatch.slice(0, 3).join(",") : "0,0,0";
 }
 
-export function eventBackground(borderColor, opacity = 0.15) {
+export function eventBackground(borderColor, opacity = 0.3) {
   if (!isValidCssColor(borderColor)) borderColor = "dodgerblue";
 
   const rgb = getRgbValues(borderColor);
