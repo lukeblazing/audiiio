@@ -299,24 +299,24 @@ const CalendarComponent = ({ }) => {
     if (startsToday && !endsToday) {
       return {
         ...baseStyle,
-        borderTop: `1px solid ${borderColor}`,
-        borderBottom: `1px solid ${borderColor}`,
-        borderLeft: `1px solid ${borderColor}`,
+        borderTop: `2px solid ${borderColor}`,
+        borderBottom: `2px solid ${borderColor}`,
+        borderLeft: `2px solid ${borderColor}`,
         borderRadius: "5px 0 0 5px",
       };
     } else if (!startsToday && endsToday) {
       return {
         ...baseStyle,
-        borderTop: `1px solid ${borderColor}`,
-        borderBottom: `1px solid ${borderColor}`,
-        borderRight: `1px solid ${borderColor}`,
+        borderTop: `2px solid ${borderColor}`,
+        borderBottom: `2px solid ${borderColor}`,
+        borderRight: `2px solid ${borderColor}`,
         borderRadius: "0 5px 5px 0",
       };
     } else if (!startsToday && !endsToday) {
       return {
         ...baseStyle,
-        borderTop: `1px solid ${borderColor}`,
-        borderBottom: `1px solid ${borderColor}`,
+        borderTop: `2px solid ${borderColor}`,
+        borderBottom: `2px solid ${borderColor}`,
         borderRadius: "0",
       };
     }
@@ -324,7 +324,7 @@ const CalendarComponent = ({ }) => {
     // Default: starts and ends today (single-day event)
     return {
       ...baseStyle,
-      border: `1px solid ${borderColor}`,
+      border: `2px solid ${borderColor}`,
       borderRadius: "5px",
     };
   };

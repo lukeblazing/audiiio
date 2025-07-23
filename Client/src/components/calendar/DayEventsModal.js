@@ -451,7 +451,7 @@ function DayEventsModal({
               background: eventBackground(ev.category_id),
               borderRadius: 1,
               p: 1.5, mb: 1,
-              border: `1px solid ${getBorderColor(ev.category_id)}`
+              border: `3px solid ${getBorderColor(ev.category_id)}`
             }}
           >
             <strong>{formatFullEventTime(ev, selectedDate)}</strong> {ev.title}
@@ -699,7 +699,7 @@ function DayEventsModal({
                 background: eventBackground(ev.category_id),
                 borderRadius: 1,
                 p: 1.5, mb: 1,
-                border: `1px solid ${getBorderColor(ev.category_id)}`
+                border: `3px solid ${getBorderColor(ev.category_id)}`
               }}
               onClick={() => askDelete(ev)}
             >
@@ -737,7 +737,7 @@ function DayEventsModal({
                 borderRadius: 1,
                 p: 1.5,
                 mb: 1,
-                border: `1px solid ${getBorderColor(eventToDelete.category_id)}`
+                border: `3px solid ${getBorderColor(eventToDelete.category_id)}`
               }}
             >
               <strong>{formatFullEventTime(eventToDelete, selectedDate)}</strong> {eventToDelete.title}
