@@ -8,7 +8,7 @@ import React, {
   useRef,
 } from "react";
 import Box from "@mui/material/Box";
-import { FixedSizeList as List } from "react-window";
+import { VariableSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
   startOfMonth,
@@ -23,6 +23,7 @@ import {
   isAfter,
   eachDayOfInterval,
   format,
+  differenceInCalendarWeeks
 } from "date-fns";
 
 import LoadingSpinner from "../loading-components/LoadingSpinner";
@@ -119,9 +120,18 @@ export function eventBackground(borderColor, opacity = 0.3) {
 
 /* ------------------------------ MonthGrid view ----------------------------- */
 
-const TOTAL_MONTHS = 16;
-const CURRENT_MONTH_INDEX = Math.floor(TOTAL_MONTHS / 2);
-const MONTH_ROW_HEIGHT = 700;
+const TOTAL_MONTHS = 15;
+const CURRENT_MONTH_INDEX = 3;
+
+
+function getMonthRowCount(monthDate) {
+  const monthStart = startOfMonth(monthDate);
+  const monthEnd = endOfMonth(monthDate);
+  const gridStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+  const totalDays = Math.round((gridEnd - gridStart) / (1000 * 60 * 60 * 24)) + 1;
+  return Math.ceil(totalDays / 7);
+}
 
 function MonthGrid({
   monthIndex,
@@ -138,6 +148,18 @@ function MonthGrid({
     [monthIndex, dayIndex, onDayClick, baseMonth, today, renderEvent]
   );
 
+  const ROW_HEIGHT = 70;    // your day cell min height
+  const MONTH_PADDING = 10; // adjust for header, weekday names, etc.
+
+  const monthHeights = useMemo(() => {
+    // We'll render TOTAL_MONTHS months, centered around today
+    return Array.from({ length: TOTAL_MONTHS }, (_, i) => {
+      const monthDate = addMonths(baseMonth, i - CURRENT_MONTH_INDEX);
+      const weekRows = getMonthRowCount(monthDate);
+      return weekRows * ROW_HEIGHT + MONTH_PADDING;
+    });
+  }, [baseMonth]);
+
   return (
     <div style={{ height: "100%", width: "100%" }}>
       <AutoSizer>
@@ -147,16 +169,17 @@ function MonthGrid({
             height={height}
             width={width}
             itemCount={TOTAL_MONTHS}
-            itemSize={MONTH_ROW_HEIGHT}
+            itemSize={index => monthHeights[index]}
             overscanCount={3}
-            initialScrollOffset={CURRENT_MONTH_INDEX * MONTH_ROW_HEIGHT}
-            itemKey={(index) =>
+            initialScrollOffset={CURRENT_MONTH_INDEX * monthHeights[CURRENT_MONTH_INDEX]}
+            itemKey={index =>
               format(addMonths(baseMonth, index - CURRENT_MONTH_INDEX), "yyyy-MM")
             }
             itemData={itemData}
           >
             {MonthRow}
           </List>
+
         )}
       </AutoSizer>
     </div>
@@ -299,7 +322,7 @@ const monthViewCss = String.raw`
   .mv-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    grid-auto-rows: minmax(70px, 1fr);
+    grid-auto-rows: 70px; // row height
     gap: 0;
   }
   .mv-day {
@@ -314,7 +337,7 @@ const monthViewCss = String.raw`
     position: absolute;
     pointer-events: none;
     top: 2px; left: 2px; right: 2px; bottom: 2px;
-    border: 2px solid var(--primary-color, #1976d2);
+    border: 3px solid var(--primary-color, #1976d2);
     border-radius: 6px;
   }
   .mv-day--past { filter: brightness(0.95); }
@@ -429,10 +452,10 @@ export default function CalendarComponent() {
           }}
         >
           <MonthGrid
-          monthIndex={monthIndex}
-          dayIndex={dayIndex}
-          onDayClick={handleDayClick}
-        />
+            monthIndex={monthIndex}
+            dayIndex={dayIndex}
+            onDayClick={handleDayClick}
+          />
 
           <DayEventsModal
             open={dayEventsModalOpen}
