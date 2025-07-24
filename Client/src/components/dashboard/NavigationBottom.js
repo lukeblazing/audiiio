@@ -13,6 +13,17 @@ const navLinks = [
   { to: '/spending', icon: Wallet, label: 'Spending' },
 ];
 
+
+
+const Divider = styled('span')({
+  width: 2,
+  height: 'calc(var(--btn-size) * 0.69)',
+  borderRadius: 2,
+  background: 'rgba(255,255,255,0.23)',
+  margin: '0 6px', // tighter spacing
+  flexShrink: 0,
+});
+
 const DockShell = styled(Paper)(({ theme }) => ({
   position: 'fixed',
   left: 16,
@@ -32,58 +43,18 @@ const DockShell = styled(Paper)(({ theme }) => ({
   gap: 0,
   minWidth: 0,
   '--btn-size': 'clamp(42px, 12vw, 55px)',
-  '--icon-size': 'clamp(23px, 6vw, 33px)',
+  '--icon-size': 'clamp(33px, 8vw, 40px)',
   '--gap': 'clamp(7px, 4vw, 18px)',
 }));
 
-const Divider = styled('span')({
-  width: 2,
-  height: 'calc(var(--btn-size) * 0.69)',
-  borderRadius: 2,
-  background: 'rgba(255,255,255,0.23)',
-  margin: '0 10px',
-  flexShrink: 0,
-});
-
-const BubbleButton = styled(IconButton)(({ selected }) => ({
-  width: 'var(--btn-size)',
-  height: 'var(--btn-size)',
-  borderRadius: 8,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transform: selected ? 'scale(1.3)' : 'scale(1)',
-  transition: 'all 280ms cubic-bezier(.22,1,.36,1)',
-  color: selected ? '#3C84FF' : undefined,
-  flexShrink: 0,
-}));
-
 const NavBox = styled(Box)({
-  position: 'relative',
   display: 'flex',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
   gap: 'var(--gap)',
-  minWidth: 0,
   flexShrink: 1,
   flexGrow: 1,
-});
-
-const SlidingBorder = styled('span')({
-  position: 'absolute',
-  top: '50%',
-  left: 0,
-  width: 'var(--btn-size)',
-  height: 'var(--btn-size)',
-  borderRadius: 'calc(var(--btn-size) * 0.18 + 6px)',
-  pointerEvents: 'none',
-  zIndex: 1,
-  border: '1.8px solid rgba(255,255,255,0.32)',
-  boxShadow: '0 0 0 1px rgba(255,255,255,0.12) inset, 0 1px 3px rgba(0,0,0,0.12)',
-  background: 'linear-gradient(135deg, rgba(255,255,255,0.21) 0%, rgba(255,255,255,0.07) 80%)',
-  backdropFilter: 'blur(9px)',
-  transform: 'translateY(-50%)',
-  transition: 'left 300ms cubic-bezier(.22,1,.36,1)',
+  minWidth: 0,
 });
 
 export default function NavigationBottom() {
@@ -117,47 +88,35 @@ export default function NavigationBottom() {
 
       <DockShell elevation={0}>
         {/* Menu */}
-        <BubbleButton onClick={() => setDrawerOpen(true)}>
-          <MenuRoundedIcon sx={{ fontSize: 'var(--icon-size)' }} />
-        </BubbleButton>
-
-        <Divider />
+        <MenuRoundedIcon onClick={() => setDrawerOpen(true)} sx={{ fontSize: 'var(--icon-size)' }} />
 
         <NavBox>
-          {selectedIndex >= 0 && (
-            <SlidingBorder
-              style={{
-                left: borderLeft,
-              }}
-            />
-          )}
-          {navLinks.map(({ to, icon: Icon }, idx) => (
-            <BubbleButton
-              key={to}
-              component={Link}
-              to={to}
-              selected={idx === selectedIndex}
-              sx={{
-                color: idx === selectedIndex
-                  ? theme.palette.primary.main
-                  : theme.palette.text.secondary,
-                position: 'relative',
-                zIndex: 2,
-              }}
-              aria-label={navLinks[idx].label}
-              ref={el => buttonRefs.current[idx] = el}
-            >
-              <Icon size="1em" style={{ fontSize: 'var(--icon-size)' }} />
-            </BubbleButton>
-          ))}
+          {navLinks.map(({ to, icon: Icon }, idx) => {
+            const isSelected = pathname === to;
+            return (
+              <Link key={to} to={to} style={{ textDecoration: 'none', color: 'unset', }}>
+                <Box
+                  ref={el => (buttonRefs.current[idx] = el)}
+                  sx={{
+                    width: 'var(--btn-size)',
+                    height: 'var(--btn-size)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transform: isSelected ? 'scale(1.2)' : 'scale(1)',
+                    transition: 'transform 280ms cubic-bezier(.22,1,.36,1)',
+                    color: pathname === to ? '#3C84FF' : 'inherit',
+                  }}
+                >
+                  <Icon style={{ fontSize: 'var(--icon-size)' }} />
+                </Box>
+              </Link>
+            );
+          })}
         </NavBox>
 
-        <Divider />
-
         {/* Refresh */}
-        <BubbleButton onClick={() => window.location.reload()}>
-          <RefreshIcon sx={{ fontSize: 'var(--icon-size)' }} />
-        </BubbleButton>
+        <RefreshIcon onClick={() => window.location.reload()} sx={{ fontSize: 'var(--icon-size)' }} />
       </DockShell>
 
       <SideMenuMobile open={drawerOpen} toggleDrawer={setDrawerOpen} />
