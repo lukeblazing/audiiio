@@ -27,7 +27,7 @@ const DockShell = styled(Paper)({
   left: 0,
   right: 0,
   bottom: 0,
-  height: "12vh",
+  height: "10vh",
   paddingLeft: "10vw",
   paddingRight: "10vw",
   paddingBottom: "3vh",
@@ -35,7 +35,7 @@ const DockShell = styled(Paper)({
   alignItems: 'center',
   justifyContent: 'space-between',
   background: "#0f172a",
-  '--icon-size': 'clamp(43px, 10vw, 50px)',
+  '--icon-size': 'clamp(25px, 10vw, 35px)',
   borderTop: "3px solid rgba(255, 255, 255, 0.12)",
 });
 
@@ -61,7 +61,7 @@ export default function NavigationBottom() {
               style={{ textDecoration: 'none', color: isSelected ? '#3C84FF' : 'inherit' }}
             >
               <IconWrapper >
-                <Icon width="70%" height="70%" />
+                <Icon width="60%" height="60%" />
               </IconWrapper>
             </Link>
           );

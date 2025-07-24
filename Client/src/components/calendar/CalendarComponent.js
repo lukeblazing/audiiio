@@ -364,9 +364,9 @@ const monthViewCss = String.raw`
     border-radius: 6px;
     background: #121212;
   }
-  .mv-day--selected {
-    background: var(--mv-selected-bg,#1976d2) !important;
-  }
+  // .mv-day--selected {
+  //   background: var(--mv-selected-bg,#1976d2) !important;
+  // }
   .mv-day--today { position: relative; }
   .mv-day--today::after {
     content: "";
