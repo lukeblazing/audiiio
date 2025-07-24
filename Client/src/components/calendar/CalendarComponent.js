@@ -173,7 +173,7 @@ function MonthGrid({
             itemCount={TOTAL_MONTHS}
             itemSize={index => monthHeights[index]}
             overscanCount={3}
-            initialScrollOffset={CURRENT_MONTH_INDEX * monthHeights[CURRENT_MONTH_INDEX] - (height * 0.1)}
+            initialScrollOffset={CURRENT_MONTH_INDEX * monthHeights[CURRENT_MONTH_INDEX] - 20}
             itemKey={index =>
               format(addMonths(baseMonth, index - CURRENT_MONTH_INDEX), "yyyy-MM")
             }
