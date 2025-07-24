@@ -264,26 +264,26 @@ const DayCell = React.memo(function DayCell({
       onClick={handleClick}
     >
       <div className="mv-day-label">{format(date, "d")}</div>
-{isPast && (
-  <svg
-    className="mv-past-x"
-    width="70%"
-    height="70%"
-    viewBox="0 0 12 12"
-    style={{
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      pointerEvents: "none",
-      zIndex: 5,
-      opacity: 0.95,
-    }}
-  >
-    <line x1="3" y1="3" x2="9" y2="9" stroke="white" strokeWidth=".5" strokeLinecap="round" />
-    <line x1="9" y1="3" x2="3" y2="9" stroke="white" strokeWidth=".5" strokeLinecap="round" />
-  </svg>
-)}
+      {isPast && (
+        <svg
+          className="mv-past-x"
+          width="70%"
+          height="70%"
+          viewBox="0 0 12 12"
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            pointerEvents: "none",
+            zIndex: 5,
+            opacity: 0.95,
+          }}
+        >
+          <line x1="3" y1="3" x2="9" y2="9" stroke="white" strokeWidth=".5" strokeLinecap="round" />
+          <line x1="9" y1="3" x2="3" y2="9" stroke="white" strokeWidth=".5" strokeLinecap="round" />
+        </svg>
+      )}
 
       <div
         style={isPast ? { filter: "blur(1px)" } : undefined}
@@ -362,6 +362,7 @@ const monthViewCss = String.raw`
     overflow: hidden;
     border: 1px solid var(--mv-divider, rgba(255, 255, 255, 0.12));
     border-radius: 6px;
+    background: #121212;
   }
   .mv-day--selected {
     background: var(--mv-selected-bg,#1976d2) !important;
