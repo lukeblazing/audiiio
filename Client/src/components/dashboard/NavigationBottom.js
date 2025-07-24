@@ -36,6 +36,7 @@ const DockShell = styled(Paper)({
   justifyContent: 'space-between',
   background: "#0f172a",
   '--icon-size': 'clamp(43px, 10vw, 50px)',
+  borderTop: "3px solid rgba(255, 255, 255, 0.12)",
 });
 
 export default function NavigationBottom() {
