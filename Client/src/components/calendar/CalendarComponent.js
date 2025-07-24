@@ -140,13 +140,14 @@ function MonthGrid({
   onDayClick,
   renderEvent,
   today = new Date(),
+  selectedDate,
 }) {
   const baseMonth = useMemo(() => startOfMonth(today), [today]);
   const listRef = useRef(null);
 
   const itemData = useMemo(
-    () => ({ monthIndex, dayIndex, onDayClick, baseMonth, today, renderEvent }),
-    [monthIndex, dayIndex, onDayClick, baseMonth, today, renderEvent]
+    () => ({ monthIndex, dayIndex, onDayClick, baseMonth, today, renderEvent, selectedDate, }),
+    [monthIndex, dayIndex, onDayClick, baseMonth, today, renderEvent, selectedDate,]
   );
 
   const ROW_HEIGHT = 80;    // your day cell min height
@@ -188,7 +189,7 @@ function MonthGrid({
 }
 
 const MonthRow = React.memo(function MonthRow({ index, style, data }) {
-  const { dayIndex, onDayClick, baseMonth, today, renderEvent } = data;
+  const { dayIndex, onDayClick, baseMonth, today, renderEvent, selectedDate } = data;
   const monthDate = addMonths(baseMonth, index - CURRENT_MONTH_INDEX);
 
   const monthStart = startOfMonth(monthDate);
@@ -214,6 +215,7 @@ const MonthRow = React.memo(function MonthRow({ index, style, data }) {
             onDayClick={onDayClick}
             renderEvent={renderEvent}
             inThisMonth={format(day, "MM") === format(monthDate, "MM")}
+            isSelected={selectedDate && isSameDay(day, selectedDate)}
           />
         ))}
       </div>
@@ -246,6 +248,7 @@ const DayCell = React.memo(function DayCell({
   onDayClick,
   renderEvent,
   inThisMonth,
+  isSelected,
 }) {
   const handleClick = () => onDayClick?.(date, events);
 
@@ -256,6 +259,7 @@ const DayCell = React.memo(function DayCell({
         isToday ? "mv-day--today" : "",
         isPast ? "mv-day--past" : "",
         !inThisMonth ? "mv-day--off" : "",
+        isSelected ? "mv-day--selected" : "",
       ].join(" ")}
       onClick={handleClick}
     >
@@ -333,6 +337,9 @@ const monthViewCss = String.raw`
     overflow: hidden;
     border: 1px solid var(--mv-divider, rgba(255,255,255,0.12));
     border-radius: 6px;
+  }
+  .mv-day--selected {
+    background: var(--mv-selected-bg, #1976d2) !important;
   }
   .mv-day--today { position: relative; }
   .mv-day--today::after {
@@ -458,11 +465,15 @@ export default function CalendarComponent() {
             monthIndex={monthIndex}
             dayIndex={dayIndex}
             onDayClick={handleDayClick}
+            selectedDate={selectedDate}
           />
 
           <DayEventsModal
             open={dayEventsModalOpen}
-            onClose={() => setDayEventsModalOpen(false)}
+            onClose={() => {
+              setDayEventsModalOpen(false);
+              setSelectedDate(null);  // <-- this clears the selection and thus removes highlight
+            }}
             selectedDate={selectedDate}
             calendarEvents={calendarEvents}
             fetchCalendarEvents={fetchCalendarEvents}
