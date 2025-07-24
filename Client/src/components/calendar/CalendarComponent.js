@@ -148,8 +148,8 @@ function MonthGrid({
     [monthIndex, dayIndex, onDayClick, baseMonth, today, renderEvent]
   );
 
-  const ROW_HEIGHT = 70;    // your day cell min height
-  const MONTH_PADDING = 10; // adjust for header, weekday names, etc.
+  const ROW_HEIGHT = 80;    // your day cell min height
+  const MONTH_PADDING = 20; // adjust for header, weekday names, etc.
 
   const monthHeights = useMemo(() => {
     // We'll render TOTAL_MONTHS months, centered around today
@@ -322,7 +322,7 @@ const monthViewCss = String.raw`
   .mv-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    grid-auto-rows: 70px; // row height
+    grid-auto-rows: 80px; // row height
     gap: 0;
   }
   .mv-day {
