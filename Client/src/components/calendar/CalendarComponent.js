@@ -28,6 +28,7 @@ import {
 
 import LoadingSpinner from "../loading-components/LoadingSpinner";
 import DayEventsModal from "./DayEventsModal";
+import { useTheme } from "@mui/material/styles";
 
 
 /* ------------------------- utils: buildEventIndexes ------------------------ */
@@ -330,6 +331,8 @@ const monthViewCss = String.raw`
     padding: 2px 4px 4px 4px;
     cursor: pointer;
     overflow: hidden;
+    border: 1px solid var(--mv-divider, rgba(255,255,255,0.12));
+    border-radius: 6px;
   }
   .mv-day--today { position: relative; }
   .mv-day--today::after {
