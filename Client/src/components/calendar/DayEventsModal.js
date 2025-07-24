@@ -770,7 +770,7 @@ function DayEventsModal({
           maxHeight: '80vh',
           width: '100%',
         }}>
-          <Grow in={open} timeout={220}>
+          <Grow in={open} timeout={100}>
             <Box sx={sharedModalBoxSx}>
               {Header}
               {mode === 'view' && ViewBody}
