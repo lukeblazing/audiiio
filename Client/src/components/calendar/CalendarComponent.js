@@ -23,11 +23,12 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import LoadingSpinner from "../loading-components/LoadingSpinner.js";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import Button from "@mui/material/Button";
 import { useAuth } from '../authentication/AuthContext';
 import DayEventsModal from "./DayEventsModal.js";
 import { formatFullEventTime } from "./DayEventsModal.js";
 import { FixedSizeList as List } from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
+import throttle from "lodash.throttle";
 
 // Set up the localizer
 const locales = { "en-US": enUS };
@@ -116,7 +117,6 @@ const MonthLabelToolbar = ({ date, localizer }) => {
   );
 };
 
-
 // Utilities for event color, etc
 function isValidCssColor(color) {
   const s = new Option().style;
@@ -141,10 +141,38 @@ export function eventBackground(borderColor, opacity = 0.3) {
 }
 
 const MONTH_ROW_HEIGHT = 500; // px; Adjust for your design/layout
+const TOTAL_MONTHS = 16; // 10 years view range, change as needed
+const CURRENT_MONTH_INDEX = Math.floor(TOTAL_MONTHS / 2);
+
+// Memoized outside-of-render DateCellWrapper
+const DateCellWrapper = React.memo(function DateCellWrapper({ value, children, onSelectSlot }) {
+  const handleClick = (e) => {
+    e.stopPropagation();
+    onSelectSlot({
+      start: value,
+      end: value,
+      action: "click",
+      slots: [value],
+    });
+  };
+  return (
+    <div onClick={handleClick} style={{ height: '100%', cursor: 'pointer' }}>
+      {children}
+    </div>
+  );
+});
 
 // One month grid as a row in the list
 const MonthRow = React.memo(
-  ({ style, monthDate, events, onSelectSlot, getEventStyle, dayPropGetter, eventPropGetter, dateCellWrapper }) => (
+  ({
+    style,
+    monthDate,
+    events,
+    onSelectSlot,
+    getEventStyle,
+    dayPropGetter,
+    eventPropGetter,
+  }) => (
     <Box style={style}>
       <BigCalendar
         localizer={localizer}
@@ -153,13 +181,17 @@ const MonthRow = React.memo(
         endAccessor="end"
         selectable={true}
         longPressThreshold={0}
-        defaultView={Views.MONTH}
+        view={Views.MONTH}
         views={[Views.MONTH]}
-        defaultDate={monthDate}
+        date={monthDate}
+        onView={() => {}}
+        onNavigate={() => {}}
         drilldownView={null}
         onSelectSlot={onSelectSlot}
         components={{
-          dateCellWrapper: dateCellWrapper,
+          dateCellWrapper: (props) => (
+            <DateCellWrapper {...props} onSelectSlot={onSelectSlot} />
+          ),
           toolbar: (toolbarProps) => (
             <MonthLabelToolbar {...toolbarProps} />
           ),
@@ -189,42 +221,26 @@ const VirtualisedCalendar = ({
   dayPropGetter,
   eventPropGetter,
 }) => {
-  const totalMonths = 12;
-  const currentMonthIndex = 3;
   const [visibleMonth, setVisibleMonth] = useState(startOfMonth(new Date()));
   const listRef = useRef(null);
 
-  const DateCellWrapper = ({ value, children }) => {
-    const handleClick = (e) => {
-      e.stopPropagation();            // <-- let our click reach the parent
-      onSelectSlot({
-        start: value,
-        end: value,
-        action: "click",
-        slots: [value],
-      });
-    };
-    return (
-      <div onClick={handleClick} style={{ height: '100%', cursor: 'pointer' }}>
-        {children}
-      </div>
-    );
-  };
+  // Stable base month for virtualized list
+  const baseMonth = useMemo(() => startOfMonth(new Date()), []);
 
-
-  // react-window callback to update header
-  const handleItemsRendered = useCallback(
-    ({ visibleStartIndex }) => {
-      const topMonth = addMonths(
-        startOfMonth(new Date()),
-        visibleStartIndex - currentMonthIndex
-      );
-      setVisibleMonth(topMonth);
-    },
-    [currentMonthIndex]
+  // Throttled handler for visible range
+  const handleItemsRendered = useMemo(
+    () =>
+      throttle(({ visibleStartIndex }) => {
+        const topMonth = addMonths(
+          baseMonth,
+          visibleStartIndex - CURRENT_MONTH_INDEX
+        );
+        setVisibleMonth(topMonth);
+      }, 120),
+    [baseMonth]
   );
 
-  // Must memoize events to avoid excess rerenders
+  // Memoize itemData
   const itemData = useMemo(
     () => ({
       events: calendarEvents,
@@ -236,37 +252,48 @@ const VirtualisedCalendar = ({
     [calendarEvents, onSelectSlot, getEventStyle, dayPropGetter, eventPropGetter]
   );
 
+  // Responsive calendar height/width
   return (
-    <Box sx={{ height: "100%", width: "100%" }}>
-      <List
-        ref={listRef}
-        height={MONTH_ROW_HEIGHT * 1.75} // fits about 1.5 months at a time, tweak to your liking
-        itemCount={totalMonths}
-        itemSize={MONTH_ROW_HEIGHT}
-        initialScrollOffset={currentMonthIndex * MONTH_ROW_HEIGHT}
-        onItemsRendered={handleItemsRendered}
-        itemData={itemData}
-        overscanCount={2}
-      >
-        {({ index, style, data }) => {
-          const monthDate = addMonths(
-            startOfMonth(new Date()),
-            index - currentMonthIndex
-          );
-          return (
-            <MonthRow
-              style={style}
-              monthDate={monthDate}
-              events={data.events}
-              onSelectSlot={data.onSelectSlot}
-              getEventStyle={data.getEventStyle}
-              dayPropGetter={data.dayPropGetter}
-              eventPropGetter={data.eventPropGetter}
-              dateCellWrapper={DateCellWrapper}
-            />
-          );
-        }}
-      </List>
+    <Box sx={{ height: "100%", width: "100%", overflow: "hidden" }}>
+      <AutoSizer disableWidth={false}>
+        {({ height, width }) => (
+          <List
+            ref={listRef}
+            height={height}
+            width={width}
+            itemCount={TOTAL_MONTHS}
+            itemSize={MONTH_ROW_HEIGHT}
+            initialScrollOffset={CURRENT_MONTH_INDEX * MONTH_ROW_HEIGHT}
+            onItemsRendered={handleItemsRendered}
+            itemData={itemData}
+            overscanCount={6}
+            itemKey={(index) =>
+              format(
+                addMonths(baseMonth, index - CURRENT_MONTH_INDEX),
+                "yyyy-MM"
+              )
+            }
+          >
+            {({ index, style, data }) => {
+              const monthDate = addMonths(
+                baseMonth,
+                index - CURRENT_MONTH_INDEX
+              );
+              return (
+                <MonthRow
+                  style={style}
+                  monthDate={monthDate}
+                  events={data.events}
+                  onSelectSlot={data.onSelectSlot}
+                  getEventStyle={data.getEventStyle}
+                  dayPropGetter={data.dayPropGetter}
+                  eventPropGetter={data.eventPropGetter}
+                />
+              );
+            }}
+          </List>
+        )}
+      </AutoSizer>
     </Box>
   );
 };
@@ -280,18 +307,15 @@ const CalendarComponent = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [isEventsLoading, setIsEventsLoading] = useState(true);
 
-  // CalendarComponent
-  const handleSelectSlot = React.useCallback((info) => {
+  const handleSelectSlot = useCallback((info) => {
     const singleDaySelect =
       info.action === "select" && info.slots && info.slots.length === 1;
-
-    if (info.action !== "click" && !singleDaySelect) return;  // ignore drags
+    if (info.action !== "click" && !singleDaySelect) return;
     setSelectedDate(info.start);
     setDayEventsModalOpen(true);
   }, []);
 
-
-  // Function to fetch all events for the user
+  // Fetch all events for the user
   const fetchCalendarEvents = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/calendar/getAllEventsForUser`, {
@@ -320,7 +344,7 @@ const CalendarComponent = () => {
     fetchCalendarEvents();
   }, [isAuthenticated]);
 
-  const getEventStyle = (startsToday, endsToday, isPastDay, event) => {
+  const getEventStyle = useCallback((startsToday, endsToday, isPastDay, event) => {
     const borderColor = isValidCssColor(event.category_id) ? event.category_id : "dodgerblue";
     const baseStyle = {
       fontSize: "0.5rem",
@@ -366,7 +390,7 @@ const CalendarComponent = () => {
       border: `2px solid ${borderColor}`,
       borderRadius: "5px",
     };
-  };
+  }, []);
 
   const dayPropGetter = useCallback((date) => {
     const today = new Date();
@@ -406,7 +430,6 @@ const CalendarComponent = () => {
         .rbc-off-range,
         .rbc-off-range-bg {
           visibility: hidden !important;
-
           pointer-events: none !important;
         }
         .rbc-month-row { border-top: none !important; }
