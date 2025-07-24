@@ -60,7 +60,7 @@ export default function NavigationBottom() {
               to={to}
               style={{ textDecoration: 'none', color: isSelected ? '#3C84FF' : 'inherit' }}
             >
-              <IconWrapper sx={{ transform: isSelected ? 'scale(0.9)' : 'scale(0.75)', transition: 'transform 280ms' }}>
+              <IconWrapper >
                 <Icon width="100%" height="100%" />
               </IconWrapper>
             </Link>
