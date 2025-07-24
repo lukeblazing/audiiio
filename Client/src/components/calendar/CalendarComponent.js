@@ -152,7 +152,7 @@ const MonthRow = React.memo(
         startAccessor="start"
         endAccessor="end"
         selectable={true}
-        longPressThreshold={250}
+        longPressThreshold={0}
         defaultView={Views.MONTH}
         views={[Views.MONTH]}
         defaultDate={monthDate}
@@ -195,14 +195,14 @@ const VirtualisedCalendar = ({
   const listRef = useRef(null);
 
   const DateCellWrapper = ({ value, children }) => {
-    const handleClick = () => {
-      const slotInfo = {
+    const handleClick = (e) => {
+      e.stopPropagation();            // <-- let our click reach the parent
+      onSelectSlot({
         start: value,
         end: value,
         action: "click",
-        slots: [value]
-      };
-      onSelectSlot(slotInfo); // Use the prop passed down!
+        slots: [value],
+      });
     };
     return (
       <div onClick={handleClick} style={{ height: '100%', cursor: 'pointer' }}>
@@ -280,16 +280,16 @@ const CalendarComponent = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [isEventsLoading, setIsEventsLoading] = useState(true);
 
-  const handleSelectSlot = React.useCallback(
-    (info) => {
-      // react‑big‑calendar sets this to "click" for a real tap,
-      // and to "select" (or "doubleClick") for a drag / long‑press.
-      if (info.action !== "click") return;        // ← ignore scroll/drag
-      setSelectedDate(info.start);
-      setDayEventsModalOpen(true);
-    },
-    []
-  );
+  // CalendarComponent
+  const handleSelectSlot = React.useCallback((info) => {
+    const singleDaySelect =
+      info.action === "select" && info.slots && info.slots.length === 1;
+
+    if (info.action !== "click" && !singleDaySelect) return;  // ignore drags
+    setSelectedDate(info.start);
+    setDayEventsModalOpen(true);
+  }, []);
+
 
   // Function to fetch all events for the user
   const fetchCalendarEvents = async () => {
