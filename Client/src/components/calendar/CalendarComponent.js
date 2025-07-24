@@ -152,7 +152,7 @@ const MonthRow = React.memo(
         startAccessor="start"
         endAccessor="end"
         selectable={true}
-        longPressThreshold={0}
+        longPressThreshold={250}
         defaultView={Views.MONTH}
         views={[Views.MONTH]}
         defaultDate={monthDate}
@@ -189,8 +189,8 @@ const VirtualisedCalendar = ({
   dayPropGetter,
   eventPropGetter,
 }) => {
-  const totalMonths = 100;
-  const currentMonthIndex = 4;
+  const totalMonths = 24;
+  const currentMonthIndex = 3;
   const [visibleMonth, setVisibleMonth] = useState(startOfMonth(new Date()));
   const listRef = useRef(null);
 
@@ -280,12 +280,15 @@ const CalendarComponent = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [isEventsLoading, setIsEventsLoading] = useState(true);
 
-  const handleSelectSlot = useCallback(
-    (slotInfo) => {
-      setSelectedDate(slotInfo.start);
+  const handleSelectSlot = React.useCallback(
+    (info) => {
+      // react‑big‑calendar sets this to "click" for a real tap,
+      // and to "select" (or "doubleClick") for a drag / long‑press.
+      if (info.action !== "click") return;        // ← ignore scroll/drag
+      setSelectedDate(info.start);
       setDayEventsModalOpen(true);
     },
-    [calendarEvents]
+    []
   );
 
   // Function to fetch all events for the user
