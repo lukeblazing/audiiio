@@ -8,8 +8,7 @@ import {
   Button,
   TextField,
   Stack,
-  Collapse,
-  Grow
+  Collapse
 } from '@mui/material';
 import { Add, Remove, ArrowBackIosNew, Mic, Stop } from '@mui/icons-material';
 import {
@@ -73,7 +72,14 @@ const sharedModalBoxSx = {
   overflowY: 'auto',
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center'
+  alignItems: 'center',
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  maxWidth: 'min(90vw, 500px)',
+  maxHeight: '80vh',
+  width: '100%',
 };
 
 /* ══════════════════════  main component ═════════════════════ */
@@ -760,51 +766,38 @@ function DayEventsModal({
     <>
       {/* main modal */}
       <Modal open={open} onClose={onClose} disableAutoFocus disableEnforceFocus>
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          outline: 'none',
-          maxWidth: 'min(90vw, 500px)',
-          maxHeight: '80vh',
-          width: '100%',
-        }}>
-          <Grow in={open} timeout={100}>
-            <Box sx={sharedModalBoxSx}>
-              {Header}
-              {mode === 'view' && ViewBody}
-              {mode === 'create' && CreateBody}
-              {mode === 'remove' && RemoveBody}
-              {mode === 'confirm_remove' && ConfirmRemoveBody}
-              {mode === 'view' && (
-                <Button
-                  disableRipple
-                  sx={{ mt: 2, maxWidth: 200 }}
-                  variant="contained"
-                  onClick={onClose}
-                >
-                  Close
-                </Button>
-              )}
-              {/* ── microphone button ───────────────────────── */}
-              {mode === 'view' && isAuthenticated && window.MediaRecorder && (
-                <IconButton
-                  aria-label="Start recording"
-                  aria-pressed={isRecording}
-                  onClick={startRecording}
-                  disabled={isMicLoading}
-                  sx={{
-                    position: 'absolute',
-                    bottom: 16,
-                    right: 16,
-                  }}
-                >
-                  {isMicLoading ? <CircularProgress size={28} /> : <Mic />}
-                </IconButton>
-              )}
-            </Box>
-          </Grow>
+        <Box sx={sharedModalBoxSx}>
+          {Header}
+          {mode === 'view' && ViewBody}
+          {mode === 'create' && CreateBody}
+          {mode === 'remove' && RemoveBody}
+          {mode === 'confirm_remove' && ConfirmRemoveBody}
+          {mode === 'view' && (
+            <Button
+              disableRipple
+              sx={{ mt: 2, maxWidth: 200 }}
+              variant="contained"
+              onClick={onClose}
+            >
+              Close
+            </Button>
+          )}
+          {/* ── microphone button ───────────────────────── */}
+          {mode === 'view' && isAuthenticated && window.MediaRecorder && (
+            <IconButton
+              aria-label="Start recording"
+              aria-pressed={isRecording}
+              onClick={startRecording}
+              disabled={isMicLoading}
+              sx={{
+                position: 'absolute',
+                bottom: 16,
+                right: 16,
+              }}
+            >
+              {isMicLoading ? <CircularProgress size={28} /> : <Mic />}
+            </IconButton>
+          )}
         </Box>
       </Modal>
       {/* ── recording overlay ─────────────────────────── */}
