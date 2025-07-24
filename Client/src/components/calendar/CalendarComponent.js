@@ -144,14 +144,14 @@ const MONTH_ROW_HEIGHT = 500; // px; Adjust for your design/layout
 
 // One month grid as a row in the list
 const MonthRow = React.memo(
-  ({ style, monthDate, events, onSelectSlot, getEventStyle, dayPropGetter, eventPropGetter }) => (
+  ({ style, monthDate, events, onSelectSlot, getEventStyle, dayPropGetter, eventPropGetter, dateCellWrapper }) => (
     <Box style={style}>
       <BigCalendar
         localizer={localizer}
         events={events}
         startAccessor="start"
         endAccessor="end"
-        selectable={false}
+        selectable={true}
         longPressThreshold={0}
         defaultView={Views.MONTH}
         views={[Views.MONTH]}
@@ -159,6 +159,7 @@ const MonthRow = React.memo(
         drilldownView={null}
         onSelectSlot={onSelectSlot}
         components={{
+          dateCellWrapper: dateCellWrapper,
           toolbar: (toolbarProps) => (
             <MonthLabelToolbar {...toolbarProps} />
           ),
@@ -192,6 +193,24 @@ const VirtualisedCalendar = ({
   const currentMonthIndex = 4;
   const [visibleMonth, setVisibleMonth] = useState(startOfMonth(new Date()));
   const listRef = useRef(null);
+
+  const DateCellWrapper = ({ value, children }) => {
+    const handleClick = () => {
+      const slotInfo = {
+        start: value,
+        end: value,
+        action: "click",
+        slots: [value]
+      };
+      onSelectSlot(slotInfo); // Use the prop passed down!
+    };
+    return (
+      <div onClick={handleClick} style={{ height: '100%', cursor: 'pointer' }}>
+        {children}
+      </div>
+    );
+  };
+
 
   // react-window callback to update header
   const handleItemsRendered = useCallback(
@@ -243,6 +262,7 @@ const VirtualisedCalendar = ({
               getEventStyle={data.getEventStyle}
               dayPropGetter={data.dayPropGetter}
               eventPropGetter={data.eventPropGetter}
+              dateCellWrapper={DateCellWrapper}
             />
           );
         }}
