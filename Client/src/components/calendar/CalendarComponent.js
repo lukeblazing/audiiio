@@ -455,9 +455,6 @@ export default function CalendarComponent() {
             justifyContent: "center",
             alignItems: "flex-start",
             bgcolor: "transparent",
-            borderRadius: 1,
-            border: (theme) => `2px solid ${theme.palette.divider}`,
-            boxShadow: 3,
           }}
         >
           <MonthGrid

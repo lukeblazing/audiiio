@@ -24,18 +24,17 @@ const IconWrapper = styled(Box)({
 
 const DockShell = styled(Paper)({
   position: 'fixed',
-  left: 16,
-  right: 16,
-  bottom: 33,
-  margin: '0 auto',
-  maxWidth: 520,
-  width: '90vw',
-  padding: '10px 16px',
-  borderRadius: 8,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  height: "10vh",
+  paddingLeft: "10vw",
+  paddingRight: "10vw",
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   backdropFilter: 'blur(14px)',
+  background: "transparent",
   '--icon-size': 'clamp(43px, 10vw, 50px)',
 });
 
@@ -61,7 +60,7 @@ export default function NavigationBottom() {
               style={{ textDecoration: 'none', color: isSelected ? '#3C84FF' : 'inherit' }}
             >
               <IconWrapper >
-                <Icon width="80%" height="80%" />
+                <Icon width="70%" height="70%" />
               </IconWrapper>
             </Link>
           );
