@@ -264,22 +264,26 @@ const DayCell = React.memo(function DayCell({
       onClick={handleClick}
     >
       <div className="mv-day-label">{format(date, "d")}</div>
-      <div className="mv-day-events">
-        {events.map((ev, i) => (
-          <div
-            key={ev.id ?? i}
-            className={computeEventClass(date, ev)}
-            style={{ "--ev-color": ev._rgb }}
-          >
-            {renderEvent ? (
-              renderEvent(ev, date)
-            ) : (
-              <strong>
-                {ev.title && ev.title !== "Busy" ? ev.title : formatTimeRange(ev)}
-              </strong>
-            )}
-          </div>
-        ))}
+      <div
+        style={isPast ? { filter: "blur(1px)" } : undefined}
+      >
+        <div className="mv-day-events">
+          {events.map((ev, i) => (
+            <div
+              key={ev.id ?? i}
+              className={computeEventClass(date, ev)}
+              style={{ "--ev-color": ev._rgb }}
+            >
+              {renderEvent ? (
+                renderEvent(ev, date)
+              ) : (
+                <strong>
+                  {ev.title && ev.title !== "Busy" ? ev.title : formatTimeRange(ev)}
+                </strong>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -350,7 +354,18 @@ const monthViewCss = String.raw`
     border: 3px solid var(--primary-color, #1976d2);
     border-radius: 6px;
   }
-  .mv-day--past { filter: brightness(0.95); }
+  .mv-day-blur-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 12;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 6px;
+  }
+  .mv-day--past {   
+      filter: brightness(0.9);
+  }
   .mv-day--off { visibility: hidden; pointer-events: none; }
   .mv-day-label { font-size: 0.9rem; margin-bottom: 2px; }
   .mv-day-events {
