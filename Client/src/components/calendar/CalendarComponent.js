@@ -151,7 +151,7 @@ const MonthRow = React.memo(
         events={events}
         startAccessor="start"
         endAccessor="end"
-        selectable
+        selectable={false}
         longPressThreshold={0}
         defaultView={Views.MONTH}
         views={[Views.MONTH]}
@@ -387,7 +387,7 @@ const CalendarComponent = () => {
           pointer-events: none !important;
         }
         .rbc-month-row { border-top: none !important; }
-        .rbc-day-bg { border-left: none !important; }
+        .rbc-day-bg { border-left: none !important;}
         .rbc-month-row .rbc-day-bg:first-child { border-left: none !important; }
         .calendar-today { z-index: 1; position: relative; background: transparent; }
         .calendar-today::after {
@@ -426,7 +426,7 @@ const CalendarComponent = () => {
             transform: 'translateX(-50%)',
             width: '90vw',
             maxWidth: '1000px',
-            height: '50vh',
+            height: '60vh',
             maxHeight: '750px',
             display: 'flex',
             justifyContent: 'center',
