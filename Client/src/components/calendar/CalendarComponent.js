@@ -339,7 +339,7 @@ const monthViewCss = String.raw`
     padding: 2px 4px 4px 4px;
     cursor: pointer;
     overflow: hidden;
-    border: 1.5px solid var(--mv-divider, rgba(255, 255, 255, 0.21));
+    border: 1.5px solid var(--mv-divider, rgba(255, 255, 255, 0.42));
     border-radius: 6px;
   }
   .mv-day--selected {
