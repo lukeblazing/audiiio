@@ -454,8 +454,8 @@ function DayEventsModal({
               border: `3px solid ${getBorderColor(ev.category_id)}`
             }}
           >
-            <strong>{formatFullEventTime(ev, selectedDate)}</strong> {ev.title}
-            {ev.description && <> <br />• {ev.description}</>}
+            <strong>{formatFullEventTime(ev, selectedDate)} {ev.title}
+            {ev.description && <> <br />• {ev.description}</>} </strong>
           </Typography>
         ))
       ) : (
@@ -703,8 +703,8 @@ function DayEventsModal({
               }}
               onClick={() => askDelete(ev)}
             >
-              <strong>{formatFullEventTime(ev, selectedDate)}</strong> {ev.title}
-              {ev.description && <> <br />• {ev.description}</>}
+              <strong>{formatFullEventTime(ev, selectedDate)} {ev.title}
+              {ev.description && <> <br />• {ev.description}</>} </strong>
             </Typography>
           ))
         ) : (
@@ -740,8 +740,8 @@ function DayEventsModal({
                 border: `3px solid ${getBorderColor(eventToDelete.category_id)}`
               }}
             >
-              <strong>{formatFullEventTime(eventToDelete, selectedDate)}</strong> {eventToDelete.title}
-              {eventToDelete.description && <> <br />• {eventToDelete.description}</>}
+              <strong>{formatFullEventTime(eventToDelete, selectedDate)} {eventToDelete.title}
+              {eventToDelete.description && <> <br />• {eventToDelete.description}</>} </strong>
             </Typography>
           </Box>
 
