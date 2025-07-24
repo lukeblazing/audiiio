@@ -61,7 +61,7 @@ export default function NavigationBottom() {
               style={{ textDecoration: 'none', color: isSelected ? '#3C84FF' : 'inherit' }}
             >
               <IconWrapper >
-                <Icon width="100%" height="100%" />
+                <Icon width="80%" height="80%" />
               </IconWrapper>
             </Link>
           );
