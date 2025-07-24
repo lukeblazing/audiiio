@@ -339,7 +339,7 @@ const monthViewCss = String.raw`
     content: "";
     position: absolute;
     pointer-events: none;
-    top: 2px; left: 2px; right: 2px; bottom: 2px;
+    top: 0px; left: 0px; right: 0px; bottom: 0px;
     border: 3px solid var(--primary-color, #1976d2);
     border-radius: 6px;
   }
