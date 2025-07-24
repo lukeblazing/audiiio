@@ -120,7 +120,7 @@ export function eventBackground(borderColor, opacity = 0.3) {
 
 /* ------------------------------ MonthGrid view ----------------------------- */
 
-const TOTAL_MONTHS = 15;
+const TOTAL_MONTHS = 17;
 const CURRENT_MONTH_INDEX = 3;
 
 
