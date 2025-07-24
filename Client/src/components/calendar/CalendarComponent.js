@@ -189,7 +189,7 @@ const VirtualisedCalendar = ({
   dayPropGetter,
   eventPropGetter,
 }) => {
-  const totalMonths = 24;
+  const totalMonths = 12;
   const currentMonthIndex = 3;
   const [visibleMonth, setVisibleMonth] = useState(startOfMonth(new Date()));
   const listRef = useRef(null);
@@ -237,7 +237,7 @@ const VirtualisedCalendar = ({
   );
 
   return (
-    <Box sx={{ height: "100%", width: "100%", overflow: "hidden" }}>
+    <Box sx={{ height: "100%", width: "100%" }}>
       <List
         ref={listRef}
         height={MONTH_ROW_HEIGHT * 1.75} // fits about 1.5 months at a time, tweak to your liking
