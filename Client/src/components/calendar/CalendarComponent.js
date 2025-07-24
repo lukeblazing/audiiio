@@ -188,8 +188,8 @@ const VirtualisedCalendar = ({
   dayPropGetter,
   eventPropGetter,
 }) => {
-  const totalMonths = 1000;
-  const currentMonthIndex = 500;
+  const totalMonths = 100;
+  const currentMonthIndex = 4;
   const [visibleMonth, setVisibleMonth] = useState(startOfMonth(new Date()));
   const listRef = useRef(null);
 
@@ -426,7 +426,7 @@ const CalendarComponent = () => {
             transform: 'translateX(-50%)',
             width: '90vw',
             maxWidth: '1000px',
-            height: '70vh',
+            height: '50vh',
             maxHeight: '750px',
             display: 'flex',
             justifyContent: 'center',
