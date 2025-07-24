@@ -339,7 +339,7 @@ const monthViewCss = String.raw`
     padding: 2px 4px 4px 4px;
     cursor: pointer;
     overflow: hidden;
-    border: 1px solid var(--mv-divider, rgba(255,255,255,0.12));
+    border: 1.5px solid var(--mv-divider, rgba(255, 255, 255, 0.21));
     border-radius: 6px;
   }
   .mv-day--selected {
@@ -364,7 +364,7 @@ const monthViewCss = String.raw`
     border-radius: 6px;
   }
   .mv-day--past {   
-      filter: brightness(0.9);
+      filter: brightness(0.5);
   }
   .mv-day--off { visibility: hidden; pointer-events: none; }
   .mv-day-label { font-size: 0.9rem; margin-bottom: 2px; }
