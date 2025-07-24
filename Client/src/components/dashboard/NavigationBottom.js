@@ -27,14 +27,14 @@ const DockShell = styled(Paper)({
   left: 0,
   right: 0,
   bottom: 0,
-  height: "10vh",
+  height: "12vh",
   paddingLeft: "10vw",
   paddingRight: "10vw",
+  paddingBottom: "3vh",
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  backdropFilter: 'blur(14px)',
-  background: "transparent",
+  background: "#0f172a",
   '--icon-size': 'clamp(43px, 10vw, 50px)',
 });
 
