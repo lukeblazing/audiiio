@@ -121,7 +121,7 @@ export function eventBackground(borderColor, opacity = 0.3) {
 
 const TOTAL_MONTHS = 16;
 const CURRENT_MONTH_INDEX = Math.floor(TOTAL_MONTHS / 2);
-const MONTH_ROW_HEIGHT = 500;
+const MONTH_ROW_HEIGHT = 700;
 
 function MonthGrid({
   monthIndex,
