@@ -491,7 +491,7 @@ export default function CalendarComponent() {
             top: "calc(env(safe-area-inset-top))",
             left: "50%",
             transform: "translateX(-50%)",
-            width: "100vw",
+            width: "98vw",
             maxWidth: "1000px",
             height: "100vh",
             display: "flex",
