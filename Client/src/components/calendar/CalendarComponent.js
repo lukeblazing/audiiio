@@ -28,8 +28,7 @@ import {
 
 import LoadingSpinner from "../loading-components/LoadingSpinner";
 import DayEventsModal from "./DayEventsModal";
-import { useTheme } from "@mui/material/styles";
-
+const SPACING = 50;
 
 /* ------------------------- utils: buildEventIndexes ------------------------ */
 
@@ -151,14 +150,13 @@ function MonthGrid({
   );
 
   const ROW_HEIGHT = 80;    // your day cell min height
-  const MONTH_PADDING = 20; // adjust for header, weekday names, etc.
 
   const monthHeights = useMemo(() => {
     // We'll render TOTAL_MONTHS months, centered around today
     return Array.from({ length: TOTAL_MONTHS }, (_, i) => {
       const monthDate = addMonths(baseMonth, i - CURRENT_MONTH_INDEX);
       const weekRows = getMonthRowCount(monthDate);
-      return weekRows * ROW_HEIGHT + MONTH_PADDING;
+      return weekRows * ROW_HEIGHT + SPACING + 15;
     });
   }, [baseMonth]);
 
@@ -201,7 +199,15 @@ const MonthRow = React.memo(function MonthRow({ index, style, data }) {
   });
 
   return (
-    <div style={{ ...style, padding: 8 }}>
+    <div style={{
+      ...style, 
+      borderRadius: 25, 
+      boxSizing: 'border-box', 
+      top: style.top + SPACING / 2, // shift downward slightly
+      height: style.height - SPACING, // shrink item to make room for spacing
+      background: "rgba(255, 255, 255, 0.12)",
+      padding: 8
+    }}>
       <MonthHeader date={monthDate} />
       <WeekdayHeader />
       <div className="mv-grid">
