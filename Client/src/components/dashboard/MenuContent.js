@@ -8,9 +8,12 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import Box from '@mui/material/Box';
+import { Bell, DollarSign } from 'lucide-react';
 
 const mainListItems = [
   { text: 'Calendar', icon: <HomeRoundedIcon />, path: '/' },
+  { text: 'Spending', icon: <DollarSign />, path: '/spending' },
+  { text: 'Reminders', icon: <Bell />, path: '/reminders' },
 ];
 
 const secondaryListItems = [

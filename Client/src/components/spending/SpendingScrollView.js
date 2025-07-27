@@ -94,7 +94,22 @@ export default function SpendingInput() {
       <Box sx={{
         mb: 3,
         p: 2,
-        bgcolor: 'primary.main',
+        bgcolor: 'green',
+        color: 'primary.contrastText',
+        borderRadius: 3,
+        textAlign: 'center',
+      }}>
+        <Typography variant="h4" sx={{ fontWeight: 900, letterSpacing: 1 }}>
+          ${'2,000'.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+        </Typography>
+        <Typography sx={{ fontWeight: 600, opacity: 0.8 }}>
+          Income
+        </Typography>
+      </Box>
+      <Box sx={{
+        mb: 3,
+        p: 2,
+        bgcolor: 'red',
         color: 'primary.contrastText',
         borderRadius: 3,
         textAlign: 'center',
@@ -106,7 +121,21 @@ export default function SpendingInput() {
           Total spent this month
         </Typography>
       </Box>
-
+      <Box sx={{
+        mb: 3,
+        p: 2,
+        bgcolor: 'primary.main',
+        color: 'primary.contrastText',
+        borderRadius: 3,
+        textAlign: 'center',
+      }}>
+        <Typography variant="h4" sx={{ fontWeight: 900, letterSpacing: 1 }}>
+          ${(5000-totalSpend).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+        </Typography>
+        <Typography sx={{ fontWeight: 600, opacity: 0.8 }}>
+          Net Income
+        </Typography>
+      </Box>
       {/* --- Entry Form --- */}
       <Card elevation={0} sx={{ borderRadius: 4, mb: 3, p: 2 }}>
         <Grid container spacing={2}>

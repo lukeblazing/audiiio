@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Calendar, Bell, Wallet } from 'lucide-react';
+import { Calendar, DollarSign } from 'lucide-react';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Link, useLocation } from 'react-router-dom';
@@ -9,8 +9,7 @@ import SideMenuMobile from './SideMenuMobile';
 
 const navLinks = [
   { to: '/', icon: Calendar, label: 'Calendar' },
-  { to: '/reminders', icon: Bell, label: 'Reminders' },
-  { to: '/spending', icon: Wallet, label: 'Spending' },
+  { to: '/spending', icon: DollarSign, label: 'Spending' },
 ];
 
 const IconWrapper = styled(Box)({
