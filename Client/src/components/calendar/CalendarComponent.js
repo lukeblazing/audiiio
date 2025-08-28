@@ -160,6 +160,17 @@ function MonthGrid({
     });
   }, [baseMonth]);
 
+  // Prefix sums for proper initial offset
+  const itemOffsets = useMemo(() => {
+    let acc = 0;
+    return monthHeights.map(h => {
+      const offset = acc;
+      acc += h;
+      return offset;
+    });
+  }, [monthHeights]);
+
+
   return (
     <div style={{ height: "100%", width: "100%" }}>
       <AutoSizer>
@@ -171,7 +182,7 @@ function MonthGrid({
             itemCount={TOTAL_MONTHS}
             itemSize={index => monthHeights[index]}
             overscanCount={3}
-            initialScrollOffset={CURRENT_MONTH_INDEX * monthHeights[CURRENT_MONTH_INDEX] - 20}
+            initialScrollOffset={itemOffsets[CURRENT_MONTH_INDEX] - 20}
             itemKey={index =>
               format(addMonths(baseMonth, index - CURRENT_MONTH_INDEX), "yyyy-MM")
             }
@@ -200,9 +211,9 @@ const MonthRow = React.memo(function MonthRow({ index, style, data }) {
 
   return (
     <div style={{
-      ...style, 
-      borderRadius: 25, 
-      boxSizing: 'border-box', 
+      ...style,
+      borderRadius: 25,
+      boxSizing: 'border-box',
       top: style.top + SPACING / 2, // shift downward slightly
       height: style.height - SPACING, // shrink item to make room for spacing
       background: "rgba(255, 255, 255, 0.12)",
