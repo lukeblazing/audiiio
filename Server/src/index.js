@@ -440,7 +440,7 @@ app.post('/api/realtime', AuthController.verifyAccessCodeToken, AuthController.v
       model: "gpt-realtime",
       audio: {
         output: {
-          voice: "marin",
+          voice: "verse",
         },
       },
     },
