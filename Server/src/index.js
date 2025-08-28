@@ -453,7 +453,7 @@ app.post('/api/realtime', AuthController.verifyAccessCodeToken, AuthController.v
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: sessionConfig,
