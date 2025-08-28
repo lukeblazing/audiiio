@@ -432,6 +432,43 @@ app.get('/api/weather', AuthController.verifyAccessCodeToken, AuthController.ver
 });
 
 
+// POST /api/realtime
+app.post('/api/realtime', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
+  const sessionConfig = JSON.stringify({
+    session: {
+      type: "realtime",
+      model: "gpt-realtime",
+      audio: {
+        output: {
+          voice: "marin",
+        },
+      },
+    },
+  });
+
+
+  try {
+    const response = await fetch(
+      "https://api.openai.com/v1/realtime/client_secrets",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: sessionConfig,
+      }
+    );
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("Token generation error:", error);
+    res.status(500).json({ error: "Failed to generate token" });
+  }
+});
+
+
 // --------------------------------------------------------------------
 // POST /api/calendar/calendar
 // Create a new calendar. The authenticated user becomes the owner.
