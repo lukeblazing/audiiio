@@ -442,7 +442,7 @@ app.post('/api/realtime', AuthController.verifyAccessCodeToken, AuthController.v
         input: {
           turn_detection: {
             "type": "semantic_vad",
-            "threshold": 0.99
+            "eagerness": "low"
           }
         },
         output: {
