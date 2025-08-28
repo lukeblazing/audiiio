@@ -442,6 +442,10 @@ app.post('/api/realtime', AuthController.verifyAccessCodeToken, AuthController.v
         output: {
           voice: "verse",
         },
+        "turn_detection": {
+          "type": "server_vad",
+          "threshold": 0.9,
+        }
       },
     },
   });
