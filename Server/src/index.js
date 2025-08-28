@@ -441,8 +441,8 @@ app.post('/api/realtime', AuthController.verifyAccessCodeToken, AuthController.v
       audio: {
         input: {
           turn_detection: {
-            "type": "semantic_vad",
-            "eagerness": "low"
+            "type": "server_vad",
+            "threshold": 0.99
           }
         },
         output: {
