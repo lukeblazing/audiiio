@@ -99,10 +99,6 @@ export default function NavigationBottom() {
       // 3) Create the session
       const session = new RealtimeSession(agent, { model: 'gpt-realtime' });
 
-      // 4) Optional streaming hooks
-      session.on('response.delta', () => {});
-      session.on('response.completed', () => {});
-      session.on('transcript.delta', () => {});
       session.on('error', () => setMicError('Voice session error.'));
 
       // 5) Connect (prompts for mic; VAD handles turns)

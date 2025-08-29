@@ -439,6 +439,9 @@ app.post('/api/realtime', AuthController.verifyAccessCodeToken, AuthController.v
       type: "realtime",
       model: "gpt-realtime",
       audio: {
+        input: {
+          turn_detection: null
+        },
         output: {
           voice: "verse",
         },
