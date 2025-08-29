@@ -158,6 +158,17 @@ export default function NavigationBottom() {
 
       session.on?.('response.started', startSpeak);
       session.on?.('response.completed', stopSpeak);
+
+      // Fallback: some builds emit raw "message" events with JSON payloads
+      const onMessage = (e) => {
+        try {
+          const ev = typeof e === 'string' ? JSON.parse(e) : JSON.parse(e?.data ?? '{}');
+          if (ev?.type === 'response.created') startSpeak();
+          if (ev?.type === 'response.done') stopSpeak();
+        } catch {
+          /* ignore */
+        }
+      };
       session.on?.('message', onMessage);
       session.addEventListener?.('message', onMessage);
 
