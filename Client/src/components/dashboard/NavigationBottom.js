@@ -96,7 +96,6 @@ export default function NavigationBottom() {
   const [micError, setMicError] = useState(null);
 
   const [isHoldingToSpeak, setIsHoldingToSpeak] = useState(false);
-  const [assistantSpeaking, setAssistantSpeaking] = useState(false);
 
   const sessionRef = useRef(null);
   const agentRef = useRef(null);
@@ -152,26 +151,6 @@ export default function NavigationBottom() {
       // Start muted until the user holds to speak
       session.mute?.(true);
 
-      // 5) Speaking indicator hooks (use whichever events your SDK exposes)
-      const startSpeak = () => setAssistantSpeaking(true);
-      const stopSpeak = () => setAssistantSpeaking(false);
-
-      session.on?.('audio_start', startSpeak);
-      session.on?.('audio_stopped', stopSpeak);
-
-      // Fallback: some builds emit raw "message" events with JSON payloads
-      const onMessage = (e) => {
-        try {
-          const ev = typeof e === 'string' ? JSON.parse(e) : JSON.parse(e?.data ?? '{}');
-          if (ev?.type === 'response.created') startSpeak();
-          if (ev?.type === 'response.done') stopSpeak();
-        } catch {
-          /* ignore */
-        }
-      };
-      session.on?.('message', onMessage);
-      session.addEventListener?.('message', onMessage);
-
       sessionRef.current = session;
       agentRef.current = agent;
       if (isMountedRef.current) setIsRecording(true);
@@ -195,7 +174,6 @@ export default function NavigationBottom() {
     }
     if (isMountedRef.current) setIsRecording(false);
     setIsHoldingToSpeak(false);
-    setAssistantSpeaking(false);
   };
 
   // Push-to-talk via mute/unmute + sendMessage
@@ -219,20 +197,6 @@ export default function NavigationBottom() {
       });
     } catch (e) {
       console.warn(e);
-    }
-  };
-
-  // keyboard accessibility for hold-to-speak
-  const onKeyDownSpeak = (e) => {
-    if (e.code === 'Space' || e.key === ' ') {
-      e.preventDefault();
-      if (!isHoldingToSpeak) beginSpeakHold();
-    }
-  };
-  const onKeyUpSpeak = (e) => {
-    if (e.code === 'Space' || e.key === ' ') {
-      e.preventDefault();
-      if (isHoldingToSpeak) endSpeakHold();
     }
   };
 
@@ -311,15 +275,12 @@ export default function NavigationBottom() {
             </Typography>
 
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {assistantSpeaking ? 'Assistant speaking…' : (isHoldingToSpeak ? 'Listening…' : 'Hold to speak')}
+              {isHoldingToSpeak ? 'Listening…' : 'Hold to speak'}
             </Typography>
 
             <Stack direction="row" alignItems="center" spacing={1} sx={{ minHeight: 22 }}>
-              {assistantSpeaking && <LiveDot />}
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                {assistantSpeaking
-                  ? 'Release is locked while the assistant talks.'
-                  : 'Press & hold the mic, then release to send.'}
+                {'Press & hold the mic, then release to send.'}
               </Typography>
             </Stack>
           </Stack>
