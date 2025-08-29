@@ -442,9 +442,9 @@ app.post('/api/realtime', AuthController.verifyAccessCodeToken, AuthController.v
         input: {
           turn_detection: null
         },
-        output: {
-          voice: "verse",
-        },
+        // output: {
+        //   voice: "verse",
+        // },
       },
     },
   });
@@ -463,6 +463,7 @@ app.post('/api/realtime', AuthController.verifyAccessCodeToken, AuthController.v
       }
     );
 
+    // console.log(response);
     const data = await response.json();
     res.json(data);
   } catch (error) {
