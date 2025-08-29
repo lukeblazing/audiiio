@@ -297,80 +297,67 @@ export default function NavigationBottom() {
             backdropFilter: 'blur(8px)',
             backgroundColor: 'rgba(2,6,23,0.55)',
             zIndex: 1301,
-            display: 'grid',
-            placeItems: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between', // <-- distribute top/mid/bottom
+            alignItems: 'center',
             p: 2,
           }}
           onTouchMove={(e) => e.preventDefault()}
         >
-          <Box
-            sx={{
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 2,
-              color: '#fff',
-              textAlign: 'center',
-              p: 2,
-            }}
-          >
+          {/* Top: Text/Status */}
+          <Stack spacing={1} alignItems="center" sx={{ mt: 4 }}>
+            <Typography variant="overline" sx={{ letterSpacing: 2, opacity: 0.9 }}>
+              VOICE ASSISTANT
+            </Typography>
 
-            <Stack spacing={1} alignItems="center">
-              <Typography variant="overline" sx={{ letterSpacing: 2, opacity: 0.9 }}>
-                VOICE ASSISTANT
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {assistantSpeaking ? 'Assistant speaking…' : (isHoldingToSpeak ? 'Listening…' : 'Hold to speak')}
+            </Typography>
+
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ minHeight: 22 }}>
+              {assistantSpeaking && <LiveDot />}
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                {assistantSpeaking
+                  ? 'Release is locked while the assistant talks.'
+                  : 'Press & hold the mic, then release to send.'}
               </Typography>
-
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {assistantSpeaking ? 'Assistant speaking…' : (isHoldingToSpeak ? 'Listening…' : 'Hold to speak')}
-              </Typography>
-
-              {/* Speaking/listening state hint */}
-              <Stack direction="row" alignItems="center" spacing={1} sx={{ minHeight: 22 }}>
-                {assistantSpeaking && <LiveDot />}
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  {assistantSpeaking
-                    ? 'Release is locked while the assistant talks.'
-                    : 'Press & hold the mic, then release to send.'}
-                </Typography>
-              </Stack>
             </Stack>
+          </Stack>
 
-            {/* Controls row */}
-            <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
-              {/* CHANGE #2 and #3: Bigger push-to-speak button, no ripple */}
-              <Tooltip title="Press & hold to speak (Spacebar supported)">
-                <BigCircleButton
-                  aria-label="Hold to speak"
-                  onMouseDown={beginSpeakHold}
-                  onMouseUp={endSpeakHold}
-                  onMouseLeave={() => isHoldingToSpeak && endSpeakHold()}
-                  onTouchStart={(e) => { e.preventDefault(); beginSpeakHold(); }}
-                  onTouchEnd={(e) => { e.preventDefault(); endSpeakHold(); }}
-                  onKeyDown={onKeyDownSpeak}
-                  onKeyUp={onKeyUpSpeak}
-                  tabIndex={0}
-                  disableRipple
-                  disableFocusRipple
-                  sx={{
-                    bgcolor: isHoldingToSpeak ? 'primary.dark' : 'primary.main',
-                    color: '#fff',
-                    '&:hover': { bgcolor: 'primary.dark' },
-                    outline: 'none',
-                    cursor: assistantSpeaking ? 'not-allowed' : 'pointer',
-                  }}
-                  disabled={assistantSpeaking}
-                >
-                  <MicIcon sx={{ fontSize: 88 }} />
-                </BigCircleButton>
-              </Tooltip>
-            </Stack>
-          </Box>
+          {/* Middle: Centered Mic */}
+            <BigCircleButton
+              aria-label="Hold to speak"
+              onMouseDown={beginSpeakHold}
+              onMouseUp={endSpeakHold}
+              onMouseLeave={() => isHoldingToSpeak && endSpeakHold()}
+              onTouchStart={(e) => { e.preventDefault(); beginSpeakHold(); }}
+              onTouchEnd={(e) => { e.preventDefault(); endSpeakHold(); }}
+              onKeyDown={onKeyDownSpeak}
+              onKeyUp={onKeyUpSpeak}
+              tabIndex={0}
+              disableRipple
+              disableFocusRipple
+              sx={{
+                bgcolor: isHoldingToSpeak ? 'primary.dark' : 'primary.main',
+                color: '#fff',
+                '&:hover': { bgcolor: 'primary.dark' },
+                outline: 'none',
+                cursor: assistantSpeaking ? 'not-allowed' : 'pointer',
+              }}
+              disabled={assistantSpeaking}
+            >
+              <MicIcon sx={{ fontSize: 88 }} />
+            </BigCircleButton>
+
+          {/* Bottom: Close Button */}
           <IconButton
             aria-label="Close"
+            disableRipple
+            disableFocusRipple
             onClick={stopRecording}
             sx={{
-              mt: 3,
+              mb: 4,
               color: '#fff',
               width: 72,
               height: 72,
@@ -380,6 +367,7 @@ export default function NavigationBottom() {
           </IconButton>
         </Box>
       )}
+
 
       {/* Inline error toast */}
       {micError && (
