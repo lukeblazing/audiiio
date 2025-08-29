@@ -6,7 +6,7 @@ import { Calendar /*, DollarSign */ } from 'lucide-react';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import MicIcon from '@mui/icons-material/Mic';
-import StopIcon from '@mui/icons-material/Stop';
+import CloseIcon from '@mui/icons-material/Close';
 import { Link, useLocation } from 'react-router-dom';
 import SideMenuMobile from './SideMenuMobile';
 import { useAuth } from '../authentication/AuthContext';
@@ -56,11 +56,13 @@ const OverlayCard = styled(Paper)(({ theme }) => ({
   alignItems: 'center',
   gap: 16,
   minWidth: 320,
+  position: 'relative', // needed for the corner X button
 }));
 
+// CHANGE #2: make push-to-speak button ~2x size (was 88x88)
 const BigCircleButton = styled(IconButton)(({ theme }) => ({
-  width: 88,
-  height: 88,
+  width: 150,
+  height: 150,
   borderRadius: '999px',
   boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
   transition: 'transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease',
@@ -301,7 +303,19 @@ export default function NavigationBottom() {
           }}
           onTouchMove={(e) => e.preventDefault()}
         >
-          <OverlayCard elevation={12}>
+          <Box
+            sx={{
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 2,
+              color: '#fff',
+              textAlign: 'center',
+              p: 2,
+            }}
+          >
+
             <Stack spacing={1} alignItems="center">
               <Typography variant="overline" sx={{ letterSpacing: 2, opacity: 0.9 }}>
                 VOICE ASSISTANT
@@ -324,7 +338,7 @@ export default function NavigationBottom() {
 
             {/* Controls row */}
             <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 1 }}>
-              {/* Hold-to-speak button */}
+              {/* CHANGE #2 and #3: Bigger push-to-speak button, no ripple */}
               <Tooltip title="Press & hold to speak (Spacebar supported)">
                 <BigCircleButton
                   aria-label="Hold to speak"
@@ -336,6 +350,8 @@ export default function NavigationBottom() {
                   onKeyDown={onKeyDownSpeak}
                   onKeyUp={onKeyUpSpeak}
                   tabIndex={0}
+                  disableRipple
+                  disableFocusRipple
                   sx={{
                     bgcolor: isHoldingToSpeak ? 'primary.dark' : 'primary.main',
                     color: '#fff',
@@ -345,26 +361,23 @@ export default function NavigationBottom() {
                   }}
                   disabled={assistantSpeaking}
                 >
-                  <MicIcon sx={{ fontSize: 44 }} />
-                </BigCircleButton>
-              </Tooltip>
-
-              {/* Stop session button */}
-              <Tooltip title="End conversation">
-                <BigCircleButton
-                  aria-label="Stop session"
-                  onClick={stopRecording}
-                  sx={{
-                    bgcolor: 'error.main',
-                    color: '#fff',
-                    '&:hover': { bgcolor: 'error.dark' },
-                  }}
-                >
-                  <StopIcon sx={{ fontSize: 44 }} />
+                  <MicIcon sx={{ fontSize: 88 }} />
                 </BigCircleButton>
               </Tooltip>
             </Stack>
-          </OverlayCard>
+          </Box>
+          <IconButton
+            aria-label="Close"
+            onClick={stopRecording}
+            sx={{
+              mt: 3,
+              color: '#fff',
+              width: 72,
+              height: 72,
+            }}
+          >
+            <CloseIcon sx={{ fontSize: 56 }} />
+          </IconButton>
         </Box>
       )}
 
