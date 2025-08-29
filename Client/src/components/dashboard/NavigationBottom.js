@@ -156,8 +156,8 @@ export default function NavigationBottom() {
       const startSpeak = () => setAssistantSpeaking(true);
       const stopSpeak = () => setAssistantSpeaking(false);
 
-      session.on?.('response.started', startSpeak);
-      session.on?.('response.completed', stopSpeak);
+      session.on?.('audio_start', startSpeak);
+      session.on?.('audio_stopped', stopSpeak);
 
       // Fallback: some builds emit raw "message" events with JSON payloads
       const onMessage = (e) => {
@@ -325,27 +325,27 @@ export default function NavigationBottom() {
           </Stack>
 
           {/* Middle: Centered Mic */}
-            <BigCircleButton
-              aria-label="Hold to speak"
-              onMouseDown={beginSpeakHold}
-              onMouseUp={endSpeakHold}
-              onMouseLeave={() => isHoldingToSpeak && endSpeakHold()}
-              onTouchStart={(e) => { e.preventDefault(); beginSpeakHold(); }}
-              onTouchEnd={(e) => { e.preventDefault(); endSpeakHold(); }}
-              onKeyDown={onKeyDownSpeak}
-              onKeyUp={onKeyUpSpeak}
-              tabIndex={0}
-              disableRipple
-              disableFocusRipple
-              sx={{
-                bgcolor: isHoldingToSpeak ? 'primary.dark' : 'primary.main',
-                color: '#fff',
-                outline: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <MicIcon sx={{ fontSize: 88 }} />
-            </BigCircleButton>
+          <BigCircleButton
+            aria-label="Hold to speak"
+            onMouseDown={beginSpeakHold}
+            onMouseUp={endSpeakHold}
+            onMouseLeave={() => isHoldingToSpeak && endSpeakHold()}
+            onTouchStart={(e) => { e.preventDefault(); beginSpeakHold(); }}
+            onTouchEnd={(e) => { e.preventDefault(); endSpeakHold(); }}
+            onKeyDown={onKeyDownSpeak}
+            onKeyUp={onKeyUpSpeak}
+            tabIndex={0}
+            disableRipple
+            disableFocusRipple
+            sx={{
+              bgcolor: isHoldingToSpeak ? 'primary.dark' : 'primary.main',
+              color: '#fff',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <MicIcon sx={{ fontSize: 88 }} />
+          </BigCircleButton>
 
           {/* Bottom: Close Button */}
           <IconButton
