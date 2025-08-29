@@ -341,7 +341,6 @@ export default function NavigationBottom() {
               sx={{
                 bgcolor: isHoldingToSpeak ? 'primary.dark' : 'primary.main',
                 color: '#fff',
-                '&:hover': { bgcolor: 'primary.dark' },
                 outline: 'none',
                 cursor: assistantSpeaking ? 'not-allowed' : 'pointer',
               }}
