@@ -441,6 +441,9 @@ app.post('/api/realtime', AuthController.verifyAccessCodeToken, AuthController.v
       audio: {
         input: {
           turn_detection: null
+        },
+        output: {
+          voice: 'verse'
         }
       },
     },
