@@ -1,6 +1,6 @@
 // NavigationBottom.jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Paper, IconButton, CircularProgress, Typography, Tooltip, Stack } from '@mui/material';
+import { Box, Paper, IconButton, CircularProgress, Typography, Stack } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Calendar /*, DollarSign */ } from 'lucide-react';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
@@ -293,8 +293,6 @@ export default function NavigationBottom() {
             onMouseLeave={() => isHoldingToSpeak && endSpeakHold()}
             onTouchStart={(e) => { e.preventDefault(); beginSpeakHold(); }}
             onTouchEnd={(e) => { e.preventDefault(); endSpeakHold(); }}
-            onKeyDown={onKeyDownSpeak}
-            onKeyUp={onKeyUpSpeak}
             tabIndex={0}
             disableRipple
             disableFocusRipple
