@@ -156,19 +156,8 @@ export default function NavigationBottom() {
       const startSpeak = () => setAssistantSpeaking(true);
       const stopSpeak = () => setAssistantSpeaking(false);
 
-      session.on?.('response_started', startSpeak);
-      session.on?.('response_completed', stopSpeak);
-
-      // Fallback: some builds emit raw "message" events with JSON payloads
-      const onMessage = (e) => {
-        try {
-          const ev = typeof e === 'string' ? JSON.parse(e) : JSON.parse(e?.data ?? '{}');
-          if (ev?.type === 'response.created') startSpeak();
-          if (ev?.type === 'response.done') stopSpeak();
-        } catch {
-          /* ignore */
-        }
-      };
+      session.on?.('response.started', startSpeak);
+      session.on?.('response.completed', stopSpeak);
       session.on?.('message', onMessage);
       session.addEventListener?.('message', onMessage);
 
@@ -201,7 +190,6 @@ export default function NavigationBottom() {
   // Push-to-talk via mute/unmute + sendMessage
   const beginSpeakHold = () => {
     if (!sessionRef.current) return;
-    if (assistantSpeaking) return; // lock while assistant is talking
     setIsHoldingToSpeak(true);
     try {
       sessionRef.current.mute?.(false);
@@ -342,9 +330,8 @@ export default function NavigationBottom() {
                 bgcolor: isHoldingToSpeak ? 'primary.dark' : 'primary.main',
                 color: '#fff',
                 outline: 'none',
-                cursor: assistantSpeaking ? 'not-allowed' : 'pointer',
+                cursor: 'pointer',
               }}
-              disabled={assistantSpeaking}
             >
               <MicIcon sx={{ fontSize: 88 }} />
             </BigCircleButton>
