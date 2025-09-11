@@ -8,7 +8,7 @@ export function startCronJobs() {
     console.log('Starting cron jobs...');
 
     // 9:00 AM every day
-    cron.schedule('*/5 * * * *', () => {
+    cron.schedule('0 9 * * *', () => {
         sendMorningMessage().catch(err => console.error(err));
     }, { timezone: 'America/Chicago' });
 }
@@ -21,7 +21,7 @@ export async function sendMorningMessage() {
         let poem = await generateDailyMorningPoem()
         for (const { user_email, subscription } of subscriptions) {
 
-            if ((user_email == "lukeblazing@yahoo.com")) { // || user_email == "chelsyjohnson1234@gmail.com") {
+            if ((user_email == "lukeblazing@yahoo.com") || user_email == "chelsyjohnson1234@gmail.com") {
                 try {
                     let notificationPayload = JSON.stringify({
                         title: 'A Poem',
