@@ -32,6 +32,7 @@ export async function sendMorningMessage() {
             if (user_email == "lukeblazing@yahoo.com") {
                 try {
                     let notificationPayload = JSON.stringify({
+                        title: 'A Poem',
                         body: poem,
                     });
 
