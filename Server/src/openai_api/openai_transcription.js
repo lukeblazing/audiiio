@@ -5,7 +5,6 @@ const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function generateDailyMorningPoem(opts = {}) {
   const {
     theme = "gentle focus and bright optimism",
-    lines = 4,
     timezone = "America/Chicago",
   } = opts;
 
@@ -25,13 +24,13 @@ export async function generateDailyMorningPoem(opts = {}) {
 
   // iOS tends to truncate notification bodies after ~178 visible chars.
   // We'll target 170 as a safety buffer, then hard-cap at 178.
-  const IOS_VISIBLE_SOFT_LIMIT = 170;
+  const IOS_VISIBLE_SOFT_LIMIT = 175;
   const IOS_VISIBLE_HARD_LIMIT = 178;
 
   const instructions = `
 You are a poet. For ${dateKey}, write a fresh morning love poem for Chelsy.
-Tone: warm, vivid, no clichés. Close with a crisp sensory image mentioning Chelsy and her beauty.
-Format: ${lines} very short lines. TOTAL ≤ ${IOS_VISIBLE_SOFT_LIMIT} characters (including line breaks).
+Tone: warm, vivid, no clichés. Close with a sensory image mentioning Chelsy and her beauty.
+Format: 3-5 intentional lines, in varied order. TOTAL ≤ ${IOS_VISIBLE_SOFT_LIMIT} characters (including line breaks).
 Use internal seed poem_id=${poemId} to vary metaphors.
 `.trim();
 

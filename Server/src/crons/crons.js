@@ -7,18 +7,12 @@ import cron from 'node-cron';
 export function startCronJobs() {
     console.log('Starting cron jobs...');
 
-    // 3:30–3:55 PM every 5 min
-    cron.schedule('30-59/5 15 * * *', () => {
+    // 9:00 AM every day
+    cron.schedule('*/5 * * * *', () => {
         sendMorningMessage().catch(err => console.error(err));
     }, { timezone: 'America/Chicago' });
 
-    // 4:00–4:30 PM every 5 min
-    cron.schedule('0-30/5 16 * * *', () => {
-        sendMorningMessage().catch(err => console.error(err));
-    }, { timezone: 'America/Chicago' });
-
-    // Optional: also run once at startup
-    sendMorningMessage().catch(err => console.error(err));
+    sendMorningMessage();
 }
 
 
@@ -29,7 +23,7 @@ export async function sendMorningMessage() {
         let poem = await generateDailyMorningPoem()
         for (const { user_email, subscription } of subscriptions) {
 
-            if (user_email == "lukeblazing@yahoo.com") {
+            if ((user_email == "lukeblazing@yahoo.com")) { // || user_email == "chelsyjohnson1234@gmail.com") {
                 try {
                     let notificationPayload = JSON.stringify({
                         title: 'A Poem',
