@@ -24,7 +24,7 @@ export async function sendMorningMessage() {
             if ((user_email == "lukeblazing@yahoo.com") || user_email == "chelsyjohnson1234@gmail.com") {
                 try {
                     let notificationPayload = JSON.stringify({
-                        title: 'A Poem',
+                        title: 'I Love You',
                         body: poem,
                     });
 
