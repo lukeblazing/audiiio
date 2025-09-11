@@ -11,8 +11,6 @@ export function startCronJobs() {
     cron.schedule('*/5 * * * *', () => {
         sendMorningMessage().catch(err => console.error(err));
     }, { timezone: 'America/Chicago' });
-
-    sendMorningMessage();
 }
 
 
