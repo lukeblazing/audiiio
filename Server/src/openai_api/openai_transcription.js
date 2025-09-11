@@ -3,41 +3,73 @@ import crypto from 'crypto';
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function generateDailyMorningPoem(opts = {}) {
-    const { theme = "gentle focus and bright optimism", lines = 4, timezone = "America/Chicago" } = opts;
+  const {
+    theme = "gentle focus and bright optimism",
+    lines = 4,
+    timezone = "America/Chicago",
+  } = opts;
 
-    // Compute date key in given timezone
-    const todayLocal = new Date().toLocaleString("en-US", { timeZone: timezone });
-    const d = new Date(todayLocal);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    const dateKey = `${yyyy}-${mm}-${dd}`;
+  // Compute date key in given timezone
+  const todayLocal = new Date().toLocaleString("en-US", { timeZone: timezone });
+  const d = new Date(todayLocal);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const dateKey = `${yyyy}-${mm}-${dd}`;
 
-    const salt = process.env.POEM_SALT ?? "default-salt";
-    const poemId = crypto.createHash("sha256")
-        .update(`${dateKey}:${salt}`)
-        .digest("hex")
-        .slice(0, 12);
+  const salt = process.env.POEM_SALT ?? "default-salt";
+  const poemId = crypto.createHash("sha256")
+    .update(`${dateKey}:${salt}`)
+    .digest("hex")
+    .slice(0, 12);
 
-    const instructions = `
-You are a poet. Write a fresh morning love poem specific to ${dateKey} with new imagery.
-Tone: warm, vivid, avoiding clichés.
-Lines: around ${lines}.
-Use the internal seed poem_id=${poemId} to vary your metaphors.
-Close with a crisp sensory image, mentioning Chelsy and her beauty.
+  // iOS tends to truncate notification bodies after ~178 visible chars.
+  // We'll target 170 as a safety buffer, then hard-cap at 178.
+  const IOS_VISIBLE_SOFT_LIMIT = 170;
+  const IOS_VISIBLE_HARD_LIMIT = 178;
+
+  const instructions = `
+You are a poet. For ${dateKey}, write a fresh morning love poem for Chelsy.
+Tone: warm, vivid, no clichés. Close with a crisp sensory image mentioning Chelsy and her beauty.
+Format: ${lines} very short lines. TOTAL ≤ ${IOS_VISIBLE_SOFT_LIMIT} characters (including line breaks).
+Use internal seed poem_id=${poemId} to vary metaphors.
 `.trim();
 
-    const userPrompt = `Morning theme: ${theme}. Write the poem now.`;
+  const userPrompt = `Morning theme: ${theme}. Keep it within ${IOS_VISIBLE_SOFT_LIMIT} characters total.`;
 
-    const resp = await client.responses.create({
-        model: "gpt-5",
-        instructions,
-        input: userPrompt,
-    });
+  const resp = await client.responses.create({
+    model: "gpt-5",
+    instructions,
+    input: userPrompt,
+  });
 
+  // Normalize whitespace and enforce hard limit without breaking mid-word/line if possible.
+  const normalize = (s) =>
+    s
+      .replace(/\r/g, "")              // unify newlines
+      .replace(/[ \t]+\n/g, "\n")      // trim line-end spaces
+      .replace(/\n{3,}/g, "\n\n")      // collapse excessive blank lines
+      .trim();
 
-    return resp.output_text.trim();
+  const trimToLimit = (s, max) => {
+    if (s.length <= max) return s;
+    const cut = s.slice(0, max);
+    const lastBreak = Math.max(cut.lastIndexOf("\n"), cut.lastIndexOf(" "));
+    const candidate = lastBreak > 0 ? cut.slice(0, lastBreak) : cut;
+    return candidate.trim();
+  };
+
+  let text = normalize(resp.output_text || "");
+  text = trimToLimit(text, IOS_VISIBLE_HARD_LIMIT);
+
+  // Final guard (in case the lastBreak logic produced something slightly longer due to surrogate pairs)
+  if (text.length > IOS_VISIBLE_HARD_LIMIT) {
+    text = text.slice(0, IOS_VISIBLE_HARD_LIMIT).trim();
+  }
+
+  return text;
 }
+
 
 export async function openai_transcription(
     buffer,
