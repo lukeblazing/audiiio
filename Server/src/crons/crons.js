@@ -25,11 +25,11 @@ export function startCronJobs() {
     }, { timezone: 'America/Chicago' });
 
     cron.schedule('15 14 * * *', () => {
-        sendCustomMessage("Hint #5", "In our haven, roots long gone cradle flame; sparks climb where once rings grew. What hollow heart in our yard warms the night we share and love?").catch(err => console.error(err));
+        sendCustomMessage("Hint #6", "In our haven, roots long gone cradle flame; sparks climb where once rings grew. What hollow heart in our yard warms the night we share and love?").catch(err => console.error(err));
     }, { timezone: 'America/Chicago' });
 
     cron.schedule('30 14 * * *', () => {
-        sendCustomMessage("Hint #5", "Glide glass to paddle's beat, chase feathered spheres, wheel the iron ghost to golden brews, then end where a stump-fire glows and bunnies, squirrels, chipmunks watch.").catch(err => console.error(err));
+        sendCustomMessage("Hint #7", "Glide glass to paddle's beat, chase feathered spheres, wheel the iron ghost to golden brews, then end where a stump-fire glows and bunnies, squirrels, chipmunks watch.").catch(err => console.error(err));
     }, { timezone: 'America/Chicago' });
 
     cron.schedule('45 14 * * *', () => {
