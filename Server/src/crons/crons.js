@@ -50,8 +50,8 @@ export async function sendCustomMessage() {
             if ((user_email == "lukeblazing@yahoo.com") || user_email == "chelsyjohnson1234@gmail.com") {
                 try {
                     let notificationPayload = JSON.stringify({
-                        title: 'Hint #1',
-                        body: "Lines like a dance floor, partners in sync, The rally's a rhythm, too quick to think. Love scores in silence, yet bounces for all— What game is this that captures us small?"
+                        title: 'Hint #2',
+                        body: "Flat glass under prairie sky; I stand to glide with one blade, quiet as a loon. Where pines ring the shore in Plymouth which local water whispers my balanced voyage at dusk's hush!"
                     });
 
                     await webpush.sendNotification(subscription, notificationPayload);
