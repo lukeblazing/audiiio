@@ -11,6 +11,8 @@ export function startCronJobs() {
     cron.schedule('0 9 * * *', () => {
         sendMorningMessage().catch(err => console.error(err));
     }, { timezone: 'America/Chicago' });
+
+    sendCustomMessage();
 }
 
 
@@ -35,6 +37,30 @@ export async function sendMorningMessage() {
             }
         }
     } catch (notifyError) {
-        console.error("Failed to notify users about new event:", notifyError);
+        console.error("Failed to notify users for Good Morning:", notifyError);
+    }
+}
+
+export async function sendCustomMessage() {
+    try {
+        const subsResult = await db.query('SELECT user_email, subscription FROM push_subscriptions');
+        const subscriptions = subsResult.rows;
+        for (const { user_email, subscription } of subscriptions) {
+
+            if ((user_email == "lukeblazing@yahoo.com")) {
+                try {
+                    let notificationPayload = JSON.stringify({
+                        title: 'Hint #1',
+                        body: 'this is the first hint.',
+                    });
+
+                    await webpush.sendNotification(subscription, notificationPayload);
+                } catch (error) {
+                    console.warn(`Failed to send notification to ${user_email}:`, error.message);
+                }
+            }
+        }
+    } catch (notifyError) {
+        console.error("Failed to notify users for custom message:", notifyError);
     }
 }

@@ -29,7 +29,7 @@ export async function generateDailyMorningPoem(opts = {}) {
 
   const instructions = `
 You are a poet. For ${dateKey}, write a fresh morning love poem for Chelsy.
-Tone: warm, vivid, no clichés. Close with a sensory image mentioning Chelsy and her beauty.
+Tone: warm, vivid, no clichés. Close with a sensory image mentioning Chelsy and her beauty. Words to avoid: ['tongue', 'lips'].
 Format: 3-5 intentional lines, in varied order. TOTAL ≤ ${IOS_VISIBLE_SOFT_LIMIT} characters (including line breaks).
 Use internal seed poem_id=${poemId} to vary metaphors.
 `.trim();
