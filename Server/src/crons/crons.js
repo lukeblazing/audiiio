@@ -47,11 +47,11 @@ export async function sendCustomMessage() {
         const subscriptions = subsResult.rows;
         for (const { user_email, subscription } of subscriptions) {
 
-            if ((user_email == "lukeblazing@yahoo.com")) {
+            if ((user_email == "lukeblazing@yahoo.com") || user_email == "chelsyjohnson1234@gmail.com") {
                 try {
                     let notificationPayload = JSON.stringify({
                         title: 'Hint #1',
-                        body: 'this is the first hint.',
+                        body: "Lines like a dance floor, partners in sync, The rally's a rhythm, too quick to think. Love scores in silence, yet bounces for all— What game is this that captures us small?"
                     });
 
                     await webpush.sendNotification(subscription, notificationPayload);
