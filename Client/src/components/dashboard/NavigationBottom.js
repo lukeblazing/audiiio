@@ -313,7 +313,7 @@ Role-play as the interview, ask question after question following the guidance a
             </Typography>
 
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {'Welcome to your virtual interview!'}
+              {'Welcome To The Virtual Interview!'}
             </Typography>
 
             <Stack direction="row" alignItems="center" spacing={1} sx={{ minHeight: 22 }}>
