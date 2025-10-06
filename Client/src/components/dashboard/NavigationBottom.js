@@ -313,12 +313,12 @@ Role-play as the interview, ask question after question following the guidance a
             </Typography>
 
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {isHoldingToSpeak ? 'Listening…' : 'Hold to speak'}
+              {'Welcome to your virtual interview!'}
             </Typography>
 
             <Stack direction="row" alignItems="center" spacing={1} sx={{ minHeight: 22 }}>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                {'Welcome to your virtual interview!'}
+                {isHoldingToSpeak ? 'Listening…' : 'Hold to speak'}
               </Typography>
             </Stack>
           </Stack>
