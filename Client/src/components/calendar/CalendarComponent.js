@@ -212,7 +212,6 @@ const MonthRow = React.memo(function MonthRow({ index, style, data }) {
   return (
     <div style={{
       ...style,
-      borderRadius: 25,
       boxSizing: 'border-box',
       top: style.top + SPACING / 2, // shift downward slightly
       height: style.height - SPACING, // shrink item to make room for spacing
@@ -378,7 +377,6 @@ const monthViewCss = String.raw`
     cursor: pointer;
     overflow: hidden;
     border: 1px solid var(--mv-divider, rgba(255, 255, 255, 0.12));
-    border-radius: 6px;
     background: #121212;
   }
   // .mv-day--selected {
@@ -391,7 +389,6 @@ const monthViewCss = String.raw`
     pointer-events: none;
     top: 0px; left: 0px; right: 0px; bottom: 0px;
     border: 3px solid var(--primary-color, #1976d2);
-    border-radius: 6px;
   }
   .mv-day-blur-overlay {
     position: absolute;
@@ -400,7 +397,6 @@ const monthViewCss = String.raw`
     z-index: 12;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-radius: 6px;
   }
   .mv-day--past {   
       filter: brightness(0.5);
@@ -423,12 +419,10 @@ const monthViewCss = String.raw`
   .mv-ev--left {
     border: 2px solid rgb(var(--ev-color));
     border-right: none;
-    border-radius: 5px 0 0 5px;
   }
   .mv-ev--right {
     border: 2px solid rgb(var(--ev-color));
     border-left: none;
-    border-radius: 0 5px 5px 0;
   }
   .mv-ev--mid {
     border-top: 2px solid rgb(var(--ev-color));
@@ -436,7 +430,6 @@ const monthViewCss = String.raw`
   }
   .mv-ev--single {
     border: 2px solid rgb(var(--ev-color));
-    border-radius: 5px;
   }
 `;
 
