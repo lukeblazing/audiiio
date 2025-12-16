@@ -406,18 +406,21 @@ export default function PodcastAudioMobile() {
   const styles = useMemo(
     () => ({
       root: {
-        height: "100dvh", // 👈 dynamic viewport (iOS-safe)
+        height: "100dvh",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        paddingTop: "env(safe-area-inset-top)",
-        paddingBottom: "env(safe-area-inset-bottom)",
       },
       header: {
-        padding: "14px 16px 10px",
-        position: "sticky",
+        position: "fixed",
         top: 0,
-        zIndex: 10,
+        left: 0,
+        right: 0,
+        zIndex: 30,
+
+        padding: "14px 16px 10px",
+        paddingTop: "calc(14px + env(safe-area-inset-top))",
+
         background: "rgba(11,11,15,0.92)",
         backdropFilter: "blur(10px)",
         borderBottom: "1px solid rgba(255,255,255,0.08)",
