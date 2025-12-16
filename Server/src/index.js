@@ -45,7 +45,7 @@ app.use(express.json({ limit: '100kb' }));
 const corsOptions = {
   origin: process.env.NODE_ENV === 'development'
     ? 'http://localhost:8080'  // Allow dev frontend on localhost
-    : 'https://www.lukeblazing.com', // Allow production frontend on myapp.com
+    : 'https://www.audiiio.com', // Allow production frontend on myapp.com
   credentials: true,               // Enable sending cookies with requests
 };
 
@@ -54,7 +54,7 @@ app.use(cors(corsOptions));
 if (process.env.NODE_ENV === 'development') {
   console.log('CORS enabled for development with localhost:8080');
 } else {
-  console.log('CORS enabled for production with www.lukeblazing.com');
+  console.log('CORS enabled for production with www.audiiio.com');
 }
 
 // Start the cron jobs
