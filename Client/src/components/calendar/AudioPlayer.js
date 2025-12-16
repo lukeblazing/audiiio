@@ -49,7 +49,7 @@ export default function PodcastAudioMobile() {
       credentials: "include",
     });
     if (!res.ok) {
-      const data = await safeJson(res);
+      const data = res.body;
       const msg = data?.error || `Request failed (${res.status})`;
       throw new Error(msg);
     }
@@ -406,14 +406,12 @@ export default function PodcastAudioMobile() {
   const styles = useMemo(
     () => ({
       root: {
-        fontFamily:
-          "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji",
-        background: "#0b0b0f",
-        color: "#fff",
-        minHeight: "100vh",
+        height: "100dvh", // 👈 dynamic viewport (iOS-safe)
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
       },
       header: {
         padding: "14px 16px 10px",
