@@ -185,7 +185,7 @@ app.get(
   AuthController.verifyAccessCodeToken,
   AuthController.verifyToken,
   async (req, res) => {
-    const { query = "", page = 1, pageSize = 30 } = req.query;
+    const { page = 1, pageSize = 30 } = req.query;
     const offset = (page - 1) * pageSize;
 
     try {
@@ -195,15 +195,10 @@ app.get(
                COUNT(*) OVER() AS total
         FROM audio_tracks
         WHERE user_email = $1
-          AND (
-            title ILIKE $2
-            OR artist ILIKE $2
-            OR album ILIKE $2
-          )
         ORDER BY created_at DESC
-        LIMIT $3 OFFSET $4
+        LIMIT $2 OFFSET $3
         `,
-        [req.user.email, `%${query}%`, pageSize, offset]
+        [req.user.email, pageSize, offset]
       );
 
       res.json({
