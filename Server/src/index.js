@@ -11,8 +11,6 @@ import AuthController from './authentication/AuthController.js'
 import db from './database/db.js';
 import webpush from 'web-push';
 import multer from 'multer';
-import { get_event_from_audio_input, openai_transcription } from './openai_api/openai_transcription.js';
-import { notifyUsersAboutEvent } from './notifications/notification-utils.js';
 
 // Multer for audio file uploading
 const upload = multer({
@@ -156,526 +154,615 @@ app.get('/api/checkAccessCode', AuthController.verifyAccessCodeToken, (req, res)
 // END ACCESS CODE
 
 
-// GET /api/calendar/getAllEventsForUser
-// Retrieve all events from any calendar associated with the user.
-// This includes calendars owned by the user and those where they are added.
-app.get('/api/calendar/getAllEventsForUser', AuthController.verifyAccessCodeToken, AuthController.verifyOptionalToken, async (req, res) => {
-  let query = ``;
-  if (req?.user?.role && req.user.email && req.user.name && (['lukeblazing@yahoo.com', 'chelsyjohnson1234@gmail.com'].map(e => e.toLowerCase()).includes(req.user.email.toLowerCase()))) {
-    query = `
-      SELECT *
-      FROM events
-      WHERE start >= NOW() - INTERVAL '3 months'
-    `;
-  } else {
-    query = `
-      SELECT
-        start,
-        end_time,
-        'gray' AS category_id,
-        'Busy' AS title
-      FROM events
-      WHERE start >= NOW() - INTERVAL '2 months'
-    `;
-  }
+// START AUDIO PLAYER ROUTES
+// START AUDIO PLAYER ROUTES
+import {
+  S3Client,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { v4 as uuidv4 } from "uuid";
 
-  try {
-    const result = await db.query(query);
-    return res.status(200).json({ events: result.rows });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
+// ------------------------------
+// S3 Client (AWS SDK v3)
+// ------------------------------
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: process.env.AWS_ACCESS_KEY_ID
+    ? {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    }
+    : undefined, // use IAM role if available
 });
 
-// --------------------------------------------------------------------
-// POST /api/calendar/createEventAudioInput
-app.post(
-  '/api/calendar/createEventAudioInput',
+const AUDIO_BUCKET = process.env.AUDIO_S3_BUCKET;
+const MULTIPART_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
+
+// ------------------------------
+// GET /api/audio/tracks
+// ------------------------------
+app.get(
+  "/api/audio/tracks",
   AuthController.verifyAccessCodeToken,
   AuthController.verifyToken,
-  upload.single('audio'),
   async (req, res) => {
-    /* ------------------------------------------------------------------ */
-    /* 1.  Quick auth checks                                              */
-    /* ------------------------------------------------------------------ */
-    if (!req?.user?.role) return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-    if (!req?.user?.email) return res.status(401).json({ message: 'Access denied. No email provided.' });
+    const { query = "", page = 1, pageSize = 30 } = req.query;
+    const offset = (page - 1) * pageSize;
 
-    /* ------------------------------------------------------------------ */
-    /* 2.  Transcribe + parse                                             */
-    /* ------------------------------------------------------------------ */
-    let transcription, event, selectedDate;
     try {
-      transcription = await openai_transcription(req.file.buffer);
-      selectedDate = req.body.selected_date;
+      const result = await db.query(
+        `
+        SELECT *,
+               COUNT(*) OVER() AS total
+        FROM audio_tracks
+        WHERE user_email = $1
+          AND (
+            title ILIKE $2
+            OR artist ILIKE $2
+            OR album ILIKE $2
+          )
+        ORDER BY created_at DESC
+        LIMIT $3 OFFSET $4
+        `,
+        [req.user.email, `%${query}%`, pageSize, offset]
+      );
+
+      res.json({
+        items: result.rows.map(r => ({
+          id: r.id,
+          title: r.title,
+          artist: r.artist,
+          album: r.album,
+          isAudiobook: r.is_audiobook,
+        })),
+        total: result.rows[0]?.total || 0,
+      });
     } catch (err) {
       console.error(err);
-      return res.status(400).json({ message: 'Invalid date or could not parse audio.' });
+      res.status(500).json({ error: "Failed to load tracks" });
     }
+  }
+);
 
-    if (!transcription?.trim()) {
-      return res.status(400).json({ message: 'Audio transcription is empty or unintelligible.' });
-    }
-
+// ------------------------------
+// GET /api/audio/tracks/:id/signed-url
+// ------------------------------
+app.get(
+  "/api/audio/tracks/:id/signed-url",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
     try {
-      event = await get_event_from_audio_input(transcription, selectedDate);
+      const { rows } = await db.query(
+        `SELECT audio_key FROM audio_tracks WHERE id=$1 AND user_email=$2`,
+        [req.params.id, req.user.email]
+      );
 
-      const [datePart] = selectedDate.split('T');
-      const [year, month, day] = datePart.split('-').map(Number);
+      if (!rows.length) return res.sendStatus(404);
 
-      // get Date() objs from the gpt-4o-mini response
-      event.start = new Date(event.start_time);
-      event.end_time = new Date(event.end_time);
+      const url = await getSignedUrl(
+        s3,
+        new GetObjectCommand({
+          Bucket: AUDIO_BUCKET,
+          Key: rows[0].audio_key,
+        }),
+        { expiresIn: 3600 }
+      );
 
-      // Set Y-M-D to match selectedDate
-      event.start.setFullYear(year, month - 1, day);
-      event.end_time.setFullYear(year, month - 1, day);
-
-      // Inline extraction of offset hours from ISO string
-      const offsetMatch = selectedDate.match(/([+-])(\d{2}):(\d{2})$/);
-      const sign = offsetMatch[1] === '+' ? 1 : -1;
-      const hours = parseInt(offsetMatch[2], 10);
-      const minutes = parseInt(offsetMatch[3], 10);
-      let offsetHours = sign * (hours + minutes / 60);
-
-      if ((event.start.getHours() + offsetHours) <= 0) {
-        event.start.setDate(event.start.getDate() + 1);
-        event.end_time.setDate(event.end_time.getDate() + 1);
-      } else if ((event.start.getHours() + offsetHours) >= 24) {
-        event.start.setDate(event.start.getDate() - 1);
-        event.end_time.setDate(event.end_time.getDate() - 1);
-      }
-
-      // If end_time is before start, delete end_time
-      if (event.end_time <= event.start) {
-        delete event.end_time;
-      }
+      res.json({ url });
     } catch (err) {
       console.error(err);
-      return res.status(500).json({ message: 'Internal server error parsing audio transcription.' });
+      res.status(500).json({ error: "Failed to sign URL" });
     }
+  }
+);
 
+// ------------------------------
+// Playback position
+// ------------------------------
+app.get(
+  "/api/audio/playback-position/:trackId",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const result = await db.query(
+      `
+      SELECT position_sec, duration_sec
+      FROM audio_playback_positions
+      WHERE user_email=$1 AND track_id=$2
+      `,
+      [req.user.email, req.params.trackId]
+    );
 
-    // Helper to check for valid dates
-    function isValidDate(d) {
-      return d instanceof Date && !isNaN(d.getTime());
-    }
+    res.json(result.rows[0] || {});
+  }
+);
 
-    if (!event?.title?.trim() || !isValidDate(event.start)) {
-      return res.status(400).json({ message: 'Missing or invalid required event fields.' });
-    }
+app.post(
+  "/api/audio/playback-position",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const { trackId, positionSec, durationSec } = req.body;
 
+    await db.query(
+      `
+      INSERT INTO audio_playback_positions
+        (user_email, track_id, position_sec, duration_sec)
+      VALUES ($1,$2,$3,$4)
+      ON CONFLICT (user_email, track_id)
+      DO UPDATE SET
+        position_sec=$3,
+        duration_sec=$4,
+        updated_at=now()
+      `,
+      [req.user.email, trackId, positionSec, durationSec]
+    );
 
-    /* ------------------------------------------------------------------ */
-    /* 5.  Persist                                                        */
-    /* ------------------------------------------------------------------ */
+    res.sendStatus(204);
+  }
+);
+
+// ------------------------------
+// Multipart upload init
+// ------------------------------
+app.post(
+  "/api/audio/uploads/init",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const {
+      filename,
+      mimeType,
+      sizeBytes,
+      title,
+      artist,
+      album,
+      isAudiobook,
+    } = req.body;
+
+    const trackId = uuidv4();
+    const audioKey = `audio/${trackId}`;
+
     try {
-      const query = `
-        INSERT INTO events
-          (calendar_id, category_id, title, description, start, end_time,
-           all_day, recurrence_rule, created_by)
+      const createCmd = new CreateMultipartUploadCommand({
+        Bucket: AUDIO_BUCKET,
+        Key: audioKey,
+        ContentType: mimeType,
+      });
+
+      const { UploadId } = await s3.send(createCmd);
+
+      const partCount = Math.ceil(sizeBytes / MULTIPART_CHUNK_SIZE);
+
+      const parts = await Promise.all(
+        Array.from({ length: partCount }).map((_, i) =>
+          getSignedUrl(
+            s3,
+            new UploadPartCommand({
+              Bucket: AUDIO_BUCKET,
+              Key: audioKey,
+              UploadId,
+              PartNumber: i + 1,
+            }),
+            { expiresIn: 900 }
+          ).then(url => ({
+            partNumber: i + 1,
+            url,
+          }))
+        )
+      );
+
+      res.json({
+        uploadId: UploadId,
+        key: audioKey,
+        partSizeBytes: MULTIPART_CHUNK_SIZE,
+        parts,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Upload init failed" });
+    }
+  }
+);
+
+// ------------------------------
+// Multipart upload complete
+// ------------------------------
+app.post(
+  "/api/audio/uploads/complete",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const { uploadId, key, parts, metadata } = req.body;
+
+    try {
+      await s3.send(
+        new CompleteMultipartUploadCommand({
+          Bucket: AUDIO_BUCKET,
+          Key: key,
+          UploadId: uploadId,
+          MultipartUpload: {
+            Parts: parts.map(p => ({
+              PartNumber: p.partNumber,
+              ETag: p.etag,
+            })),
+          },
+        })
+      );
+
+      const trackId = key.split("/")[1];
+
+      const result = await db.query(
+        `
+        INSERT INTO audio_tracks
+          (id, user_email, title, artist, album,
+           is_audiobook, audio_key,
+           mime_type, size_bytes)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-        RETURNING *;
-      `;
-      const vals = [
-        event.calendar_id ?? null,
-        event.category_id ?? null,
-        event.title.trim(),
-        event.description ?? null,
-        event.start,                // pass Date objects directly
-        event.end_time,
-        event.all_day ?? false,
-        event.recurrence_rule ?? null,
-        req.user.email,
-      ];
+        RETURNING *
+        `,
+        [
+          trackId,
+          req.user.email,
+          metadata.title,
+          metadata.artist,
+          metadata.album,
+          metadata.isAudiobook,
+          key,
+          metadata.mimeType,
+          metadata.sizeBytes,
+        ]
+      );
 
-      const { rows } = await db.query(query, vals);
-      return res.status(201).json({ event: rows[0] });
+      res.json({ track: result.rows[0] });
     } catch (err) {
       console.error(err);
-      return res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ error: "Upload completion failed" });
+    }
+  }
+);
+
+// ------------------------------
+// Playlists
+// ------------------------------
+app.get(
+  "/api/audio/playlists",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const result = await db.query(
+      `
+      SELECT p.*, COUNT(i.track_id) AS "itemCount"
+      FROM audio_playlists p
+      LEFT JOIN audio_playlist_items i
+        ON p.id = i.playlist_id
+      WHERE p.user_email=$1
+      GROUP BY p.id
+      `,
+      [req.user.email]
+    );
+
+    res.json({ items: result.rows });
+  }
+);
+
+app.post(
+  "/api/audio/playlists",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const id = uuidv4();
+    await db.query(
+      `INSERT INTO audio_playlists (id, user_email, name)
+       VALUES ($1,$2,$3)`,
+      [id, req.user.email, req.body.name]
+    );
+    res.json({ id, name: req.body.name });
+  }
+);
+
+app.get(
+  "/api/audio/playlists/:id",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const result = await db.query(
+      `
+      SELECT t.*
+      FROM audio_playlist_items i
+      JOIN audio_tracks t ON t.id=i.track_id
+      WHERE i.playlist_id=$1
+      ORDER BY i.position
+      `,
+      [req.params.id]
+    );
+
+    res.json({ items: result.rows });
+  }
+);
+
+app.post(
+  "/api/audio/playlists/:id/items",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const { trackId } = req.body;
+
+    // Get next position only if inserting
+    const posResult = await db.query(
+      `
+      SELECT COALESCE(MAX(position), 0) + 1 AS p
+      FROM audio_playlist_items
+      WHERE playlist_id = $1
+      `,
+      [req.params.id]
+    );
+
+    await db.query(
+      `
+      INSERT INTO audio_playlist_items
+        (playlist_id, track_id, position)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (playlist_id, track_id)
+      DO NOTHING
+      `,
+      [req.params.id, trackId, posResult.rows[0].p]
+    );
+
+    res.sendStatus(204);
+  }
+);
+
+
+app.delete(
+  "/api/audio/playlists/:id/items/:trackId",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    await db.query(
+      `
+      DELETE FROM audio_playlist_items
+      WHERE playlist_id=$1 AND track_id=$2
+      `,
+      [req.params.id, req.params.trackId]
+    );
+    res.sendStatus(204);
+  }
+);
+
+app.delete(
+  "/api/audio/playlists/:id",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const client = await db.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      // Delete playlist items first (FK safety)
+      await client.query(
+        `DELETE FROM audio_playlist_items WHERE playlist_id = $1`,
+        [req.params.id]
+      );
+
+      // Delete playlist itself
+      const result = await client.query(
+        `
+        DELETE FROM audio_playlists
+        WHERE id = $1 AND user_email = $2
+        `,
+        [req.params.id, req.user.email]
+      );
+
+      await client.query("COMMIT");
+
+      if (result.rowCount === 0) {
+        return res.sendStatus(404);
+      }
+
+      res.sendStatus(204);
+    } catch (err) {
+      await client.query("ROLLBACK");
+      console.error(err);
+      res.status(500).json({ error: "Failed to delete playlist" });
+    } finally {
+      client.release();
+    }
+  }
+);
+
+app.delete(
+  "/api/audio/tracks/:id",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const client = await db.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const { rows } = await client.query(
+        `
+        SELECT audio_key
+        FROM audio_tracks
+        WHERE id = $1 AND user_email = $2
+        `,
+        [req.params.id, req.user.email]
+      );
+
+      if (!rows.length) {
+        await client.query("ROLLBACK");
+        return res.sendStatus(404);
+      }
+
+      const { audio_key } = rows[0];
+
+      // Remove playlist references
+      await client.query(
+        `DELETE FROM audio_playlist_items WHERE track_id = $1`,
+        [req.params.id]
+      );
+
+      // Remove playback position
+      await client.query(
+        `DELETE FROM audio_playback_positions WHERE track_id = $1`,
+        [req.params.id]
+      );
+
+      // Remove track
+      await client.query(
+        `DELETE FROM audio_tracks WHERE id = $1`,
+        [req.params.id]
+      );
+
+      await client.query("COMMIT");
+
+      // Delete from S3 (best-effort)
+      await s3.send(
+        new DeleteObjectCommand({
+          Bucket: AUDIO_BUCKET,
+          Key: audio_key,
+        })
+      );
+
+      res.sendStatus(204);
+    } catch (err) {
+      await client.query("ROLLBACK");
+      console.error(err);
+      res.status(500).json({ error: "Failed to delete track" });
+    } finally {
+      client.release();
     }
   }
 );
 
 
-// --------------------------------------------------------------------
-// POST /api/calendar/event
-// Create an event in a particular calendar.
-app.post('/api/calendar/event', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  if (!req?.user?.role) {
-    return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  }
-  if (!req?.user?.email) {
-    return res.status(401).json({ message: 'Access denied. No email provided.' });
-  }
-  const event = req.body.event;
-  if (!event || !event.title || !event.start) {
-    return res.status(400).json({ message: 'Missing required event fields.' });
-  }
-  try {
-    const query = `
-      INSERT INTO events (calendar_id, category_id, title, description, start, end_time, all_day, recurrence_rule, created_by)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING *
-    `;
-    const values = [
-      event.calendar_id || null,
-      event.category_id || null,
-      event.title,
-      event.description || null,
-      new Date(event.start).toISOString(),   // sanitize
-      event.end_time ? new Date(event.end_time).toISOString() : null,  // sanitize
-      event.all_day || false,
-      event.recurrence_rule || null,
-      req.user.email,
-    ];
-    const result = await db.query(query, values);
+import ytDlp from "yt-dlp-exec";
+import fs from "fs";
 
-    // -- Respond to the client immediately!
-    res.status(201).json({ event: result.rows[0] });
+app.post(
+  "/api/audio/import",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const { url } = req.body;
 
-    // -- Kick off the notification in the background (no await)
-    notifyUsersAboutEvent(event, req.user);
-
-  } catch (err) {
-    console.error(err);
-    // If DB insert failed, client will get this
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// --------------------------------------------------------------------
-// DELETE /api/calendar/event
-// Delete a specified event.
-app.delete('/api/calendar/event', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  if (!req?.user?.role) {
-    return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  }
-  if (!req?.user?.email) {
-    return res.status(401).json({ message: 'Access denied. No email provided.' });
-  }
-  const event = req.body.event;
-  if (!event || !event.id) {
-    return res.status(400).json({ message: 'Event id is required for deletion.' });
-  }
-  try {
-    const query = `DELETE FROM events WHERE id = $1 RETURNING *`;
-    const result = await db.query(query, [event.id]);
-    if (result.rowCount === 0) {
-      return res.status(404).json({ message: 'Event not found.' });
-    }
-    return res.status(200).json({ message: 'Event deleted successfully.', event: result.rows[0] });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-
-// GET /api/weather
-app.get('/api/weather', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  if (!req?.user?.role) {
-    return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  }
-  if (!req?.user?.email) {
-    return res.status(401).json({ message: 'Access denied. No email provided.' });
-  }
-
-  const isValidDate = (str) => /^\d{4}-\d{2}-\d{2}$/.test(str); // basic YYYY-MM-DD check
-
-  const lat = process.env.WEATHER_LATITUDE;
-  const lon = process.env.WEATHER_LONGITUDE;
-  const date = req.query.date;
-
-  if (!isValidDate(date)) {
-    return res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD.' });
-  }
-
-  const url =
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-    `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode` +
-    `&hourly=temperature_2m,precipitation,weathercode` +
-    `&start_date=${date}&end_date=${date}` +
-    `&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`;
-
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (!data?.daily?.time?.length) {
-      return res.status(404).json({ error: 'No weather data found for this date.' });
+    if (!url || typeof url !== "string") {
+      return res.status(400).json({ error: "Missing URL" });
     }
 
-    const weather = {
-      date: data.daily.time[0],
-      temp_max: data.daily.temperature_2m_max[0],
-      temp_min: data.daily.temperature_2m_min[0],
-      precip: data.daily.precipitation_sum[0],
-      weathercode: data.daily.weathercode[0],
-    };
+    // Create placeholder track
+    const trackId = uuidv4();
 
-    const hourly = {
-      time: data.hourly.time,
-      temp: data.hourly.temperature_2m,
-      precip: data.hourly.precipitation,
-      wcode: data.hourly.weathercode,
-    };
-
-    return res.status(200).json({ weather, hourly });
-  } catch (err) {
-    console.error('Weather API fetch failed:', err);
-    return res.status(500).json({ error: 'Failed to fetch weather data' });
-  }
-});
-
-
-// POST /api/realtime
-app.post('/api/realtime', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  const sessionConfig = JSON.stringify({
-    session: {
-      type: "realtime",
-      model: "gpt-realtime",
-      audio: {
-        input: {
-          turn_detection: null
-        },
-        output: {
-          voice: 'verse'
-        }
-      },
-    },
-  });
-
-
-  try {
-    const response = await fetch(
-      "https://api.openai.com/v1/realtime/client_secrets",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: sessionConfig,
-      }
-    );
-
-    //console.log(response);
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    console.error("Token generation error:", error);
-    res.status(500).json({ error: "Failed to generate token" });
-  }
-});
-
-
-// --------------------------------------------------------------------
-// POST /api/calendar/calendar
-// Create a new calendar. The authenticated user becomes the owner.
-app.post('/api/calendar/calendar', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  if (!req?.user?.role) {
-    return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  }
-  if (!req?.user?.email) {
-    return res.status(401).json({ message: 'Access denied. No email provided.' });
-  }
-  const calendar = req.body.calendar;
-  if (!calendar || !calendar.name) {
-    return res.status(400).json({ message: 'Calendar name is required.' });
-  }
-  try {
-    const query = `
-      INSERT INTO calendars (name, description, owner_id)
-      VALUES ($1, $2, $3)
-      RETURNING *
-    `;
-    const values = [calendar.name, calendar.description || null, req.user.email];
-    const result = await db.query(query, values);
-    return res.status(201).json({ calendar: result.rows[0] });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// --------------------------------------------------------------------
-// DELETE /api/calendar/calendar
-// Delete a calendar. Only the owner is allowed to delete it.
-app.delete('/api/calendar/calendar', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  if (!req?.user?.role) {
-    return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  }
-  if (!req?.user?.email) {
-    return res.status(401).json({ message: 'Access denied. No email provided.' });
-  }
-  const calendar = req.body.calendar;
-  if (!calendar || !calendar.id) {
-    return res.status(400).json({ message: 'Calendar id is required for deletion.' });
-  }
-  try {
-    // Check that the authenticated user is the owner of the calendar.
-    const checkQuery = `SELECT * FROM calendars WHERE id = $1 AND owner_id = $2`;
-    const checkResult = await db.query(checkQuery, [calendar.id, req.user.email]);
-    if (checkResult.rowCount === 0) {
-      return res.status(404).json({ message: 'Calendar not found or you are not the owner.' });
-    }
-    const deleteQuery = `DELETE FROM calendars WHERE id = $1 RETURNING *`;
-    const result = await db.query(deleteQuery, [calendar.id]);
-    return res.status(200).json({ message: 'Calendar deleted successfully.', calendar: result.rows[0] });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// GET /api/calendar/getCalendarsForUser
-// Retrieve all calendars that the user owns or is added to.
-app.get('/api/calendar/getCalendarsForUser', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  if (!req?.user?.email) {
-    return res.status(401).json({ message: 'Access denied. No email provided.' });
-  }
-  try {
-    const query = `
-      SELECT * FROM calendars
-    `;
-    const result = await db.query(query);
-    return res.status(200).json({ calendars: result.rows });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// GET /api/calendar/categories
-// Retrieve all categories for a given calendar.
-app.get('/api/calendar/categories', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  if (!req?.user?.email) {
-    return res.status(401).json({ message: 'Access denied. No email provided.' });
-  }
-  const { calendar_id } = req.query;
-  if (!calendar_id) {
-    return res.status(400).json({ message: 'calendar_id query parameter is required.' });
-  }
-  try {
-    const query = 'SELECT id, calendar_id, name, color FROM categories WHERE calendar_id = $1';
-    const result = await db.query(query, [calendar_id]);
-    return res.status(200).json({ categories: result.rows });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// ------------------------------
-// Push Notification Endpoints
-// ------------------------------
-
-// POST /api/subscribe
-// Registers a push subscription for the authenticated user.
-app.post('/api/subscribe', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  // return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  const subscription = req.body.subscription;
-  if (!subscription) {
-    return res.status(400).json({ message: 'Subscription object is required.' });
-  }
-  try {
-    // Use an upsert query to insert or update the subscription for the user.
     await db.query(
       `
-      INSERT INTO push_subscriptions (user_email, subscription)
-      VALUES ($1, $2)
-      ON CONFLICT (user_email)
-      DO UPDATE SET subscription = $2, created_at = now()
+      INSERT INTO audio_tracks
+        (id, user_email, title, album, status)
+      VALUES ($1, $2, $3, $4, 'importing')
+
       `,
-      [req.user.email, subscription]
+      [trackId, req.user.email, "Importing…", "Import"]
     );
-    console.log(`Stored subscription for user: ${req.user.email}`);
-    return res.status(201).json({ message: 'Subscription registered.' });
-  } catch (error) {
-    console.error('Error saving subscription:', error);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
 
-// POST /api/unsubscribe
-// Removes the push subscription for the authenticated user.
-app.post('/api/unsubscribe', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  // return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  try {
-    // Delete the subscription record from the database for the authenticated user.
-    await db.query(
-      `DELETE FROM push_subscriptions WHERE user_email = $1`,
-      [req.user.email]
-    );
-    console.log(`Removed subscription for user: ${req.user.email}`);
-    return res.status(200).json({ message: 'Subscription removed.' });
-  } catch (error) {
-    console.error('Error removing subscription:', error);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
+    // Respond immediately
+    res.status(202).json({ trackId });
 
-// POST /api/sendNotification
-// Sends a push notification to a target user.
-// Expects { targetEmail, title, body, url } in the request body.
-app.post('/api/sendNotification', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  const { targetEmail, title, body: messageBody, url } = req.body;
-  if (!targetEmail || !messageBody) {
-    return res.status(400).json({ message: 'targetEmail and message body are required.' });
-  }
-  try {
-    // Retrieve the subscription from the database for the target user.
-    const result = await db.query(
-      'SELECT subscription FROM push_subscriptions WHERE user_email = $1',
-      [targetEmail]
-    );
-    if (result.rowCount === 0) {
-      return res.status(404).json({ message: 'No subscription found for target user.' });
-    }
-    const subscription = result.rows[0].subscription;
-    const payload = JSON.stringify({
-      title: req.user.name,
-      body: messageBody,
-      icon: '/icon.png', // Update with your icon path if needed
-      url: url || '/',   // URL to open when the notification is clicked
-    });
-    await webpush.sendNotification(subscription, payload);
-    return res.status(200).json({ message: 'Notification sent.' });
-  } catch (error) {
-    console.error('Error sending notification:', error);
-    return res.status(500).json({ message: 'Failed to send notification', error: error.message });
-  }
-});
+    // Background worker
+    (async () => {
+      const audioKey = `audio/${trackId}.mp3`;
+      const tmpAudio = `/tmp/${trackId}.mp3`;
 
-// GET /api/availableUsers
-app.get('/api/availableUsers', AuthController.verifyAccessCodeToken, AuthController.verifyToken, async (req, res) => {
-  return res.status(401).json({ message: 'Access denied. User does not have sufficient permissions provided.' });
-  try {
-    const result = await db.query('SELECT user_email FROM push_subscriptions');
-    // Map the result into a format suitable for your select box.
-    const users = result.rows.map(row => ({
-      id: row.user_email,
-      email: row.user_email,
-    }));
-    return res.status(200).json({ users });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
+      try {
+        // 1️⃣ Extract metadata
+        const info = await ytDlp(url, {
+          dumpSingleJson: true,
+          noWarnings: true,
+          noPlaylist: true,
+        });
 
-// ------------------------------
-// End Push Notification Endpoints
-// ------------------------------
+        const title = info.title || "Untitled";
+        const artist = info.uploader || info.channel || "Unknown Artist";
+
+        // 2️⃣ Download audio WITH progress tracking (CORRECT)
+        const proc = ytDlp.exec(url, {
+          extractAudio: true,
+          audioFormat: "mp3",
+          audioQuality: "0",
+          output: tmpAudio,
+          noPlaylist: true,
+          newline: true,
+          progress: true,
+          forceOverwrites: true,
+          noCheckCertificates: true,
+        });
+
+
+
+        await new Promise((resolve, reject) => {
+          proc.on("close", (code) => {
+            if (code === 0) resolve();
+            else reject(new Error(`yt-dlp exited with code ${code}`));
+          });
+        });
+
+        const stats = fs.statSync(tmpAudio);
+
+        // 3️⃣ Upload audio to S3
+        await s3.send(
+          new PutObjectCommand({
+            Bucket: AUDIO_BUCKET,
+            Key: audioKey,
+            Body: fs.createReadStream(tmpAudio),
+            ContentType: "audio/mpeg",
+          })
+        );
+
+        // 5️⃣ Finalize placeholder → real track
+        await db.query(
+          `
+          UPDATE audio_tracks
+          SET
+            title = $1,
+            artist = $2,
+            album = 'Import',
+            audio_key = $3,
+            status = 'ready'
+          WHERE id = $4
+          `,
+          [title, artist, audioKey, trackId]
+        );
+
+
+        console.log(`✅ Import complete: ${title}`);
+      } catch (err) {
+        console.error("❌ Import failed:", err);
+
+        await db.query(
+          `
+          UPDATE audio_tracks
+          SET status = 'failed'
+          WHERE id = $1
+          `,
+          [trackId]
+        );
+      } finally {
+        try { fs.unlinkSync(tmpAudio); } catch { }
+      }
+    })();
+  }
+);
+
+
+// END AUDIO PLAYER ROUTES
+// END AUDIO PLAYER ROUTES
 
 // Place *after* all routes, before the 404 handler if you have one
 app.use((err, req, res, next) => {

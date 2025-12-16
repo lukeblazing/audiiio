@@ -65,7 +65,6 @@ export default (env, argv) => {
             to: path.resolve(__dirname, 'dist'), 
             globOptions: { ignore: ['**/index.html'] } // Exclude index.html
           },
-          { from: path.resolve(__dirname, 'src/service-worker.js'), to: path.resolve(__dirname, 'dist/service-worker.js') },
         ],
       }),      
     ],

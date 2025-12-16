@@ -7,10 +7,7 @@ import SignUp from './components/authentication/SignUp.js';
 import SignIn from './components/authentication/SignIn.js';
 import { ThemeProvider } from '@emotion/react';
 import theme from './Theme/theme';
-import CalendarComponent from './components/calendar/CalendarComponent.js';
-import RemindersScrollView from './components/reminders/RemindersScrollView.js';
-import SpendingScrollView from './components/spending/SpendingScrollView.js';
-import NavbarLayoutPage from './components/dashboard/NavbarLayoutPage.js';
+import AudioPlayer from './components/calendar/AudioPlayer.js';
 
 
 function App() {
@@ -23,11 +20,7 @@ function App() {
 
             <Routes>
               {/* All routes that need the navbar live under DashboardLayout */}
-              <Route element={<NavbarLayoutPage />}>
-                <Route index element={<CalendarComponent />} /> 
-                <Route path="reminders" element={<RemindersScrollView />} />
-                <Route path="spending" element={<SpendingScrollView />} />
-              </Route>
+              <Route index element={<AudioPlayer />} /> 
 
               {/* Routes without the navbar */}
               <Route path="sign-up" element={<SignUp />} />

@@ -7,82 +7,7 @@
  role     | character varying(50)  |           | not null | 
 Indexes:
     "app_users_pkey" PRIMARY KEY, btree (email)
-
-
-
-                             Table "public.calendars"
-   Column    |           Type           | Collation | Nullable |      Default      
--------------+--------------------------+-----------+----------+-------------------
- id          | uuid                     |           | not null | gen_random_uuid()
- name        | text                     |           | not null | 
- description | text                     |           |          | 
- owner_id    | character varying(255)   |           | not null | 
- created_at  | timestamp with time zone |           |          | now()
-Indexes:
-    "calendars_pkey" PRIMARY KEY, btree (id)
-Foreign-key constraints:
-    "calendars_owner_id_fkey" FOREIGN KEY (o
-    wner_id) REFERENCES app_users(email) ON DELETE CASCADE
-Referenced by:
-    TABLE "calendar_users" CONSTRAINT "calendar_users_calendar_id_fkey" FOREIGN KEY (calendar_id) REFERENCES calendars(id) ON DELETE CASCADE
-    TABLE "categories" CONSTRAINT "categories_calendar_id_fkey" FOREIGN KEY (calendar_id) REFERENCES calendars(id) ON DELETE CASCADE
-    TABLE "events" CONSTRAINT "events_calendar_id_fkey" FOREIGN KEY (calendar_id) REFERENCES calendars(id) ON DELETE CASCADE
-
-
-
-
-                     Table "public.calendar_users"
-   Column    |          Type          | Collation | Nullable | Default 
--------------+------------------------+-----------+----------+---------
- calendar_id | uuid                   |           | not null | 
- user_id     | character varying(255) |           | not null | 
-Indexes:
-    "calendar_users_pkey" PRIMARY KEY, btree (calendar_id, user_id)
-Foreign-key constraints:
-    "calendar_users_calendar_id_fkey" FOREIGN KEY (calendar_id) REFERENCES calendars(id) ON DELETE CASCADE
-    "calendar_users_user_id_fkey" FOREIGN KEY (user_id) REFERENCES app_users(email) ON DELETE CASCADE
-
-
-
-
-
-                   Table "public.categories"
-   Column    | Type | Collation | Nullable |      Default      
--------------+------+-----------+----------+-------------------
- id          | uuid |           | not null | gen_random_uuid()
- calendar_id | uuid |           | not null | 
- name        | text |           | not null | 
- color       | text |           | not null | 
-Indexes:
-    "categories_pkey" PRIMARY KEY, btree (id)
-Foreign-key constraints:
-    "categories_calendar_id_fkey" FOREIGN KEY (calendar_id) REFERENCES calendars(id) ON DELETE CASCADE
-Referenced by:
-    TABLE "events" CONSTRAINT "events_category_id_fkey" FOREIGN KEY (category_id) REFERENCES categories(id)
-
-
-
-
-                                 Table "public.events"
-     Column      |           Type           | Collation | Nullable |      Default      
------------------+--------------------------+-----------+----------+-------------------
- id              | uuid                     |           | not null | gen_random_uuid()
- calendar_id     | uuid                     |           |          | 
- category_id     | text                     |           |          | 
- title           | text                     |           | not null | 
- description     | text                     |           |          | 
- start           | timestamp with time zone |           | not null | 
- end_time        | timestamp with time zone |           |          | 
- all_day         | boolean                  |           |          | false
- recurrence_rule | text                     |           |          | 
- created_at      | timestamp with time zone |           |          | now()
- created_by      | text                     |           |          | 
-Indexes:
-    "events_pkey" PRIMARY KEY, btree (id)
-    "idx_events_start" btree (start)
-Foreign-key constraints:
-    "events_calendar_id_fkey" FOREIGN KEY (calendar_id) REFERENCES calendars(id) ON DELETE CASCADE
-
+ 
 
                     Table "public.push_subscriptions"
     Column    |           Type           | Collation | Nullable | Default 
@@ -92,3 +17,59 @@ Foreign-key constraints:
  created_at   | timestamp with time zone |           |          | now()
 Indexes:
     "push_subscriptions_pkey" PRIMARY KEY, btree (user_email)
+
+
+
+                            Table "public.audio_tracks"
+    Column    |            Type             | Collation | Nullable |    Default    
+--------------+-----------------------------+-----------+----------+---------------
+ id           | uuid                        |           | not null | 
+ user_email   | text                        |           | not null | 
+ title        | text                        |           |          | 
+ artist       | text                        |           |          | 
+ album        | text                        |           |          | 
+ is_audiobook | boolean                     |           |          | false
+ audio_key    | text                        |           |          | 
+ mime_type    | text                        |           |          | 
+ size_bytes   | bigint                      |           |          | 
+ created_at   | timestamp without time zone |           |          | now()
+ status       | text                        |           |          | 'ready'::text
+Indexes:
+    "audio_tracks_pkey" PRIMARY KEY, btree (id)
+    "audio_tracks_user_email_created_at_idx" btree (user_email, created_at DESC)
+Check constraints:
+    "audio_tracks_status_check" CHECK (status = ANY (ARRAY['importing'::text, 'ready'::text, 'failed'::text]))
+
+
+
+                   Table "public.audio_playback_positions"
+    Column    |            Type             | Collation | Nullable | Default 
+--------------+-----------------------------+-----------+----------+---------
+ user_email   | text                        |           | not null | 
+ track_id     | uuid                        |           | not null | 
+ position_sec | real                        |           |          | 
+ duration_sec | real                        |           |          | 
+ updated_at   | timestamp without time zone |           |          | now()
+Indexes:
+    "audio_playback_positions_pkey" PRIMARY KEY, btree (user_email, track_id)
+
+
+                      Table "public.audio_playlists"
+   Column   |            Type             | Collation | Nullable | Default 
+------------+-----------------------------+-----------+----------+---------
+ id         | uuid                        |           | not null | 
+ user_email | text                        |           | not null | 
+ name       | text                        |           | not null | 
+ created_at | timestamp without time zone |           |          | now()
+Indexes:
+    "audio_playlists_pkey" PRIMARY KEY, btree (id)
+
+
+          Table "public.audio_playlist_items"
+   Column    |  Type   | Collation | Nullable | Default 
+-------------+---------+-----------+----------+---------
+ playlist_id | uuid    |           | not null | 
+ track_id    | uuid    |           | not null | 
+ position    | integer |           |          | 
+Indexes:
+    "audio_playlist_items_pkey" PRIMARY KEY, btree (playlist_id, track_id)
