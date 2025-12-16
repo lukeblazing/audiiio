@@ -9,16 +9,6 @@ Indexes:
     "app_users_pkey" PRIMARY KEY, btree (email)
  
 
-                    Table "public.push_subscriptions"
-    Column    |           Type           | Collation | Nullable | Default 
---------------+--------------------------+-----------+----------+---------
- user_email   | character varying(255)   |           | not null | 
- subscription | jsonb                    |           | not null | 
- created_at   | timestamp with time zone |           |          | now()
-Indexes:
-    "push_subscriptions_pkey" PRIMARY KEY, btree (user_email)
-
-
 
                             Table "public.audio_tracks"
     Column    |            Type             | Collation | Nullable |    Default    

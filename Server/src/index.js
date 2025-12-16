@@ -72,14 +72,14 @@ app.use((req, res, next) => {
 app.post('/api/signUp', AuthController.verifyAccessCodeToken, async (req, res) => {
   try {
 
-    // temporarily disable sign up
-    return res.status(500).json({
-      success: false,
-      message: 'An internal server error occurred',
-      error: error.message
-    });
+    // // temporarily disable sign up
+    // return res.status(500).json({
+    //   success: false,
+    //   message: 'An internal server error occurred',
+    //   error: error.message
+    // });
 
-    //return await AuthController.createUser(req, res);
+    return await AuthController.createUser(req, res);
   } catch (error) {
     // If there's a server error, return a 500 status code
     return res.status(500).json({
