@@ -60,13 +60,6 @@ if (process.env.NODE_ENV === 'development') {
 // Start the cron jobs
 startCronJobs();
 
-// Configure VAPID details
-webpush.setVapidDetails(
-  'mailto:camp_cellars6k@icloud.com',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
-
 // Middleware to force HTTPS
 app.use((req, res, next) => {
   if (process.env.NODE_ENV !== 'development' && req.headers['x-forwarded-proto'] !== 'https') {
