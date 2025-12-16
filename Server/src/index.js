@@ -638,120 +638,120 @@ app.delete(
 );
 
 
-import ytDlp from "yt-dlp-exec";
-import fs from "fs";
+// import ytDlp from "yt-dlp-exec";
+// import fs from "fs";
 
-app.post(
-  "/api/audio/import",
-  AuthController.verifyAccessCodeToken,
-  AuthController.verifyToken,
-  async (req, res) => {
-    const { url } = req.body;
+// app.post(
+//   "/api/audio/import",
+//   AuthController.verifyAccessCodeToken,
+//   AuthController.verifyToken,
+//   async (req, res) => {
+//     const { url } = req.body;
 
-    if (!url || typeof url !== "string") {
-      return res.status(400).json({ error: "Missing URL" });
-    }
+//     if (!url || typeof url !== "string") {
+//       return res.status(400).json({ error: "Missing URL" });
+//     }
 
-    // Create placeholder track
-    const trackId = uuidv4();
+//     // Create placeholder track
+//     const trackId = uuidv4();
 
-    await db.query(
-      `
-      INSERT INTO audio_tracks
-        (id, user_email, title, album, status)
-      VALUES ($1, $2, $3, $4, 'importing')
+//     await db.query(
+//       `
+//       INSERT INTO audio_tracks
+//         (id, user_email, title, album, status)
+//       VALUES ($1, $2, $3, $4, 'importing')
 
-      `,
-      [trackId, req.user.email, "Importing…", "Import"]
-    );
+//       `,
+//       [trackId, req.user.email, "Importing…", "Import"]
+//     );
 
-    // Respond immediately
-    res.status(202).json({ trackId });
+//     // Respond immediately
+//     res.status(202).json({ trackId });
 
-    // Background worker
-    (async () => {
-      const audioKey = `audio/${trackId}.mp3`;
-      const tmpAudio = `/tmp/${trackId}.mp3`;
+//     // Background worker
+//     (async () => {
+//       const audioKey = `audio/${trackId}.mp3`;
+//       const tmpAudio = `/tmp/${trackId}.mp3`;
 
-      try {
-        // 1️⃣ Extract metadata
-        const info = await ytDlp(url, {
-          dumpSingleJson: true,
-          noWarnings: true,
-          noPlaylist: true,
-        });
+//       try {
+//         // 1️⃣ Extract metadata
+//         const info = await ytDlp(url, {
+//           dumpSingleJson: true,
+//           noWarnings: true,
+//           noPlaylist: true,
+//         });
 
-        const title = info.title || "Untitled";
-        const artist = info.uploader || info.channel || "Unknown Artist";
+//         const title = info.title || "Untitled";
+//         const artist = info.uploader || info.channel || "Unknown Artist";
 
-        // 2️⃣ Download audio WITH progress tracking (CORRECT)
-        const proc = ytDlp.exec(url, {
-          extractAudio: true,
-          audioFormat: "mp3",
-          audioQuality: "0",
-          output: tmpAudio,
-          noPlaylist: true,
-          newline: true,
-          progress: true,
-          forceOverwrites: true,
-          noCheckCertificates: true,
-        });
-
-
-
-        await new Promise((resolve, reject) => {
-          proc.on("close", (code) => {
-            if (code === 0) resolve();
-            else reject(new Error(`yt-dlp exited with code ${code}`));
-          });
-        });
-
-        const stats = fs.statSync(tmpAudio);
-
-        // 3️⃣ Upload audio to S3
-        await s3.send(
-          new PutObjectCommand({
-            Bucket: AUDIO_BUCKET,
-            Key: audioKey,
-            Body: fs.createReadStream(tmpAudio),
-            ContentType: "audio/mpeg",
-          })
-        );
-
-        // 5️⃣ Finalize placeholder → real track
-        await db.query(
-          `
-          UPDATE audio_tracks
-          SET
-            title = $1,
-            artist = $2,
-            album = 'Import',
-            audio_key = $3,
-            status = 'ready'
-          WHERE id = $4
-          `,
-          [title, artist, audioKey, trackId]
-        );
+//         // 2️⃣ Download audio WITH progress tracking (CORRECT)
+//         const proc = ytDlp.exec(url, {
+//           extractAudio: true,
+//           audioFormat: "mp3",
+//           audioQuality: "0",
+//           output: tmpAudio,
+//           noPlaylist: true,
+//           newline: true,
+//           progress: true,
+//           forceOverwrites: true,
+//           noCheckCertificates: true,
+//         });
 
 
-        console.log(`✅ Import complete: ${title}`);
-      } catch (err) {
-        console.error("❌ Import failed:", err);
 
-        await db.query(
-          `
-          UPDATE audio_tracks
-          SET status = 'failed'
-          WHERE id = $1
-          `,
-          [trackId]
-        );
-      } finally {
-        try { fs.unlinkSync(tmpAudio); } catch { }
-      }
-    })();
-  }
-);
+//         await new Promise((resolve, reject) => {
+//           proc.on("close", (code) => {
+//             if (code === 0) resolve();
+//             else reject(new Error(`yt-dlp exited with code ${code}`));
+//           });
+//         });
+
+//         const stats = fs.statSync(tmpAudio);
+
+//         // 3️⃣ Upload audio to S3
+//         await s3.send(
+//           new PutObjectCommand({
+//             Bucket: AUDIO_BUCKET,
+//             Key: audioKey,
+//             Body: fs.createReadStream(tmpAudio),
+//             ContentType: "audio/mpeg",
+//           })
+//         );
+
+//         // 5️⃣ Finalize placeholder → real track
+//         await db.query(
+//           `
+//           UPDATE audio_tracks
+//           SET
+//             title = $1,
+//             artist = $2,
+//             album = 'Import',
+//             audio_key = $3,
+//             status = 'ready'
+//           WHERE id = $4
+//           `,
+//           [title, artist, audioKey, trackId]
+//         );
+
+
+//         console.log(`✅ Import complete: ${title}`);
+//       } catch (err) {
+//         console.error("❌ Import failed:", err);
+
+//         await db.query(
+//           `
+//           UPDATE audio_tracks
+//           SET status = 'failed'
+//           WHERE id = $1
+//           `,
+//           [trackId]
+//         );
+//       } finally {
+//         try { fs.unlinkSync(tmpAudio); } catch { }
+//       }
+//     })();
+//   }
+// );
 
 
 // END AUDIO PLAYER ROUTES
