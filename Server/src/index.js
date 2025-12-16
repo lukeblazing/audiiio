@@ -633,120 +633,155 @@ app.delete(
 );
 
 
-// import ytDlp from "yt-dlp-exec";
-// import fs from "fs";
+import fs from "fs";
 
-// app.post(
-//   "/api/audio/import",
-//   AuthController.verifyAccessCodeToken,
-//   AuthController.verifyToken,
-//   async (req, res) => {
-//     const { url } = req.body;
+app.post(
+  "/api/audio/import",
+  AuthController.verifyAccessCodeToken,
+  AuthController.verifyToken,
+  async (req, res) => {
+    const { url } = req.body;
 
-//     if (!url || typeof url !== "string") {
-//       return res.status(400).json({ error: "Missing URL" });
-//     }
+    if (!url || typeof url !== "string") {
+      return res.status(400).json({ error: "Missing URL" });
+    }
 
-//     // Create placeholder track
-//     const trackId = uuidv4();
+    // Extract IA identifier
+    const match = url.match(/archive\.org\/details\/([^/?#]+)/);
+    if (!match) {
+      return res.status(400).json({ error: "Invalid Internet Archive URL" });
+    }
 
-//     await db.query(
-//       `
-//       INSERT INTO audio_tracks
-//         (id, user_email, title, album, status)
-//       VALUES ($1, $2, $3, $4, 'importing')
+    const identifier = match[1];
 
-//       `,
-//       [trackId, req.user.email, "Importing…", "Import"]
-//     );
+    // Create placeholder track
+    const trackId = uuidv4();
 
-//     // Respond immediately
-//     res.status(202).json({ trackId });
+    await db.query(
+      `
+      INSERT INTO audio_tracks
+        (id, user_email, title, album, status)
+      VALUES ($1, $2, $3, $4, 'importing')
+      `,
+      [trackId, req.user.email, "Importing…", "Internet Archive"]
+    );
 
-//     // Background worker
-//     (async () => {
-//       const audioKey = `audio/${trackId}.mp3`;
-//       const tmpAudio = `/tmp/${trackId}.mp3`;
+    // Respond immediately
+    res.status(202).json({ trackId });
 
-//       try {
-//         // 1️⃣ Extract metadata
-//         const info = await ytDlp(url, {
-//           dumpSingleJson: true,
-//           noWarnings: true,
-//           noPlaylist: true,
-//         });
+    // Background worker
+    (async () => {
+      const audioKey = `audio/${trackId}.mp3`;
+      const tmpAudio = `/tmp/${trackId}.mp3`;
 
-//         const title = info.title || "Untitled";
-//         const artist = info.uploader || info.channel || "Unknown Artist";
+      try {
+        // 1️⃣ Fetch IA metadata
+        const metaRes = await fetch(
+          `https://archive.org/metadata/${identifier}`
+        );
+        if (!metaRes.ok) throw new Error("Failed to fetch IA metadata");
 
-//         // 2️⃣ Download audio WITH progress tracking (CORRECT)
-//         const proc = ytDlp.exec(url, {
-//           extractAudio: true,
-//           audioFormat: "mp3",
-//           audioQuality: "0",
-//           output: tmpAudio,
-//           noPlaylist: true,
-//           newline: true,
-//           progress: true,
-//           forceOverwrites: true,
-//           noCheckCertificates: true,
-//         });
+        const meta = await metaRes.json();
+
+        const title =
+          meta.metadata?.title ||
+          meta.metadata?.identifier ||
+          "Untitled";
+
+        const artist =
+          meta.metadata?.creator ||
+          meta.metadata?.uploader ||
+          "Unknown Author";
+
+        // 2️⃣ Find first MP3 file
+        const mp3 = meta.files.find(
+          (f) =>
+            f.format?.toLowerCase().includes("mp3") &&
+            !f.name?.includes("_64kb")
+        );
+
+        if (!mp3) {
+          throw new Error("No MP3 file found in Internet Archive item");
+        }
+
+        const downloadUrl = `https://archive.org/download/${identifier}/${encodeURIComponent(
+          mp3.name
+        )}`;
+
+        // 3️⃣ Download MP3
+        const audioRes = await fetch(downloadUrl);
+        if (!audioRes.ok) {
+          throw new Error(`Failed to download MP3 (${audioRes.status})`);
+        }
+
+        const file = fs.createWriteStream(tmpAudio);
+        const reader = audioRes.body.getReader();
+
+        await new Promise(async (resolve, reject) => {
+          file.on("finish", resolve);
+          file.on("error", reject);
+
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              file.write(Buffer.from(value));
+            }
+            file.end();
+          } catch (err) {
+            reject(err);
+          }
+        });
 
 
+        const stats = fs.statSync(tmpAudio);
 
-//         await new Promise((resolve, reject) => {
-//           proc.on("close", (code) => {
-//             if (code === 0) resolve();
-//             else reject(new Error(`yt-dlp exited with code ${code}`));
-//           });
-//         });
+        // 4️⃣ Upload to S3
+        await s3.send(
+          new PutObjectCommand({
+            Bucket: AUDIO_BUCKET,
+            Key: audioKey,
+            Body: fs.createReadStream(tmpAudio),
+            ContentType: "audio/mpeg",
+            ContentLength: stats.size,
+          })
+        );
 
-//         const stats = fs.statSync(tmpAudio);
+        // 5️⃣ Finalize placeholder → real track
+        await db.query(
+          `
+          UPDATE audio_tracks
+          SET
+            title = $1,
+            artist = $2,
+            album = 'Internet Archive',
+            audio_key = $3,
+            status = 'ready'
+          WHERE id = $4
+          `,
+          [title, artist, audioKey, trackId]
+        );
 
-//         // 3️⃣ Upload audio to S3
-//         await s3.send(
-//           new PutObjectCommand({
-//             Bucket: AUDIO_BUCKET,
-//             Key: audioKey,
-//             Body: fs.createReadStream(tmpAudio),
-//             ContentType: "audio/mpeg",
-//           })
-//         );
+        console.log(`✅ IA import complete: ${title}`);
+      } catch (err) {
+        console.error("❌ IA import failed:", err);
 
-//         // 5️⃣ Finalize placeholder → real track
-//         await db.query(
-//           `
-//           UPDATE audio_tracks
-//           SET
-//             title = $1,
-//             artist = $2,
-//             album = 'Import',
-//             audio_key = $3,
-//             status = 'ready'
-//           WHERE id = $4
-//           `,
-//           [title, artist, audioKey, trackId]
-//         );
-
-
-//         console.log(`✅ Import complete: ${title}`);
-//       } catch (err) {
-//         console.error("❌ Import failed:", err);
-
-//         await db.query(
-//           `
-//           UPDATE audio_tracks
-//           SET status = 'failed'
-//           WHERE id = $1
-//           `,
-//           [trackId]
-//         );
-//       } finally {
-//         try { fs.unlinkSync(tmpAudio); } catch { }
-//       }
-//     })();
-//   }
-// );
+        await db.query(
+          `
+          UPDATE audio_tracks
+          SET status = 'failed'
+          WHERE id = $1
+          `,
+          [trackId]
+        );
+      } finally {
+        try {
+          fs.unlinkSync(tmpAudio);
+        } catch { }
+      }
+    })();
+  }
+);
 
 
 // END AUDIO PLAYER ROUTES
