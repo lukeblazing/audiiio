@@ -437,18 +437,18 @@ export default function PodcastAudioMobile() {
         fontSize: 13,
         fontWeight: 600,
       }),
-      search: {
-        marginTop: 12,
-        width: "100%",
-        padding: "10px 12px",
-        borderRadius: 12,
-        background: "rgba(255,255,255,0.06)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        color: "#fff",
-        outline: "none",
-        fontSize: 14,
+      content: {
+        flex: 1,
+        overflowY: "auto",
+
+        /* 👇 push scrollable tracks below the fixed header */
+        paddingTop: "calc(14px + env(safe-area-inset-top) + 56px)",
+
+        paddingLeft: 12,
+        paddingRight: 12,
+        paddingBottom: 92,
       },
-      content: { flex: 1, overflowY: "auto", padding: "10px 12px 92px" }, // leave space for bottom bar
+
       grid: {
         display: "grid",
         gridTemplateColumns: "1fr", // 👈 full-width cards
@@ -489,7 +489,7 @@ export default function PodcastAudioMobile() {
         padding: 10,
         borderRadius: 12,
         border: "1px solid rgba(255,90,90,0.35)",
-        background: "rgba(255,90,90,0.10)",
+        background: "rgba(34, 32, 32, 0.1)",
         color: "#ffd0d0",
         fontSize: 13,
       },
@@ -499,10 +499,7 @@ export default function PodcastAudioMobile() {
         right: 0,
         bottom: 0,
         zIndex: 20,
-        background: "rgba(11,11,15,0.92)",
-        backdropFilter: "blur(10px)",
-        borderTop: "1px solid rgba(255,255,255,0.08)",
-        padding: "10px 10px 12px",
+        paddingBottom: "calc(14px + env(safe-area-inset-bottom))",
       },
       navRow: { display: "flex", gap: 8, justifyContent: "space-between" },
       navBtn: (active) => ({
